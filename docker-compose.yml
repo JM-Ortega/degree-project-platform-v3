@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -10,5 +12,32 @@ services:
       RABBITMQ_DEFAULT_PASS: apppass
     volumes:
       - rabbit_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres:
+    image: postgres:16
+    container_name: pg
+    environment:
+      POSTGRES_USER: root          # superusuario inicial
+      POSTGRES_PASSWORD: root
+      # No definimos POSTGRES_DB para permitir múltiples DB vía init SQL
+    ports:
+      - "5432:5432"                # conexión JDBC desde tus micros (localhost:5432)
+    volumes:
+      - pg_data:/var/lib/postgresql/data     # persistencia (volumen nombrado)
+      - ./init:/docker-entrypoint-initdb.d   # scripts init (bind mount de tu repo)
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   rabbit_data:
+  pg_data:

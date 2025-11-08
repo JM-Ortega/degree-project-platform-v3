@@ -13,28 +13,14 @@ spring:
       max-file-size: 60MB        # tamaño máx. por archivo
       max-request-size: 60MB     # tamaño máx. del request completo (incluye metadatos multipart)
 
-#  # ======================================================
-#  #  Configuracion de base de datos (SQLite local)
-#  # ======================================================
-#  datasource:
-#    url: jdbc:sqlite:./data/coordinator.db
-#    driver-class-name: org.sqlite.JDBC
-#  jpa:
-#    hibernate:
-#      ddl-auto: update
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        dialect: org.hibernate.community.dialect.SQLiteDialect
-
   # ======================================================
-  #  Configuracion de base de datos (H2 local)
+  #  Configuracion de base de datos (PostgreSQL)
   # ======================================================
   datasource:
-    url: jdbc:h2:file:./data/coordinatordb;AUTO_SERVER=TRUE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/coordinator_db
+    username: ${DB_USER:coord_user}
+    password: ${DB_PASS:coord_pass}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -42,12 +28,7 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console #http://localhost:8083/h2-console
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   # ======================================================
   # Configuracion de mensajeria (RabbitMQ)
@@ -105,7 +86,6 @@ messaging:
     formatAApprovedByCoordinator: coordinator.formata.approved
     proposalApprovedByDeptHead: department.proposal.approved
     notificationAny: notification.send.*
-
 
 # ======================================================
 # Configuracion del servidor embebido (Tomcat)

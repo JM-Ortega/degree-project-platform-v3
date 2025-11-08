@@ -74,7 +74,7 @@ logs/
 **/*.log
 
 # Bases de datos locales (SQLite)
-data/
+init/
 **/data/
 *.db
 *.db-shm

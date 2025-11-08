@@ -5,60 +5,66 @@ import co.edu.unicauca.academicprojectservice.Service.ProyectoService;
 import co.edu.unicauca.academicprojectservice.infra.dto.AnteproyectoDTO;
 import co.edu.unicauca.academicprojectservice.infra.dto.EstudianteDTO;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/estudiantes")
 public class EstudianteController {
-    @Autowired
-    private EstudianteService estudianteService;
-    @Autowired
-    private ProyectoService proyectoService;
+
+    private final EstudianteService estudianteService;
+    private final ProyectoService proyectoService;
+
+    public EstudianteController(EstudianteService estudianteService, ProyectoService proyectoService) {
+        this.estudianteService = estudianteService;
+        this.proyectoService = proyectoService;
+    }
 
     @GetMapping("/libre/{correo}")
-    public ResponseEntity<Boolean> estudianteLibre(@PathVariable String correo) throws Exception {
-        if (!estudianteService.existeEstudiantePorCorreo(correo)) {
-            throw new Exception();
+    public ResponseEntity<?> estudianteLibre(@PathVariable String correo) {
+        if (correo == null || correo.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El correo no puede estar vacío");
+        }
+        boolean existe = estudianteService.existeEstudiantePorCorreo(correo);
+        if (!existe) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe un estudiante con ese correo");
         }
         boolean libre = !estudianteService.estudianteTieneProyectoEnTramitePorCorreo(correo);
-        return ResponseEntity.ok(libre);
+        return ResponseEntity.ok().body(
+                java.util.Map.of("correo", correo, "libre", libre)
+        );
     }
 
     @GetMapping("/existe/{correo}")
     public ResponseEntity<Boolean> existeEstudiante(@PathVariable String correo) {
-        boolean existe = estudianteService.existeEstudiantePorCorreo(correo);
-        return ResponseEntity.ok(existe);
+        return ResponseEntity.ok(estudianteService.existeEstudiantePorCorreo(correo));
     }
 
     @GetMapping
     public ResponseEntity<EstudianteDTO> obtenerEstudiante(@RequestParam String correo) {
         try {
-            EstudianteDTO dto = estudianteService.obtenerEstudiantePorCorreo(correo);
-            return ResponseEntity.ok(dto);
+            return ResponseEntity.ok(estudianteService.obtenerEstudiantePorCorreo(correo));
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
         }
     }
 
     @PostMapping("/agregarEstudiante")
     public ResponseEntity<EstudianteDTO> agregarEstudiante(@RequestBody EstudianteDTO dto) {
         estudianteService.agregarEstudiante(dto);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @GetMapping("/tieneProyectoEnTramite/{correo}")
     public ResponseEntity<Boolean> estudianteTieneProyectoEnTramitePorCorreo(@PathVariable String correo) {
-        boolean existe = estudianteService.estudianteTieneProyectoEnTramitePorCorreo(correo);
-        return ResponseEntity.ok(existe);
+        return ResponseEntity.ok(estudianteService.estudianteTieneProyectoEnTramitePorCorreo(correo));
     }
 
     @GetMapping("/tieneFormatoAAprobado/{correo}")
     public ResponseEntity<Boolean> estudianteTieneFormatoAAprobado(@PathVariable String correo) {
-        boolean existe = estudianteService.estudianteTieneFormatoAAprobado(correo);
-        return ResponseEntity.ok(existe);
+        return ResponseEntity.ok(estudianteService.estudianteTieneFormatoAAprobado(correo));
     }
 
     @PostMapping("/asociarAnteproyecto/{correo}")
@@ -73,19 +79,16 @@ public class EstudianteController {
         } catch (IllegalStateException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno");
         }
     }
 
     @GetMapping("/{correo}/tieneAnteproyecto")
     public ResponseEntity<Boolean> estudianteTieneAnteproyecto(@PathVariable String correo) {
         try {
-            boolean tiene = estudianteService.estudianteTieneAnteproyectoAsociado(correo);
-            return ResponseEntity.ok(tiene);
+            return ResponseEntity.ok(estudianteService.estudianteTieneAnteproyectoAsociado(correo));
         } catch (EntityNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
         }
     }
 }

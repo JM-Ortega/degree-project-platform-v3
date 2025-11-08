@@ -1,11 +1,10 @@
 package co.edu.unicauca.frontend.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.List;
 
-/**
- * DTO que el frontend envía al gateway para registrar una persona.
- * Debe coincidir con la estructura que espera el auth-service.
- */
+@JsonInclude(JsonInclude.Include.NON_EMPTY) // no serializa "" ni listas vacías
 public class RegistroPersonaDto {
 
     private String nombres;
@@ -13,23 +12,14 @@ public class RegistroPersonaDto {
     private String email;
     private String password;
     private String celular;
-    /**
-     * Nombre del enum Programa tal como lo define shared-contracts.
-     * Ej: "IngenieriaDeSistemas"
-     */
-    private String programa;
-    /**
-     * Lista de nombres de los roles. Ej: ["Estudiante"] o ["Docente","Estudiante"]
-     */
-    private List<String> roles;
-    /**
-     * Puede ser null si el rol no lo requiere.
-     */
-    private String departamento;
+    private String programa;       // nombre exacto del enum en shared-contracts
+    private List<String> roles;    // p.ej. ["Estudiante","Docente"]
+    private String departamento;   // nombre exacto del enum en shared-contracts
 
     public RegistroPersonaDto() {
     }
 
+    // MISMA firma, pero delega a setters para normalizar
     public RegistroPersonaDto(String nombres,
                               String apellidos,
                               String email,
@@ -43,9 +33,9 @@ public class RegistroPersonaDto {
         this.email = email;
         this.password = password;
         this.celular = celular;
-        this.programa = programa;
-        this.roles = roles;
-        this.departamento = departamento;
+        setPrograma(programa);
+        setRoles(roles);
+        setDepartamento(departamento);
     }
 
     public String getNombres() {
@@ -91,24 +81,21 @@ public class RegistroPersonaDto {
     public String getPrograma() {
         return programa;
     }
-
     public void setPrograma(String programa) {
-        this.programa = programa;
+        this.programa = (programa == null || programa.isBlank()) ? null : programa;
     }
 
     public List<String> getRoles() {
         return roles;
     }
-
     public void setRoles(List<String> roles) {
-        this.roles = roles;
+        this.roles = (roles == null || roles.isEmpty()) ? null : roles;
     }
 
     public String getDepartamento() {
         return departamento;
     }
-
     public void setDepartamento(String departamento) {
-        this.departamento = departamento;
+        this.departamento = (departamento == null || departamento.isBlank()) ? null : departamento;
     }
 }

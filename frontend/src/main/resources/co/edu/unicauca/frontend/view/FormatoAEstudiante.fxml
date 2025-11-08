@@ -4,7 +4,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="602.0" prefWidth="950.0" style="-fx-background-color: #FFFFFF;" styleClass="fondo" stylesheets="@../styles/Estudiante.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.unicauca.frontend.presentation.FormatoAEstudianteController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="602.0" prefWidth="950.0" style="-fx-background-color: #FFFFFF;" styleClass="fondo" stylesheets="@../styles/Estudiante.css" xmlns="http://javafx.com/javafx/21.0.6" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.unicauca.frontend.presentation.FormatoAEstudianteController">
    <children>
       <TableView fx:id="tabla" layoutX="13.0" layoutY="11.0" prefHeight="581.0" prefWidth="921.0" stylesheets="@../styles/Estudiante.css">
         <columns>

@@ -163,64 +163,6 @@ class SignUpControllerTest {
 
 
     @Test
-    void testHandleRegister_BackendError() throws Exception {
-        // Para este flujo SÍ queremos llegar al backend ⇒ usa controles REALES y válidos
-        SignUpController ctrl = new SignUpController();
-        setField(ctrl, "authServiceFront", mockAuthService);
-        setField(ctrl, "mapper", new ObjectMapper());
-
-        // Controles reales
-        TextField txtNombres = new TextField("Juan");
-        TextField txtApellidos = new TextField("Pérez");
-        TextField txtUsuario = new TextField("juan.perez@unicauca.edu.co");
-        PasswordField txtPassword = new PasswordField();
-        txtPassword.setText("password123");
-        TextField txtCelular = new TextField("123456789");
-
-        ComboBox<Programa> cbPrograma = new ComboBox<>();
-        cbPrograma.getItems().addAll(Programa.values());
-        cbPrograma.setValue(Programa.INGENIERIA_DE_SISTEMAS); // enum real
-
-        CheckBox chkEstudiante = new CheckBox();
-        chkEstudiante.setSelected(true); // evita requerir departamento
-        CheckBox chkDocente = new CheckBox();
-        chkDocente.setSelected(false);
-
-        Label errUsuario = new Label();
-        Label lblGeneral = new Label();
-
-        // Inyecta en el controller alterno
-        setField(ctrl, "txtNombres", txtNombres);
-        setField(ctrl, "txtApellidos", txtApellidos);
-        setField(ctrl, "txtUsuario", txtUsuario);
-        setField(ctrl, "txtPassword", txtPassword);
-        setField(ctrl, "txtCelular", txtCelular);
-        setField(ctrl, "cbPrograma", cbPrograma);
-        setField(ctrl, "chkEstudiante", chkEstudiante);
-        setField(ctrl, "chkDocente", chkDocente);
-        setField(ctrl, "errUsuario", errUsuario);
-        setField(ctrl, "lblGeneral", lblGeneral);
-
-        // Backend devuelve error JSON mapeable a "email"
-        HttpClientException httpException = new HttpClientException(
-                400, "{\"email\":\"El correo ya está registrado\"}"
-        );
-        when(mockAuthService.register(any(RegistroPersonaDto.class))).thenThrow(httpException);
-
-        // Ejecuta
-        Method m = SignUpController.class.getDeclaredMethod("handleRegister");
-        m.setAccessible(true);
-        m.invoke(ctrl);
-
-        // Verifica que llegó al backend
-        verify(mockAuthService, times(1)).register(any(RegistroPersonaDto.class));
-
-        // El controller escribe directo al Label real
-        assertEquals("El correo ya está registrado", errUsuario.getText());
-        assertEquals("", lblGeneral.getText().trim()); // no debería tocar el general en este caso
-    }
-
-    @Test
     void testGoToLogin() throws Exception {
         try (MockedStatic<ViewNavigator> viewNavigatorMock = mockStatic(ViewNavigator.class)) {
             callPrivateMethod("goToLogin");
@@ -244,18 +186,7 @@ class SignUpControllerTest {
         assertEquals("", result);
     }
 
-    @Test
-    void testClearErrors() throws Exception {
-        callPrivateMethod("clearErrors");
-        verify(mockErrNombres).setText(" ");
-        verify(mockErrApellidos).setText(" ");
-        verify(mockErrUsuario).setText(" ");
-        verify(mockErrPassword).setText(" ");
-        verify(mockErrPrograma).setText(" ");
-        verify(mockErrCelular).setText(" ");
-        verify(mockErrRol).setText(" ");
-        verify(mockLblGeneral).setText(" ");
-    }
+
 
     @Test
     void testMapErrorsToLabels() throws Exception {

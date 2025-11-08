@@ -55,7 +55,7 @@
                   <Image url="@../images/avatar.png" />
                </image>
             </ImageView>
-            <Label fx:id="lblPrograma" layoutX="84.0" layoutY="33.0" text="Nombre coordinador">
+            <Label fx:id="lblPrograma" layoutX="84.0" layoutY="33.0" text="Coordinador">
                <font>
                   <Font name="Roboto Bold" size="12.0" />
                </font>

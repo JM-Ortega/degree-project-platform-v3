@@ -150,6 +150,13 @@ public class SignUpController {
             return;
         }
 
+        String programa = (programaSeleccionado == null || programaSeleccionado.isBlank())
+                ? null
+                : programaSeleccionado;
+
+        String departamento = (departamentoSeleccionado == null || departamentoSeleccionado.isBlank())
+                ? null
+                : departamentoSeleccionado;
         // 4) Crear DTO y enviar
         RegistroPersonaDto dto = new RegistroPersonaDto(
                 val(txtNombres),
@@ -157,9 +164,9 @@ public class SignUpController {
                 val(txtUsuario).toLowerCase(),
                 val(txtPassword),
                 val(txtCelular),
-                programaSeleccionado,        // "INGENIERIA_DE_SISTEMAS"
-                roles,                       // ["ESTUDIANTE", "DOCENTE"]
-                departamentoSeleccionado     // "SISTEMAS" (si aplica)
+                programa,            // ya normalizado
+                roles,
+                departamento          // ya normalizado
         );
 
         try {

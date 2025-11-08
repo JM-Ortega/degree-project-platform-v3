@@ -1,5 +1,6 @@
 package co.edu.unicauca.frontend.presentation;
 
+import co.edu.unicauca.frontend.FrontendServices;
 import co.edu.unicauca.frontend.infra.dto.ProyectoEstudianteDTO;
 import co.edu.unicauca.frontend.services.ProyectoEstudianteService;
 import co.edu.unicauca.frontend.services.ProyectoService;
@@ -13,11 +14,8 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.time.LocalDate;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class FormatoAEstudianteController implements Initializable {
@@ -28,19 +26,20 @@ public class FormatoAEstudianteController implements Initializable {
     @FXML private TableColumn<ProyectoEstudianteDTO, String> colEstado;
     @FXML private TableColumn<ProyectoEstudianteDTO, Void> colDescarga;
 
-
     private final ProyectoEstudianteService proyectoEstService = new ProyectoEstudianteService();
     private ProyectoService proyectoService;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        this.proyectoService = FrontendServices.proyectoService();
+
         configurarColumnas();
         configurarColumnaEstado();
         agregarBotonDescargar();
         cargarDatos();
     }
 
-    public void configurarColumnas(){
+    public void configurarColumnas() {
         colTitulo.setCellValueFactory(cell -> cell.getValue().tituloProperty());
 
         colTipo.setCellValueFactory(cellData -> {
@@ -61,12 +60,13 @@ public class FormatoAEstudianteController implements Initializable {
         });
 
         colDirector.setCellValueFactory(cell -> cell.getValue().nombreDirectorProperty());
+
         colEstado.setCellValueFactory(cellData -> {
-            String tipo = cellData.getValue().getEstadoProyecto();
+            String tipo = cellData.getValue().getEstadoProyecto(); // EN_TRAMITE | RECHAZADO | TERMINADO
             String estP;
             switch (tipo) {
                 case "EN_TRAMITE":
-                    estP = "En tramite";
+                    estP = "En trámite";
                     break;
                 case "RECHAZADO":
                     estP = "Rechazado";
@@ -82,35 +82,42 @@ public class FormatoAEstudianteController implements Initializable {
         });
     }
 
+    /**
+     * Alineo los íconos con los estados del proyecto.
+     */
     private void configurarColumnaEstado() {
         colEstado.setCellFactory(col -> new TableCell<ProyectoEstudianteDTO, String>() {
             private final ImageView imageView = new ImageView();
 
             @Override
-            protected void updateItem(String estado, boolean empty) {
-                super.updateItem(estado, empty);
-                if (empty || estado == null) {
+            protected void updateItem(String estadoLegible, boolean empty) {
+                super.updateItem(estadoLegible, empty);
+                if (empty || estadoLegible == null) {
                     setGraphic(null);
                     setText(null);
                     return;
                 }
 
-                Image img = null;
-                String e = estado.trim().toUpperCase();
-                switch (e) {
-                    case "APROBADO" -> img = loadImage("/co/unicauca/workflow/degree_project/images/aprobado.png");
-                    case "OBSERVADO" -> img = loadImage("/co/unicauca/workflow/degree_project/images/observado.png");
-                    case "PENDIENTE" -> img = loadImage("/co/unicauca/workflow/degree_project/images/pendiente.png");
-                    default -> img = null;
-                }
+                // Mapeo: EN_TRAMITE -> pendiente, RECHAZADO -> observado, TERMINADO -> aprobado
+                String raw = getTableView().getItems().get(getIndex()).getEstadoProyecto();
+                String key = raw == null ? "" : raw.trim().toUpperCase();
+
+                Image img = switch (key) {
+                    case "EN_TRAMITE" -> loadImage("/co/unicauca/workflow/degree_project/images/pendiente.png");
+                    case "RECHAZADO" -> loadImage("/co/unicauca/workflow/degree_project/images/observado.png");
+                    case "TERMINADO" -> loadImage("/co/unicauca/workflow/degree_project/images/aprobado.png");
+                    default -> null;
+                };
 
                 if (img != null) {
                     imageView.setImage(img);
+                    imageView.setFitWidth(20);
+                    imageView.setFitHeight(20);
                     setGraphic(imageView);
                     setText(null);
                 } else {
                     setGraphic(null);
-                    setText(estado);
+                    setText(estadoLegible);
                 }
             }
         });
@@ -152,24 +159,38 @@ public class FormatoAEstudianteController implements Initializable {
                 imgView.setFitWidth(20);
                 imgView.setFitHeight(20);
                 btnDescargar.setGraphic(imgView);
+                btnDescargar.setTooltip(new Tooltip("Descargar Formato A con observaciones"));
 
                 btnDescargar.setOnAction(event -> {
                     ProyectoEstudianteDTO proyecto = getTableView().getItems().get(getIndex());
-                    if (proyecto != null) {
-                        try {
-                            var form = proyectoService.obtenerUltimoFormatoAConObservaciones(proyecto.getId());
-                            FileChooser fc = new FileChooser();
-                            fc.setTitle("Guardar Formato A con observaciones");
-                            fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-                            fc.setInitialFileName(form.getNombreFormato());
-                            File dest = fc.showSaveDialog(tabla.getScene().getWindow());
-                            if (dest == null) return;
+                    if (proyecto == null) return;
 
-                            Files.write(dest.toPath(), form.getBlob());
-                        }catch (Exception e) {
-                            e.printStackTrace();
-                            alerta(Alert.AlertType.ERROR, "Error", null, "Error al cargar los datos: " + e.getMessage());
+                    if (proyectoService == null) {
+                        alerta(Alert.AlertType.ERROR, "Error", null, "Servicio no inicializado.");
+                        return;
+                    }
+
+                    try {
+                        var form = proyectoService.obtenerUltimoFormatoAConObservaciones(proyecto.getId());
+                        if (form == null || form.getBlob() == null) {
+                            alerta(Alert.AlertType.INFORMATION, "Sin archivo", null, "No hay Formato A con observaciones.");
+                            return;
                         }
+
+                        FileChooser fc = new FileChooser();
+                        fc.setTitle("Guardar Formato A con observaciones");
+                        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+                        String nombre = (form.getNombreFormato() != null && !form.getNombreFormato().isBlank())
+                                ? form.getNombreFormato() : "formatoA.pdf";
+                        fc.setInitialFileName(nombre);
+
+                        File dest = fc.showSaveDialog(tabla.getScene().getWindow());
+                        if (dest == null) return;
+
+                        Files.write(dest.toPath(), form.getBlob());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        alerta(Alert.AlertType.ERROR, "Error", null, "No se pudo descargar: " + e.getMessage());
                     }
                 });
             }

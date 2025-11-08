@@ -14,18 +14,25 @@ spring:
       max-request-size: 60MB     # tamaño máx. del request completo (incluye metadatos multipart)
 
   # ======================================================
-  #  Configuracion de base de datos (SQLite local)
+  #  Configuracion de base de datos (PostgreSQL local/Docker)
+  #  Nota:
+  #    - Si el micro corre FUERA de docker-compose: DB_HOST=localhost
+  #    - Si el micro corre DENTRO del mismo compose: DB_HOST=postgres (nombre del servicio)
+  #    - Cada micro debe usar SU propia DB y credenciales (principio DB-per-service)
   # ======================================================
   datasource:
-    url: jdbc:sqlite:./data/department-head.db
-    driver-class-name: org.sqlite.JDBC
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/department_head_db
+    username: ${DB_USER:dept_user}
+    password: ${DB_PASS:dept_pass}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: update                  # En dev: update | En prod: validate + Flyway/Liquibase
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.community.dialect.SQLiteDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
 
   # ======================================================
   # Configuracion de mensajeria (RabbitMQ)

@@ -14,18 +14,20 @@ spring:
       max-request-size: 60MB     # tamaño máx. del request completo (incluye metadatos multipart)
 
   # ======================================================
-  #  Configuracion de base de datos (SQLite local)
+  #  Configuracion de base de datos (PostgreSQL)
   # ======================================================
   datasource:
-    url: jdbc:sqlite:./data/academic-project.db
-    driver-class-name: org.sqlite.JDBC
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/academic_project_db
+    username: ${DB_USER:project_user}
+    password: ${DB_PASS:project_pass}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.community.dialect.SQLiteDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   # ======================================================
   # Configuracion de mensajeria (RabbitMQ)
@@ -58,7 +60,7 @@ messaging:
     auth: auth-service.q
     project: academic-project-service.q
     projectFormatoA: academic-project-service.formatoa.q
-    projectAuth: academic.auth.q          # ✅ nueva cola dedicada para UserCreatedEvent
+    projectAuth: academic.auth.q
     coordinator: coordinator-service.q
     department: department-head-service.q
     notification: notification-service.q
@@ -74,7 +76,6 @@ messaging:
     formatAApprovedByCoordinator: coordinator.formata.approved
     proposalApprovedByDeptHead: department.proposal.approved
     notificationAny: notification.send.*
-
 
 # ======================================================
 # Configuracion del servidor embebido (Tomcat)

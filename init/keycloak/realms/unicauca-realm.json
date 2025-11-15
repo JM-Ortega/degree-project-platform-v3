@@ -1,0 +1,191 @@
+{
+  "realm": "unicauca",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ESTUDIANTE"
+      },
+      {
+        "name": "DOCENTE"
+      },
+      {
+        "name": "COORDINADOR"
+      },
+      {
+        "name": "JEFE_DE_DEPARTAMENTO"
+      },
+      {
+        "name": "ADMIN"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "name": "Departamento",
+      "subGroups": [
+        {
+          "name": "SISTEMAS"
+        },
+        {
+          "name": "ELECTRONICA_INSTRUMENTACION_Y_CONTROL"
+        },
+        {
+          "name": "TELEMATICA"
+        },
+        {
+          "name": "TELECOMUNICACIONES"
+        }
+      ]
+    },
+    {
+      "name": "Programa",
+      "subGroups": [
+        {
+          "name": "INGENIERIA_DE_SISTEMAS"
+        },
+        {
+          "name": "INGENIERIA_ELECTRONICA_Y_TELECOMUNICACIONES"
+        },
+        {
+          "name": "AUTOMATICA_INDUSTRIAL"
+        },
+        {
+          "name": "TECNOLOGIA_EN_TELEMATICA"
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "frontend-spa",
+      "name": "Frontend SPA",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "redirectUris": [
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173"
+      ]
+    }
+  ],
+  "defaultDefaultClientScopes": [
+    "web-origins",
+    "acr",
+    "roles",
+    "profile",
+    "email"
+  ],
+  "defaultOptionalClientScopes": [
+    "address",
+    "phone",
+    "microprofile-jwt"
+  ],
+  "clientScopes": [
+    {
+      "name": "persona-idtoken",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "codigo (ID token)",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "codigo",
+            "claim.name": "codigo",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "false",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "celular (ID token)",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "celular",
+            "claim.name": "celular",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "false",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "affiliations-access",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "groups → affiliations (access token)",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "false",
+            "claim.name": "affiliations"
+          }
+        }
+      ]
+    }
+  ],
+  "clientScopeMappings": [
+    {
+      "clientScope": "persona-idtoken",
+      "client": "frontend-spa",
+      "roles": []
+    }
+  ],
+  "scopeMappings": [],
+  "users": [
+    {
+      "username": "docente1",
+      "enabled": true,
+      "firstName": "Docente",
+      "lastName": "Prueba",
+      "email": "docente1@example.com",
+      "attributes": {
+        "codigo": [
+          "202300001"
+        ],
+        "celular": [
+          "3000000000"
+        ]
+      },
+      "groups": [
+        "/Departamento/SISTEMAS",
+        "/Programa/INGENIERIA_DE_SISTEMAS"
+      ],
+      "realmRoles": [
+        "DOCENTE"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Temporal#2025",
+          "temporary": true
+        }
+      ]
+    }
+  ]
+}

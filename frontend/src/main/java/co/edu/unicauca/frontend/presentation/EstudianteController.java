@@ -96,7 +96,7 @@ public class EstudianteController implements Initializable {
     @FXML
     public void onSalir(javafx.event.ActionEvent event) {
         try {
-            FXMLLoader loader = FrontendApp.newLoader("/co/edu/unicauca/frontend/view/signin.fxml");
+            FXMLLoader loader = FrontendApp.newLoader("/co/edu/unicauca/frontend/view/SignIn.fxml");
             Parent root = loader.load();
 
             // Obtener la ventana actual (Stage)

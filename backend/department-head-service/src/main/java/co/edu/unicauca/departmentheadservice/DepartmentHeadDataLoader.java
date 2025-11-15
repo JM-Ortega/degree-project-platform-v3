@@ -102,11 +102,15 @@ public class DepartmentHeadDataLoader implements CommandLineRunner {
             anteproyectoRepository.saveAll(nuevos);
         }
 
-        System.out.println("✅ Seed idempotente ejecutado en DepartmentHeadService");
+        System.out.println("Seed idempotente ejecutado en DepartmentHeadService");
     }
 
     private Docente getOrCreateDocente(String nombre, String email) {
         return docenteRepository.findByEmail(email)
-                .orElseGet(() -> docenteRepository.save(new Docente(null, nombre, email)));
+                .orElseGet(() -> {
+                    Docente nuevo = new Docente(email, nombre, email);
+                    return docenteRepository.save(nuevo);
+                });
     }
+
 }

@@ -5,8 +5,8 @@ services:
     image: rabbitmq:3.13-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"     # puerto para que los microservicios se conecten
-      - "15672:15672"   # consola web (http://localhost:15672)
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: appuser
       RABBITMQ_DEFAULT_PASS: apppass
@@ -20,17 +20,16 @@ services:
       retries: 10
 
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: pg
     environment:
-      POSTGRES_USER: root          # superusuario inicial
+      POSTGRES_USER: root
       POSTGRES_PASSWORD: root
-      # No definimos POSTGRES_DB para permitir múltiples DB vía init SQL
     ports:
-      - "5432:5432"                # conexión JDBC desde tus micros (localhost:5432)
+      - "5432:5432"
     volumes:
-      - pg_data:/var/lib/postgresql/data     # persistencia (volumen nombrado)
-      - ./init:/docker-entrypoint-initdb.d   # scripts init (bind mount de tu repo)
+      - pg_data:/var/lib/postgresql/data
+      - ./init/postgres:/docker-entrypoint-initdb.d # ← scripts SQL
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U root -d postgres"]
@@ -38,6 +37,42 @@ services:
       timeout: 5s
       retries: 10
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: keycloak
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: keycloak_db
+      KC_DB_USERNAME: keycloak_user
+      KC_DB_PASSWORD: keycloak_pass
+
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+    command: ["start-dev"] # http://localhost:8081
+    #command: ["start-dev", "--import-realm"]          # ← importa los JSON de /import
+    ports:
+      - "8181:8080" # externo:interno
+    volumes:
+      - kc_data:/opt/keycloak/data
+      # - ./init/keycloak/realms:/opt/keycloak/data/import  # ← realms JSON
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:8080/realms/master/.well-known/openid-configuration || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
 volumes:
   rabbit_data:
   pg_data:
+  kc_data:

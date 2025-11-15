@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
-    <file url="file://$PROJECT_DIR$/init/create-databases.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/init/postgres/001-db-per-service.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/init/postgres/010-keycloak-db.sql" dialect="PostgreSQL" />
   </component>
 </project>

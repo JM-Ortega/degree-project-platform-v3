@@ -1,87 +1,230 @@
-package co.edu.unicauca.academicprojectservice.Old.Entity;
+package co.edu.unicauca.academicprojectservice.domain.model;
 
-import co.edu.unicauca.academicprojectservice.Domain.model.Anteproyecto;
-import co.edu.unicauca.academicprojectservice.Domain.model.Docente;
-import co.edu.unicauca.academicprojectservice.Domain.model.Estudiante;
-import jakarta.persistence.*;
+import co.edu.unicauca.academicprojectservice.domain.exceptions.DomainException;
+import co.edu.unicauca.academicprojectservice.domain.exceptions.formatoa.FormatoANoObservadoException;
+import co.edu.unicauca.academicprojectservice.domain.exceptions.formatoa.MaximoDeVersionesFormatoAException;
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
+import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
+import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-@Entity
-@Table(name = "proyecto")
 public class Proyecto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String titulo;
 
-    @ManyToMany
-    @JoinTable(
-            name = "trabajo_estudiantes",
-            joinColumns = @JoinColumn(name = "trabajo_id"),
-            inverseJoinColumns = @JoinColumn(name = "estudiante_id")
-    )
-    @com.fasterxml.jackson.annotation.JsonIgnore
-
-    private List<Estudiante> estudiantes;
-
-    @ManyToOne
-    @JoinColumn(name = "director_id", nullable = false)
-    private Docente director;
-
-    @ManyToOne
-    @JoinColumn(name = "codirector_id")
-    private Docente codirector;
-
-    @OneToMany(mappedBy = "proyecto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FormatoA> formatosA = new ArrayList<>();
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cartaLaboral_id")
-    private CartaLaboral cartaLaboral;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "anteproyecto_id")
+    private final UUID id;
+    private final String titulo;
+    private final List<EstudianteId> estudiantesId;
+    private final DocenteId directorId;
+    private final List<FormatoA> formatosA;
+    private final TipoProyecto tipoProyecto;
+    private DocenteId codirectorId;
+    private byte[] cartaLaboral;
     private Anteproyecto anteproyecto;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_proyecto", nullable = false)
-    private TipoProyecto tipoProyecto;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "estado_proyecto", nullable = false)
     private EstadoProyecto estadoProyecto;
 
-    public Proyecto() {}
+    public Proyecto(String titulo, List<EstudianteId> estudiantesId, DocenteId directorId, TipoProyecto tipoProyecto) {
 
-    public Long getId() { return id; }
-    public void setId(Long id) {this.id = id;}
+        if (titulo == null || titulo.isBlank()) {
+            throw new DomainException("El título del proyecto es obligatorio.");
+        }
+        if (estudiantesId == null || estudiantesId.isEmpty()) {
+            throw new DomainException("El proyecto debe tener al menos un estudiante.");
+        }
+        if (tipoProyecto == TipoProyecto.TRABAJO_DE_INVESTIGACION && (estudiantesId.size() < 1 || estudiantesId.size() > 2)) {
+            throw new DomainException("Un trabajo de investigación debe tener entre 1 y 2 estudiantes.");
+        }
+        if (tipoProyecto == TipoProyecto.PRACTICA_PROFESIONAL && estudiantesId.size() != 1) {
+            throw new DomainException("Una práctica profesional debe tener exactamente 1 estudiante.");
+        }
+        if (directorId == null) {
+            throw new DomainException("El proyecto debe tener director.");
+        }
+        if (tipoProyecto == null) {
+            throw new DomainException("El tipo de proyecto es obligatorio.");
+        }
 
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
+        this.id = UUID.randomUUID();
+        this.titulo = titulo;
+        this.estudiantesId = List.copyOf(estudiantesId);
+        this.directorId = directorId;
+        this.tipoProyecto = tipoProyecto;
 
-    public List<Estudiante> getEstudiantes() { return estudiantes; }
-    public void setEstudiantes(List<Estudiante> estudiantes) { this.estudiantes = estudiantes; }
+        this.codirectorId = null;
+        this.formatosA = new ArrayList<>();
+        this.cartaLaboral = null;
+        this.anteproyecto = null;
+        this.estadoProyecto = EstadoProyecto.PRIMERA_REVISION_FORMATOA;
+    }
 
-    public Docente getDirector() { return director; }
-    public void setDirector(Docente director) { this.director = director; }
+    public static Proyecto crear(String titulo, List<EstudianteId> estudiantesId, DocenteId directorId, TipoProyecto tipoProyecto) {
+        return new Proyecto(titulo, estudiantesId, directorId, tipoProyecto);
+    }
 
-    public Docente getCodirector() { return codirector; }
-    public void setCodirector(Docente codirector) { this.codirector = codirector; }
+    public void asignarCodirector(DocenteId codirectorId) {
+        if (codirectorId == null) {
+            throw new DomainException("El codirector no puede ser nulo.");
+        }
+        this.codirectorId = codirectorId;
+    }
 
-    public TipoProyecto getTipoProyecto() { return tipoProyecto; }
-    public void setTipoProyecto(TipoProyecto tipoProyecto) { this.tipoProyecto = tipoProyecto; }
+    public void adjuntarCartaLaboral(byte[] cartaLaboral) {
+        if (tipoProyecto == TipoProyecto.TRABAJO_DE_INVESTIGACION) {
+            throw new DomainException("Los trabajos de investigación no deben tener carta laboral.");
+        }
+        if (cartaLaboral == null || cartaLaboral.length == 0) {
+            throw new DomainException("La carta laboral no puede estar vacía.");
+        }
+        this.cartaLaboral = cartaLaboral;
+    }
 
-    public CartaLaboral getCartaLaboral() { return cartaLaboral; }
-    public void setCartaLaboral(CartaLaboral cartaLaboral) { this.cartaLaboral = cartaLaboral; }
+    public void agregarFormatoAInicial(String nombreFormato, byte[] archivo) {
+        if (!formatosA.isEmpty()) {
+            throw new DomainException("El Formato A inicial ya fue creado.");
+        }
+        if (estadoProyecto != EstadoProyecto.PRIMERA_REVISION_FORMATOA) {
+            throw new DomainException("El Formato A inicial solo puede crearse en PRIMERA_REVISION_FORMATOA.");
+        }
+        FormatoA formato = FormatoA.crearInicial(nombreFormato, archivo);
+        this.formatosA.add(formato);
+    }
 
-    public EstadoProyecto getEstadoProyecto() { return estadoProyecto; }
-    public void setEstadoProyecto(EstadoProyecto estadoProyecto) { this.estadoProyecto = estadoProyecto; }
+    public void agregarNuevaVersionFormatoA(String nombreFormato, byte[] archivo) {
+        if (estadoProyecto != EstadoProyecto.SEGUNDA_REVISION_FORMATOA && estadoProyecto != EstadoProyecto.TERCERA_REVISION_FORMATOA) {
+            throw new DomainException("Solo se puede crear una nueva versión de Formato A en segunda o tercera revisión.");
+        }
 
-    public List<FormatoA> getFormatosA() {return formatosA;}
-    public void addFormato(FormatoA formato) {this.formatosA.add(formato);}
+        if (formatosA.isEmpty()) {
+            throw new DomainException("No existe Formato A inicial para versionar.");
+        }
 
-    public Anteproyecto getAnteproyecto() {return anteproyecto;}
-    public void setAnteproyecto(Anteproyecto anteproyecto) {this.anteproyecto = anteproyecto;}
+        FormatoA ultimo = formatosA.getLast();
+
+        if (ultimo.getEstado() != EstadoFormatoA.OBSERVADO) {
+            throw new FormatoANoObservadoException();
+        }
+
+        if (formatosA.size() >= 3) {
+            throw new MaximoDeVersionesFormatoAException();
+        }
+
+        int nuevaVersion = ultimo.getNroVersion() + 1;
+        FormatoA nuevo = FormatoA.crearNuevaVersion(nuevaVersion, nombreFormato, archivo);
+        this.formatosA.add(nuevo);
+    }
+
+    public void registrarResultadoRevisionFormatoA(EstadoFormatoA nuevoEstado) {
+        if (nuevoEstado == null) {
+            throw new DomainException("El nuevo estado del Formato A no puede ser nulo.");
+        }
+
+        if (formatosA.isEmpty()) {
+            throw new DomainException("El proyecto no tiene Formato A para revisar.");
+        }
+
+        if (estadoProyecto == EstadoProyecto.FORMATOA_RECHAZADO || estadoProyecto == EstadoProyecto.ANTEPROYECTO_ENVIADO || estadoProyecto == EstadoProyecto.EN_REVISION_ANTEPROYECTO || estadoProyecto == EstadoProyecto.FORMATOA_ACEPTADO) {
+            throw new DomainException("El estado del proyecto no permite revisar Formato A.");
+        }
+
+        FormatoA ultimo = formatosA.getLast();
+        ultimo.cambiarEstado(nuevoEstado);
+
+        if (nuevoEstado == EstadoFormatoA.APROBADO) {
+            if (tipoProyecto == TipoProyecto.PRACTICA_PROFESIONAL && cartaLaboral == null) {
+                throw new DomainException("La práctica profesional requiere carta laboral antes de aprobar el Formato A.");
+            }
+            this.estadoProyecto = EstadoProyecto.FORMATOA_ACEPTADO;
+            return;
+        }
+
+        if (nuevoEstado == EstadoFormatoA.OBSERVADO) {
+            if (estadoProyecto == EstadoProyecto.PRIMERA_REVISION_FORMATOA) {
+                this.estadoProyecto = EstadoProyecto.SEGUNDA_REVISION_FORMATOA;
+            } else if (estadoProyecto == EstadoProyecto.SEGUNDA_REVISION_FORMATOA) {
+                this.estadoProyecto = EstadoProyecto.TERCERA_REVISION_FORMATOA;
+            } else if (estadoProyecto == EstadoProyecto.TERCERA_REVISION_FORMATOA) {
+                this.estadoProyecto = EstadoProyecto.FORMATOA_RECHAZADO;
+            }
+            return;
+        }
+
+        if (nuevoEstado == EstadoFormatoA.PENDIENTE) {
+            throw new DomainException("No se puede registrar revisión con estado PENDIENTE.");
+        }
+    }
+
+    public void crearAnteproyecto(String nombreArchivo, String descripcion, String titulo, byte[] archivo) {
+        if (estadoProyecto != EstadoProyecto.FORMATOA_ACEPTADO) {
+            throw new DomainException("Solo se puede crear el anteproyecto cuando el Formato A está aceptado.");
+        }
+        if (this.anteproyecto != null) {
+            throw new DomainException("El proyecto ya tiene anteproyecto.");
+        }
+        this.anteproyecto = Anteproyecto.crear(nombreArchivo, descripcion, titulo, archivo);
+        this.estadoProyecto = EstadoProyecto.ANTEPROYECTO_ENVIADO;
+    }
+
+    public void marcarAnteproyectoEnRevision() {
+        if (anteproyecto == null) {
+            throw new DomainException("El proyecto no tiene anteproyecto.");
+        }
+        if (!anteproyecto.tieneCantidadValidaDeEvaluadores()) {
+            throw new DomainException("El anteproyecto debe tener entre 1 y 2 evaluadores para entrar en revisión.");
+        }
+        if (estadoProyecto != EstadoProyecto.ANTEPROYECTO_ENVIADO) {
+            throw new DomainException("El anteproyecto solo puede pasar a revisión desde ANTEPROYECTO_ENVIADO.");
+        }
+        this.estadoProyecto = EstadoProyecto.EN_REVISION_ANTEPROYECTO;
+    }
+
+    public int getMaxVersionFormatoA() {
+        Integer maxVersion = formatosA.getLast().getNroVersion();
+        return maxVersion != null ? maxVersion : 0;
+    }
+
+    public FormatoA getUltimoFormatoA() {
+        FormatoA formatoA = formatosA.getLast();
+        return  formatoA;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public List<EstudianteId> getEstudiantesId() {
+        return estudiantesId;
+    }
+
+    public DocenteId getDirectorId() {
+        return directorId;
+    }
+
+    public DocenteId getCodirectorId() {
+        return codirectorId;
+    }
+
+    public List<FormatoA> getFormatosA() {
+        return List.copyOf(formatosA);
+    }
+
+    public byte[] getCartaLaboral() {
+        return cartaLaboral;
+    }
+
+    public Anteproyecto getAnteproyecto() {
+        return anteproyecto;
+    }
+
+    public TipoProyecto getTipoProyecto() {
+        return tipoProyecto;
+    }
+
+    public EstadoProyecto getEstadoProyecto() {
+        return estadoProyecto;
+    }
 }

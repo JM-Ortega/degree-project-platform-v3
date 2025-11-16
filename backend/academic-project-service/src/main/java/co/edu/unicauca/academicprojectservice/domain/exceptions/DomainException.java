@@ -1,4 +1,7 @@
-package co.edu.unicauca.academicprojectservice.exceptions;
+package co.edu.unicauca.academicprojectservice.domain.exceptions;
 
-public class DomainException {
+public class DomainException extends RuntimeException {
+    public DomainException(String message) {
+        super(message);
+    }
 }

@@ -1,4 +1,6 @@
-package co.edu.unicauca.academicprojectservice.domain.exceptions;
+package co.edu.unicauca.academicprojectservice.domain.exceptions.formatoa;
+
+import co.edu.unicauca.academicprojectservice.domain.exceptions.DomainException;
 
 public class FormatoANoObservadoException extends DomainException {
     public FormatoANoObservadoException() {

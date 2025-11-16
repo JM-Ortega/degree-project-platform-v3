@@ -1,88 +1,84 @@
-package co.edu.unicauca.academicprojectservice.Old.Entity;
+package co.edu.unicauca.academicprojectservice.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import co.edu.unicauca.academicprojectservice.domain.exceptions.DomainException;
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 
-@Entity
-@Table(name = "formatoA")
 public class FormatoA {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private int nroVersion;
-    private String nombreFormato;
 
-    @Column(name = "fecha_creacion")
-    private LocalDate fechaCreacion;
+    private final UUID id;
 
-    private byte[] blob;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "estado_archivo", nullable = false)
+    private final int nroVersion;
+
+    private final String nombreFormato;
+
+    private final LocalDate fechaCreacion;
+
+    private final byte[] blob;
+
     private EstadoFormatoA estado;
 
-    @ManyToOne
-    @JoinColumn(name = "proyecto_id")
-    @JsonIgnore
-    private Proyecto proyecto;
 
-    public FormatoA() {}
+    public FormatoA(int nroVersion, String nombreFormato, byte[] blob) {
+        if (nroVersion <= 0) {
+            throw new DomainException("El numero de version del FormatoA debe ser positivo.");
+        }
+        if (nombreFormato == null || nombreFormato.isBlank()) {
+            throw new DomainException("El nombre del FormatoA es obligatorio.");
+        }
+        if (blob == null || blob.length == 0) {
+            throw new DomainException("El archivo del FormatoA es obligatorio.");
+        }
 
-    public byte[] getBlob() {
-        return blob;
-    }
-
-    public void setBlob(byte[] blob) {
-        this.blob = blob;
-    }
-
-    public EstadoFormatoA getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoFormatoA estado) {
-        this.estado = estado;
-    }
-
-    public LocalDate getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDate fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNombreFormato() {
-        return nombreFormato;
-    }
-
-    public void setNombreFormato(String nombreFormato) {
+        this.id = UUID.randomUUID();
+        this.nroVersion = nroVersion;
         this.nombreFormato = nombreFormato;
+        this.fechaCreacion = LocalDate.now();
+        this.blob = blob;
+        this.estado = EstadoFormatoA.PENDIENTE;
     }
 
-    public Proyecto getProyecto() {
-        return proyecto;
+    public static FormatoA crearInicial(String nombreFormato, byte[] blob) {
+        return new FormatoA(1, nombreFormato, blob);
     }
 
-    public void setProyecto(Proyecto proyecto) {
-        this.proyecto = proyecto;
+    public static FormatoA crearNuevaVersion(int nuevaVersion, String nombreFormato, byte[] blob) {
+        return new FormatoA(nuevaVersion, nombreFormato, blob);
+    }
+
+    public void cambiarEstado(EstadoFormatoA nuevoEstado) {
+        if (nuevoEstado == null) {
+            throw new DomainException("El estado del FormatoA no puede ser nulo.");
+        }
+        this.estado = nuevoEstado;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public int getNroVersion() {
         return nroVersion;
     }
 
-    public void setNroVersion(int nroVersion) {
-        this.nroVersion = nroVersion;
+    public String getNombreFormato() {
+        return nombreFormato;
     }
+
+    public LocalDate getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public byte[] getBlob() {
+        return blob;
+    }
+
+    public EstadoFormatoA getEstado() {
+        return estado;
+    }
+
 }
+

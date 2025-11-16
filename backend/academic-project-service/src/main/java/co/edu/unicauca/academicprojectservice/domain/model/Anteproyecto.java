@@ -1,60 +1,112 @@
-package co.edu.unicauca.academicprojectservice.Old.Entity;
+package co.edu.unicauca.academicprojectservice.domain.model;
 
-import jakarta.persistence.*;
+import co.edu.unicauca.academicprojectservice.domain.exceptions.DomainException;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
-@Entity
-@Table(name = "anteproyecto")
 public class Anteproyecto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String nombreArchivo;
-    private String descripcion;
-    private String titulo;
+
+    private final UUID id;
+    private final String nombreArchivo;
+    private final String descripcion;
+    private final String titulo;
     private byte[] blob;
+    private final LocalDate fechaCreacion;
+    private List<DocenteId> evaluadores;
 
-    @Column(name = "fecha_creacion")
-    private LocalDate fechaCreacion;
+    private static final int MAX_EVALUADORES = 2;
 
-    @ManyToMany
-    @JoinTable(
-            name = "anteproyecto_evaluador",
-            joinColumns = @JoinColumn(name = "anteproyecto_id"),
-            inverseJoinColumns = @JoinColumn(name = "docente_id")
-    )
-    private List<Docente> evaluadores;
+    public Anteproyecto(String nombreArchivo,
+                         String descripcion,
+                         String titulo,
+                         byte[] blob) {
 
-    @OneToOne(mappedBy = "anteproyecto")
-    @com.fasterxml.jackson.annotation.JsonIgnore
-    private Proyecto proyecto;
+        if (nombreArchivo == null || nombreArchivo.isBlank()) {
+            throw new DomainException("El nombre de archivo del anteproyecto es obligatorio.");
+        }
+        if (descripcion == null || descripcion.isBlank()) {
+            throw new DomainException("La descripción del anteproyecto es obligatoria.");
+        }
+        if (titulo == null || titulo.isBlank()) {
+            throw new DomainException("El título del anteproyecto es obligatorio.");
+        }
+        if (blob == null || blob.length == 0) {
+            throw new DomainException("El archivo del anteproyecto es obligatorio.");
+        }
 
-    public Anteproyecto() {}
+        this.id = UUID.randomUUID();
+        this.nombreArchivo = nombreArchivo;
+        this.descripcion = descripcion;
+        this.titulo = titulo;
+        this.blob = blob;
+        this.fechaCreacion = LocalDate.now();
+        this.evaluadores = new ArrayList<>();
+    }
 
-    // Getters y setters
-    public Long getId() { return id; }
+    public static Anteproyecto crear(String nombreArchivo,
+                                     String descripcion,
+                                     String titulo,
+                                     byte[] blob) {
+        return new Anteproyecto(nombreArchivo, descripcion, titulo, blob);
+    }
 
-    public LocalDate getFechaCreacion() { return fechaCreacion; }
-    public void setFechaCreacion(LocalDate fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+    public void asignarEvaluadores(List<DocenteId> nuevosEvaluadores) {
 
-    public Proyecto getProyecto() { return proyecto; }
-    public void setProyecto(Proyecto proyecto) { this.proyecto = proyecto; }
+        if (nuevosEvaluadores == null || nuevosEvaluadores.isEmpty()) {
+            throw new DomainException("El anteproyecto debe tener al menos un evaluador.");
+        }
 
-    public byte[] getBlob() { return blob; }
-    public void setBlob(byte[] blob) { this.blob = blob; }
+        if (nuevosEvaluadores.size() > MAX_EVALUADORES) {
+            throw new DomainException("Un anteproyecto no puede tener más de " + MAX_EVALUADORES + " evaluadores.");
+        }
 
-    public String getNombreArchivo() { return nombreArchivo; }
-    public void setNombreArchivo(String nombreArchivo) { this.nombreArchivo = nombreArchivo; }
+        if (nuevosEvaluadores.stream().anyMatch(Objects::isNull)) {
+            throw new DomainException("Los evaluadores del anteproyecto no pueden ser nulos.");
+        }
 
-    public String getDescripcion() {return descripcion;}
-    public void setDescripcion(String descripcion) {this.descripcion = descripcion;}
+        Set<DocenteId> sinDuplicados = new HashSet<>(nuevosEvaluadores);
+        if (sinDuplicados.size() != nuevosEvaluadores.size()) {
+            throw new DomainException("Los evaluadores del anteproyecto no pueden repetirse.");
+        }
 
-    public void setId(Long id) {this.id = id;}
-    public String getTitulo() {return titulo;}
-    public void setTitulo(String titulo) {this.titulo = titulo;}
+        this.evaluadores = List.copyOf(nuevosEvaluadores);
+    }
 
-    public List<Docente> getEvaluadores() {return evaluadores;}
-    public void setEvaluadores(List<Docente> evaluadores) {this.evaluadores = evaluadores;}
+    public boolean tieneCantidadValidaDeEvaluadores() {
+        return evaluadores != null
+                && !evaluadores.isEmpty()
+                && evaluadores.size() <= MAX_EVALUADORES;
+    }
+
+    public void actualizarArchivo(byte[] nuevoBlob) {
+        if (nuevoBlob == null || nuevoBlob.length == 0) {
+            throw new DomainException("El archivo del anteproyecto no puede ser vacío.");
+        }
+        this.blob = nuevoBlob;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getNombreArchivo() {
+        return nombreArchivo;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public LocalDate getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public List<DocenteId> getEvaluadores() {
+        return Collections.unmodifiableList(evaluadores);
+    }
 }

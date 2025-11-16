@@ -1,14 +1,12 @@
 package co.edu.unicauca.academicprojectservice.domain.model;
 
 import co.edu.unicauca.academicprojectservice.domain.exceptions.DomainException;
-import co.edu.unicauca.shared.contracts.model.Departamento;
-
 import java.util.UUID;
 
-public class Docente {
-    private UUID value;
+public class DocenteId {
+    private final UUID value;
 
-    public Docente(UUID value) {
+    public DocenteId(UUID value) {
         if (value == null) {
             throw new DomainException("El docente es obligatorio,");
         }
@@ -16,6 +14,6 @@ public class Docente {
     }
 
     public UUID value() {
-        return 
+        return value;
     }
 }

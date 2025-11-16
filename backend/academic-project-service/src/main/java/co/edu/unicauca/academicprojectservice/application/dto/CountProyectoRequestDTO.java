@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.Old.infra.dto;
+package co.edu.unicauca.academicprojectservice.application.dto;
 
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;

@@ -1,9 +1,7 @@
-package co.edu.unicauca.academicprojectservice.Old.infra.dto;
+package co.edu.unicauca.academicprojectservice.application.dto;
 
-import co.edu.unicauca.academicprojectservice.Domain.model.Anteproyecto;
-import co.edu.unicauca.academicprojectservice.Domain.model.CartaLaboral;
-import co.edu.unicauca.academicprojectservice.Domain.model.FormatoA;
-import co.edu.unicauca.academicprojectservice.Entity.*;
+import co.edu.unicauca.academicprojectservice.domain.model.Anteproyecto;
+import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 
@@ -14,18 +12,18 @@ public class ProyectoDTO {
     private String director;
     private Anteproyecto anteproyecto;
     private FormatoA formatoA;
-    private CartaLaboral cartaLaboral;
+    private byte[] cartaLaboral;
     private TipoProyecto tipoProyecto;
     private EstadoProyecto estadoProyecto;
 
     public Anteproyecto getAnteproyecto() {return anteproyecto;}
     public void setAnteproyecto(Anteproyecto anteproyecto) {this.anteproyecto = anteproyecto;}
 
-    public CartaLaboral getCartaLaboral() {return cartaLaboral;}
-    public void setCartaLaboral(CartaLaboral cartaLaboral) {this.cartaLaboral = cartaLaboral;}
-
     public String getDirector() {return director;}
     public void setDirector(String director) {this.director = director;}
+
+    public byte[] getCartaLaboral() {return cartaLaboral;}
+    public void setCartaLaboral(byte[] cartaLaboral) {this.cartaLaboral = cartaLaboral;}
 
     public EstadoProyecto getEstadoProyecto() {return estadoProyecto;}
     public void setEstadoProyecto(EstadoProyecto estadoProyecto) {this.estadoProyecto = estadoProyecto;}

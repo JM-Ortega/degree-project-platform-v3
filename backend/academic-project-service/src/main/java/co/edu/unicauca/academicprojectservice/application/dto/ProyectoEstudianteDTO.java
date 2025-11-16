@@ -1,15 +1,15 @@
-package co.edu.unicauca.academicprojectservice.Old.infra.dto;
+package co.edu.unicauca.academicprojectservice.application.dto;
 
-import java.time.LocalDate;
+import java.util.UUID;
 
 public class ProyectoEstudianteDTO {
-    private Long id;
+    private UUID id;
     private String titulo;
     private String nombreDirector;
     private String tipoProyecto;
     private String estadoProyecto;
 
-    public ProyectoEstudianteDTO(Long id, String titulo, String nombreDirector, String tipoProyecto, String estadoProyecto) {
+    public ProyectoEstudianteDTO(UUID id, String titulo, String nombreDirector, String tipoProyecto, String estadoProyecto) {
         this.id = id;
         this.titulo = titulo;
         this.nombreDirector = nombreDirector;
@@ -17,11 +17,11 @@ public class ProyectoEstudianteDTO {
         this.estadoProyecto = estadoProyecto;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

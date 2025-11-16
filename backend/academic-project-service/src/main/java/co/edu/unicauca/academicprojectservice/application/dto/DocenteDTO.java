@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.Old.infra.dto;
+package co.edu.unicauca.academicprojectservice.application.dto;
 
 
 public class DocenteDTO {

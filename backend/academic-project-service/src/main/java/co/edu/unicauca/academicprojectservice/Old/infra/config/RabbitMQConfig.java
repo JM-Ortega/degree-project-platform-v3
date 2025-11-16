@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.infra.config;
+package co.edu.unicauca.academicprojectservice.Old.infra.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;

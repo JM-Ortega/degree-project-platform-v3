@@ -1,5 +1,7 @@
 package co.edu.unicauca.academicprojectservice.Old.Service;
 
+import co.edu.unicauca.academicprojectservice.application.dto.ProyectoDTO;
+import co.edu.unicauca.academicprojectservice.application.dto.ProyectoInfoDTO;
 import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.*;
 
 import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.DocenteDTOSend;
@@ -8,8 +10,6 @@ import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.FormatoADTOSend;
 import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.ProyectoDTOSend;
 import co.edu.unicauca.academicprojectservice.application.dto.AnteproyectoDTO;
 import co.edu.unicauca.academicprojectservice.application.dto.FormatoADTO;
-import co.edu.unicauca.academicprojectservice.application.dto.ProyectoDTO;
-import co.edu.unicauca.academicprojectservice.application.dto.ProyectoInfoDTO;
 import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.*;
 import co.edu.unicauca.shared.contracts.events.academic.AnteproyectoSinEvaluadoresEvent;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class ProyectoServiceOld {
+public class ProyectoService {
     @Autowired
     private ProyectoRepository proyectoRepository;
     @Autowired
@@ -46,11 +46,7 @@ public class ProyectoServiceOld {
     @Autowired
     private AnteproyectoRepository anteproyectoRepository;
     @Autowired
-    private CoordinadorRepository coordinadorRepository;
-    @Autowired
-    private JefeDeDepartamentoRepository jefeDeDepartamentoRepository;
-    @Autowired
-    private RabbitTemplate  rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     @Value("${messaging.exchange.main}")
     private String mainExchange;
@@ -68,146 +64,13 @@ public class ProyectoServiceOld {
         return proyectoRepository.listarInfoPorDocente(docente.getId(), filtro);
     }
 
-    @Transactional
-    public void crearProyectoConArchivos(ProyectoDTO dto) {
-
-        // ===== Crear y poblar la entidad Proyecto =====
-        Proyecto proyecto = new Proyecto();
-        proyecto.setTitulo(dto.getTitulo());
-        proyecto.setTipoProyecto(dto.getTipoProyecto());
-        proyecto.setEstadoProyecto(EstadoProyecto.EN_TRAMITE);
-
-        // ===== Asociar estudiante =====
-        Estudiante estudiante = estudianteRepository.findByCorreoIgnoreCase(dto.getEstudiante())
-                .orElseThrow(() -> new IllegalArgumentException("No existe un estudiante con ese correo"));
-        proyecto.setEstudiantes(List.of(estudiante));
-
-        // ===== Asociar director =====
-        Docente docente = docenteRepository.findByCorreo(dto.getDirector())
-                .orElseThrow(() -> new IllegalArgumentException("No existe un docente con ese correo"));
-        proyecto.setDirector(docente);
-
-        // ===== Asociar Formato A (si lo hay) =====
-        FormatoA formatoA = dto.getFormatoA();
-        if (formatoA != null) {
-            formatoA.setProyecto(proyecto);
-            formatoA.setEstado(dto.getFormatoA().getEstado());
-            formatoA.setNombreFormato(dto.getFormatoA().getNombreFormato());
-            formatoA.setFechaCreacion(dto.getFormatoA().getFechaCreacion());
-            formatoA.setNroVersion(dto.getFormatoA().getNroVersion());
-            proyecto.addFormato(formatoA);
-        }
-
-        // ===== Asociar Carta Laboral (si la hay) =====
-        CartaLaboral cartaLaboral = dto.getCartaLaboral();
-        if (cartaLaboral != null) {
-            cartaLaboral.setProyecto(proyecto);
-            cartaLaboral.setNombreCartaLaboral(dto.getCartaLaboral().getNombreCartaLaboral());
-            cartaLaboral.setFechaCreacion(dto.getCartaLaboral().getFechaCreacion());
-            proyecto.setCartaLaboral(cartaLaboral);
-        }
-
-        // ===== Guardar el proyecto y obtener su ID =====
-        Proyecto proyectoGuardado = proyectoRepository.save(proyecto);
-        Long proyectoId = proyectoGuardado.getId();
-
-        // =====================================================
-        // Construcción del DTO que se enviará por RabbitMQ
-        // =====================================================
-        ProyectoDTOSend pDtoSend = new ProyectoDTOSend();
-        pDtoSend.setId(proyectoId);
-        pDtoSend.setTitulo(proyectoGuardado.getTitulo());
-        pDtoSend.setTipoProyecto(proyectoGuardado.getTipoProyecto());
-        pDtoSend.setEstado(proyectoGuardado.getEstadoProyecto());
-
-        // ======= Estudiantes DTO =======
-        List<EstudianteDTOSend> estudiantes = new ArrayList<>();
-        EstudianteDTOSend estDto = new EstudianteDTOSend();
-        estDto.setId(proyectoGuardado.getEstudiantes().get(0).getId());
-        estDto.setPrograma(estudiante.getPrograma());
-        estDto.setEmail(estudiante.getCorreo());
-        estDto.setNombres(estudiante.getNombres());
-        estDto.setApellidos(estudiante.getApellidos());
-        estDto.setCelular(estudiante.getCelular());
-
-        // Referencia inversa de trabajos (opcional; evitar ciclos de serialización)
-        estDto.setTrabajos(List.of(pDtoSend));
-        estudiantes.add(estDto);
-        pDtoSend.setEstudiantes(estudiantes);
-
-        // ======= Director DTO =======
-        DocenteDTOSend docDto = new DocenteDTOSend();
-        docDto.setId(proyectoGuardado.getDirector().getId());
-        docDto.setDepartamento(docente.getDepartamento());
-        docDto.setEmail(docente.getCorreo());
-        docDto.setNombres(docente.getNombres());
-        docDto.setApellidos(docente.getApellidos());
-        docDto.setCelular(docente.getCelular());
-        docDto.setTrabajosComoDirector(List.of(pDtoSend));
-        docDto.setTrabajosComoCodirector(null);
-
-        pDtoSend.setDirector(docDto);
-        pDtoSend.setCodirector(null); // En caso de no tener
-
-        // ======= Formato A DTO =======
-        if (formatoA != null) {
-            FormatoADTOSend formatoSend = new FormatoADTOSend();
-            formatoSend.setId(formatoA.getId());
-            formatoSend.setProyectoId(proyectoId);
-            formatoSend.setNroVersion(formatoA.getNroVersion());
-            formatoSend.setNombreFormatoA(formatoA.getNombreFormato());
-            formatoSend.setFechaSubida(formatoA.getFechaCreacion());
-            formatoSend.setBlob(formatoA.getBlob());
-            formatoSend.setEstado(formatoA.getEstado());
-            pDtoSend.setFormatoA(formatoSend);
-        } else {
-            pDtoSend.setFormatoA(null);
-        }
-
-        // No hay anteproyecto al crear
-        pDtoSend.setAnteproyecto(null);
-
-        // ======= Envío del mensaje =======
-        rabbitTemplate.convertAndSend(mainExchange, routingKeyProjectCreated, pDtoSend);
-
-        ProyectoService.log.info("[RabbitMQ] Proyecto creado enviado a la cola: {} con ID: {}",
-                routingKeyProjectCreated, proyectoId);
-
-
-            String subject = "Nuevo Proyecto Creado";
-            String message = String.format(
-                    "Se ha creado el proyecto '%s' para el estudiante %s %s, bajo la dirección de %s %s.",
-                    proyectoGuardado.getTitulo(),
-                    estudiante.getNombres(), estudiante.getApellidos(),
-                    docente.getNombres(), docente.getApellidos()
-            );
-
-            NotificationEvent notificationEvent = new NotificationEvent(
-                    "project.created",
-                    subject,
-                    message,
-                    estudiantes.get(0).getPrograma(),
-                    OffsetDateTime.now()
-            );
-
-            rabbitTemplate.convertAndSend(
-                    mainExchange,
-                    "notification.send.project.created",
-                    notificationEvent
-            );
-
-            ProyectoService.log.info("📨 Notificación enviada: {}", notificationEvent.getSubject());
-
-        } catch (Exception e) {
-            ProyectoService.log.error("Error al enviar notificación: {}", e.getMessage(), e);
-        }
-    }
-
+    // Pasado a la clase Proyecto del dominio
     public int getMaxVersionFormatoA(UUID proyectoId) {
         Integer maxVersion = formatoARepository.findMaxVersionByProyectoId(proyectoId);
         return maxVersion != null ? maxVersion : 0;
     }
 
+    // Pasado a la clase Proyecto del dominio
     private FormatoA getUltimoFormatoA(UUID proyectoId) {
         List<FormatoA> resultados = formatoARepository.findUltimoFormatoA(proyectoId, PageRequest.of(0, 1));
         return resultados.isEmpty() ? null : resultados.get(0);
@@ -216,7 +79,7 @@ public class ProyectoServiceOld {
     public EstadoProyecto enforceAutoCancelIfNeeded(UUID proyectoId) {
         int observados = formatoARepository.countByProyectoIdAndEstado(proyectoId, EstadoFormatoA.OBSERVADO);
         if (observados >= 3) {
-            proyectoRepository.actualizarEstadoProyecto(proyectoId, EstadoProyecto.RECHAZADO);
+            proyectoRepository.actualizarEstadoProyecto(proyectoId, EstadoProyecto.FORMATOA_RECHAZADO);
         }
         String est = proyectoRepository.getEstadoProyecto(proyectoId);
         return EstadoProyecto.valueOf(est);
@@ -224,7 +87,7 @@ public class ProyectoServiceOld {
 
     public boolean canResubmit(UUID proyectoId) {
         String estado = proyectoRepository.getEstadoProyecto(proyectoId);
-        if (estado.equalsIgnoreCase(EstadoProyecto.RECHAZADO.name())) {
+        if (estado.equalsIgnoreCase(EstadoProyecto.FORMATOA_RECHAZADO.name())) {
             return false;
         }
         int maxVersion = getMaxVersionFormatoA(proyectoId);
@@ -385,10 +248,10 @@ public class ProyectoServiceOld {
                     notificationEvent
             );
 
-            ProyectoService.log.info("📨 Notificación enviada: {}", notificationEvent.getSubject());
+            co.edu.unicauca.academicprojectservice.Old.Repository.ProyectoService.log.info("📨 Notificación enviada: {}", notificationEvent.getSubject());
 
         } catch (Exception e) {
-            ProyectoService.log.error("Error al enviar notificación: {}", e.getMessage(), e);
+            co.edu.unicauca.academicprojectservice.Old.Repository.ProyectoService.log.error("Error al enviar notificación: {}", e.getMessage(), e);
         }
 
         return true;

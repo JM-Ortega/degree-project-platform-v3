@@ -1,11 +1,11 @@
-package co.edu.unicauca.academicprojectservice.Service;
+package co.edu.unicauca.academicprojectservice.Old.Service;
 
 import co.edu.unicauca.shared.contracts.model.Departamento;
-import co.edu.unicauca.academicprojectservice.Entity.Docente;
-import co.edu.unicauca.academicprojectservice.Entity.EstadoProyecto;
-import co.edu.unicauca.academicprojectservice.Repository.DocenteRepository;
-import co.edu.unicauca.academicprojectservice.Repository.ProyectoRepository;
-import co.edu.unicauca.academicprojectservice.infra.dto.DocenteDTO;
+import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Docente;
+import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
+import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.DocenteRepository;
+import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.ProyectoRepository;
+import co.edu.unicauca.academicprojectservice.application.dto.DocenteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +40,7 @@ public class DocenteService {
     }
 
     public int countProyectosEnTramitePorCorreo(String correo) {
-        return proyectoRepository.countByDocenteCorreoAndEstado(correo, EstadoProyecto.EN_TRAMITE);
+        return proyectoRepository.countByDocenteCorreoAndEstadoNot(correo, EstadoProyecto.FORMATOA_RECHAZADO);
     }
 }
 

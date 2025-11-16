@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.infra.DTOs;
+package co.edu.unicauca.academicprojectservice.Old.infra.DTOs;
 
 import co.edu.unicauca.shared.contracts.model.Programa;
 import com.fasterxml.jackson.annotation.JsonBackReference;

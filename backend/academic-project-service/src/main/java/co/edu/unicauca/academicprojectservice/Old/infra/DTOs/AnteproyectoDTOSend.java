@@ -1,8 +1,7 @@
-package co.edu.unicauca.academicprojectservice.infra.DTOs;
+package co.edu.unicauca.academicprojectservice.Old.infra.DTOs;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Data

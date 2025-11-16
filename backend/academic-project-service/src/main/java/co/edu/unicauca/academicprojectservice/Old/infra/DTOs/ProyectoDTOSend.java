@@ -1,7 +1,7 @@
-package co.edu.unicauca.academicprojectservice.infra.DTOs;
+package co.edu.unicauca.academicprojectservice.Old.infra.DTOs;
 
-import co.edu.unicauca.academicprojectservice.Entity.EstadoProyecto;
-import co.edu.unicauca.academicprojectservice.Entity.TipoProyecto;
+import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
+import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 

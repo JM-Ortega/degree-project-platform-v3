@@ -1,12 +1,12 @@
-package co.edu.unicauca.academicprojectservice.Service;
+package co.edu.unicauca.academicprojectservice.Old.Service;
 
-import co.edu.unicauca.academicprojectservice.Entity.EstadoFormatoA;
-import co.edu.unicauca.academicprojectservice.Entity.Estudiante;
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
+import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Estudiante;
 import co.edu.unicauca.shared.contracts.model.Programa;
-import co.edu.unicauca.academicprojectservice.Entity.Proyecto;
-import co.edu.unicauca.academicprojectservice.Repository.EstudianteRepository;
-import co.edu.unicauca.academicprojectservice.Repository.FormatoARepository;
-import co.edu.unicauca.academicprojectservice.infra.dto.EstudianteDTO;
+import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
+import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.EstudianteRepository;
+import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.FormatoARepository;
+import co.edu.unicauca.academicprojectservice.application.dto.EstudianteDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,6 +86,7 @@ public class EstudianteService {
                 .orElseThrow(() -> new EntityNotFoundException("No se encontró el estudiante con correo: " + correo));
 
         List<Proyecto> proyectos = estudiante.getTrabajos();
+
         if (proyectos == null || proyectos.isEmpty()) {
             return false;
         }

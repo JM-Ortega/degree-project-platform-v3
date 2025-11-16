@@ -62,7 +62,6 @@ public class DocenteService {
             HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
             validar2xx(resp);
 
-            // Respuesta simple tipo "3"
             return Integer.parseInt(resp.body().trim());
         } catch (Exception ex) {
             throw new RuntimeException("Error consultando conteo de proyectos: " + ex.getMessage(), ex);

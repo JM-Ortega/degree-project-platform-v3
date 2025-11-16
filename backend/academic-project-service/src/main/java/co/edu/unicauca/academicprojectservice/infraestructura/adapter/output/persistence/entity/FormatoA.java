@@ -1,17 +1,20 @@
 package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity;
 
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Entity
 @Table(name = "formatoA")
 public class FormatoA {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
     private int nroVersion;
     private String nombreFormato;
 
@@ -19,14 +22,10 @@ public class FormatoA {
     private LocalDate fechaCreacion;
 
     private byte[] blob;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_archivo", nullable = false)
     private EstadoFormatoA estado;
-
-    @ManyToOne
-    @JoinColumn(name = "proyecto_id")
-    @JsonIgnore
-    private Proyecto proyecto;
 
     public FormatoA() {}
 
@@ -54,11 +53,11 @@ public class FormatoA {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -68,14 +67,6 @@ public class FormatoA {
 
     public void setNombreFormato(String nombreFormato) {
         this.nombreFormato = nombreFormato;
-    }
-
-    public Proyecto getProyecto() {
-        return proyecto;
-    }
-
-    public void setProyecto(Proyecto proyecto) {
-        this.proyecto = proyecto;
     }
 
     public int getNroVersion() {

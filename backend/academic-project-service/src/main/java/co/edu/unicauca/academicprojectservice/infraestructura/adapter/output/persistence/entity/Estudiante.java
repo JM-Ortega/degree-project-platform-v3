@@ -2,20 +2,26 @@ package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.pe
 
 import co.edu.unicauca.shared.contracts.model.Programa;
 import jakarta.persistence.*;
-
+import java.util.UUID;
 import java.util.List;
 
 @Entity
 @Table(name = "estudiante")
 public class Estudiante {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
+    @Column(nullable = false)
     private String nombres;
+
+    @Column(nullable = false)
     private String apellidos;
+
     private String celular;
+
+    @Column(nullable = false)
     private String correo;
+
     @Enumerated(EnumType.STRING)
     private Programa programa;
 
@@ -47,11 +53,11 @@ public class Estudiante {
         this.correo = correo;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

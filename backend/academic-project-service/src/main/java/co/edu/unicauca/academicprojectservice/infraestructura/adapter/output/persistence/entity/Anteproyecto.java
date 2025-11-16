@@ -4,13 +4,15 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "anteproyecto")
 public class Anteproyecto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
+
     private String nombreArchivo;
     private String descripcion;
     private String titulo;
@@ -27,20 +29,14 @@ public class Anteproyecto {
     )
     private List<Docente> evaluadores;
 
-    @OneToOne(mappedBy = "anteproyecto")
-    @com.fasterxml.jackson.annotation.JsonIgnore
-    private Proyecto proyecto;
-
     public Anteproyecto() {}
 
     // Getters y setters
-    public Long getId() { return id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) {this.id = id;}
 
     public LocalDate getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDate fechaCreacion) { this.fechaCreacion = fechaCreacion; }
-
-    public Proyecto getProyecto() { return proyecto; }
-    public void setProyecto(Proyecto proyecto) { this.proyecto = proyecto; }
 
     public byte[] getBlob() { return blob; }
     public void setBlob(byte[] blob) { this.blob = blob; }
@@ -51,7 +47,6 @@ public class Anteproyecto {
     public String getDescripcion() {return descripcion;}
     public void setDescripcion(String descripcion) {this.descripcion = descripcion;}
 
-    public void setId(Long id) {this.id = id;}
     public String getTitulo() {return titulo;}
     public void setTitulo(String titulo) {this.titulo = titulo;}
 

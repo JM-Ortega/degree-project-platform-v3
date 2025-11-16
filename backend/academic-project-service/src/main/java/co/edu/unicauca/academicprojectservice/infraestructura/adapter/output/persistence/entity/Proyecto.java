@@ -1,16 +1,19 @@
 package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity;
 
+import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
+import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "proyecto")
 public class Proyecto {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
+
     private String titulo;
 
     @ManyToMany
@@ -20,7 +23,6 @@ public class Proyecto {
             inverseJoinColumns = @JoinColumn(name = "estudiante_id")
     )
     @com.fasterxml.jackson.annotation.JsonIgnore
-
     private List<Estudiante> estudiantes;
 
     @ManyToOne
@@ -34,9 +36,7 @@ public class Proyecto {
     @OneToMany(mappedBy = "proyecto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FormatoA> formatosA = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cartaLaboral_id")
-    private CartaLaboral cartaLaboral;
+    private byte[] cartaLaboral;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "anteproyecto_id")
@@ -52,8 +52,8 @@ public class Proyecto {
 
     public Proyecto() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) {this.id = id;}
+    public UUID getId() { return id; }
+    public void setId(UUID id) {this.id = id;}
 
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
@@ -70,8 +70,8 @@ public class Proyecto {
     public TipoProyecto getTipoProyecto() { return tipoProyecto; }
     public void setTipoProyecto(TipoProyecto tipoProyecto) { this.tipoProyecto = tipoProyecto; }
 
-    public CartaLaboral getCartaLaboral() { return cartaLaboral; }
-    public void setCartaLaboral(CartaLaboral cartaLaboral) { this.cartaLaboral = cartaLaboral; }
+    public byte[] getCartaLaboral() { return cartaLaboral; }
+    public void setCartaLaboral(byte[] cartaLaboral) { this.cartaLaboral = cartaLaboral; }
 
     public EstadoProyecto getEstadoProyecto() { return estadoProyecto; }
     public void setEstadoProyecto(EstadoProyecto estadoProyecto) { this.estadoProyecto = estadoProyecto; }

@@ -4,6 +4,7 @@ import co.edu.unicauca.shared.contracts.model.Departamento;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -16,25 +17,22 @@ import java.util.List;
     }
 )
 public class Docente {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
-    @Column(length = 100, nullable = false)
+    @Column(nullable = false)
     private String nombres;
 
-    @Column(length = 100, nullable = false)
+    @Column(nullable = false)
     private String apellidos;
 
-    @Column(length = 20)
     private String celular;
 
-    @Column(length = 120, nullable = false)
+    @Column(nullable = false)
     private String correo;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 60) // coincide con nombres del enum global
+    @Column(length = 60)
     private Departamento departamento;
 
     @OneToMany(mappedBy = "director")
@@ -51,8 +49,8 @@ public class Docente {
     public Docente() {}
 
     // Getters/Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getNombres() { return nombres; }
     public void setNombres(String nombres) { this.nombres = nombres; }

@@ -1,6 +1,7 @@
 package co.edu.unicauca.shared.contracts.events.notification;
 
 
+import co.edu.unicauca.shared.contracts.model.Programa;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -24,10 +25,6 @@ public class NotificationEvent {
     @NotBlank
     private String type;
 
-    /** Lista de direcciones de correo electrónico de los destinatarios. */
-    @NotEmpty
-    private List<String> recipientEmails;
-
     /** Asunto del mensaje de notificación. */
     @NotBlank
     private String subject;
@@ -36,8 +33,9 @@ public class NotificationEvent {
     @NotBlank
     private String message;
 
-    /** Lista de números telefónicos para envío de SMS (puede ser nula o vacía). */
-    private List<String> recipientPhones;
+    /** Programa de los estudiantes. */
+    @NotBlank
+    private Programa programa;
 
     /** Marca de tiempo del evento (formato ISO-8601). */
     @JsonFormat(shape = JsonFormat.Shape.STRING)

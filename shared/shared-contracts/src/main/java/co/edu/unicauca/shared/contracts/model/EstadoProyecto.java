@@ -1,0 +1,11 @@
+package co.edu.unicauca.shared.contracts.model;
+
+public enum EstadoProyecto {
+    PRIMERA_REVISION_FORMATOA,
+    SEGUNDA_REVISION_FORMATOA,
+    TERCERA_REVISION_FORMATOA,
+    FORMATOA_ACEPTADO,
+    FORMATOA_RECHAZADO,
+    ANTEPROYECTO_ENVIADO,
+    EN_REVISION_ANTEPROYECTO
+}

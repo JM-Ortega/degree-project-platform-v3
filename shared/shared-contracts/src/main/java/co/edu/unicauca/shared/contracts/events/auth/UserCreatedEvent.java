@@ -5,6 +5,7 @@ import co.edu.unicauca.shared.contracts.model.Programa;
 import co.edu.unicauca.shared.contracts.model.Rol;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Evento que emite el auth-service cuando se crea un nuevo usuario.
@@ -16,9 +17,11 @@ import java.util.List;
  * asociación a un departamento (por ejemplo, Estudiante o Coordinador).</p>
  */
 public record UserCreatedEvent(
-        String personaId,            // Identificador único de la persona creada
-        String nombre,               // Nombre completo del usuario
+        UUID id,                     // Identificador único de la entidad
+        String nombre,               // Nombre del usuario
+        String apellido,             // Apellido del usuario
         String email,                // Correo institucional
+        String telefono,             // Telefono del usuario
         Programa programa,           // Programa académico al que pertenece
         Departamento departamento,   // Departamento (puede ser null)
         List<Rol> roles              // Roles asignados al usuario

@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.Old.Controller;
+package co.edu.unicauca.academicprojectservice.ui.controller;
 
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
@@ -33,11 +33,10 @@ public class FormatoAListener {
      * Los eventos llegan desde otros microservicios (p. ej., coordinator-service o project-service)
      * a través de la cola del servicio académico.
      */
-    @RabbitListener(queues = "${messaging.queues.coordinator}") // <-- cola dedicada
+    @RabbitListener(queues = "${messaging.queues.coordinator}")
     @Transactional
     public void handleFormatoAEvent(FormatoADTOSend dto) {
         try {
-            // ===== Validaciones defensivas =====
             if (dto == null) {
                 System.err.println("[RabbitMQ] FormatoA DTO nulo — se ignora");
                 return;
@@ -58,36 +57,22 @@ public class FormatoAListener {
                 throw new IllegalArgumentException("estado es requerido");
             }
 
-            // ===== Mapeo de estado (Enum externo o String) =====
-            // Si dto.getEstado() es Enum de otro paquete, usa .name(); si es String, úsalo directo.
             final String estadoName = (dto.getEstado() instanceof Enum<?>)
                     ? ((Enum<?>) dto.getEstado()).name()
                     : dto.getEstado().toString();
             final EstadoFormatoA estado = EstadoFormatoA.valueOf(estadoName);
 
-            // ===== Upsert por proyecto =====
             Optional<FormatoA> existingFormato = formatoARepository.findByProyectoId(dto.getProyectoId());
-            FormatoA formato = existingFormato.orElse(new FormatoA());
-
-            formato.setNroVersion(dto.getNroVersion());
-            formato.setNombreFormato(dto.getNombreFormatoA());
-            formato.setFechaCreacion(dto.getFechaSubida());
-            formato.setBlob(dto.getBlob());
-            formato.setEstado(estado);
-
-            // TODO(si aplica): asociar el Proyecto si el nuevo FormatoA no lo tiene aún
-            // formato.setProyecto(proyectoRepository.getReferenceById(dto.getProyectoId()));
+            FormatoA formato = existingFormato.orElse(new FormatoA(dto.getNroVersion(), dto.getNombreFormatoA(), dto.getBlob()));
+            formato.cambiarEstado(estado);
 
             formatoARepository.save(formato);
 
-            System.out.println("[AcademicProjectService] FormatoA actualizado/creado: "
-                    + formato.getNombreFormato() + " (versión " + formato.getNroVersion() + ")");
+            System.out.println("[AcademicProjectService] FormatoA actualizado/creado ");
         } catch (IllegalArgumentException ex) {
-            // Datos inválidos -> no reencolar, que vaya a DLQ
             System.err.println("[RabbitMQ] Evento FormatoA inválido: " + ex.getMessage());
             throw new AmqpRejectAndDontRequeueException("Evento FormatoA inválido", ex);
         } catch (Exception ex) {
-            // Error inesperado -> no reencolar para evitar bucles
             System.err.println("[RabbitMQ] Error procesando FormatoA: " + ex.getMessage());
             throw new AmqpRejectAndDontRequeueException("Error procesando FormatoA", ex);
         }

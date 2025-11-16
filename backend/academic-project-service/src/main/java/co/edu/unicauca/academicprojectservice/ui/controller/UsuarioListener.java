@@ -1,13 +1,9 @@
-package co.edu.unicauca.academicprojectservice.Old.Controller;
+package co.edu.unicauca.academicprojectservice.ui.controller;
 
-import co.edu.unicauca.academicprojectservice.Old.Entity.Coordinador;
-import co.edu.unicauca.academicprojectservice.domain.model.Docente;
-import co.edu.unicauca.academicprojectservice.domain.model.Estudiante;
-import co.edu.unicauca.academicprojectservice.Old.Entity.JefeDeDepartamento;
-import co.edu.unicauca.academicprojectservice.Old.Repository.CoordinadorRepository;
+import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Docente;
+import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Estudiante;
 import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.DocenteRepository;
 import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.EstudianteRepository;
-import co.edu.unicauca.academicprojectservice.Old.Repository.JefeDeDepartamentoRepository;
 import co.edu.unicauca.shared.contracts.events.auth.UserCreatedEvent;
 import co.edu.unicauca.shared.contracts.model.Rol;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -27,17 +23,11 @@ public class UsuarioListener {
 
     private final DocenteRepository docenteRepository;
     private final EstudianteRepository estudianteRepository;
-    private final CoordinadorRepository coordinadorRepository;
-    private final JefeDeDepartamentoRepository jefeDeDepartamentoRepository;
 
     public UsuarioListener(DocenteRepository docenteRepository,
-                           EstudianteRepository estudianteRepository,
-                           CoordinadorRepository coordinadorRepository,
-                           JefeDeDepartamentoRepository jefeDeDepartamentoRepository) {
+                           EstudianteRepository estudianteRepository) {
         this.docenteRepository = docenteRepository;
         this.estudianteRepository = estudianteRepository;
-        this.coordinadorRepository = coordinadorRepository;
-        this.jefeDeDepartamentoRepository = jefeDeDepartamentoRepository;
     }
 
     /**
@@ -70,8 +60,6 @@ public class UsuarioListener {
                 switch (r) {
                     case DOCENTE -> procesarDocente(email, nombres, apellidos, evt);
                     case ESTUDIANTE -> procesarEstudiante(email, nombres, apellidos, evt);
-                    case COORDINADOR -> procesarCoordinador(email);
-                    case JEFE_DE_DEPARTAMENTO -> procesarJefeDepartamento(email);
                     default -> System.out.println("[RabbitMQ] Rol no manejado: {}");
                 }
             }
@@ -79,22 +67,6 @@ public class UsuarioListener {
         } catch (Exception ex) {
             throw new AmqpRejectAndDontRequeueException("Error procesando UserCreatedEvent", ex);
         }
-    }
-
-    /** Registra o actualiza la información del jefe de departamento. */
-    private void procesarJefeDepartamento(String email) {
-        Optional<JefeDeDepartamento> existente = jefeDeDepartamentoRepository.findByCorreo(email);
-        JefeDeDepartamento jefe = existente.orElse(new JefeDeDepartamento());
-        jefe.setCorreo(email);
-        jefeDeDepartamentoRepository.save(jefe);
-    }
-
-    /** Registra o actualiza la información del coordinador. */
-    private void procesarCoordinador(String email) {
-        Optional<Coordinador> existente = coordinadorRepository.findByCorreo(email);
-        Coordinador c = existente.orElse(new Coordinador());
-        c.setCorreo(email);
-        coordinadorRepository.save(c);
     }
 
     /** Registra o actualiza la información del docente. */

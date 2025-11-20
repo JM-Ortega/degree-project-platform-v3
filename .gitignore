@@ -93,3 +93,4 @@ openapi*.json
 openapi*.yaml
 **/swagger-ui/
 **/docs/
+.idea/sqldialects.xml

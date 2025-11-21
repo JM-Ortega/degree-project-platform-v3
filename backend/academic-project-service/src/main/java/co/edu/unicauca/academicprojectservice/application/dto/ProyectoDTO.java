@@ -5,10 +5,12 @@ import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 
+import java.util.List;
+
 
 public class ProyectoDTO {
     private String titulo;
-    private String estudiante;
+    private List<String> correoEstudiantes;
     private String director;
     private Anteproyecto anteproyecto;
     private FormatoA formatoA;
@@ -28,8 +30,8 @@ public class ProyectoDTO {
     public EstadoProyecto getEstadoProyecto() {return estadoProyecto;}
     public void setEstadoProyecto(EstadoProyecto estadoProyecto) {this.estadoProyecto = estadoProyecto;}
 
-    public String getEstudiante() {return estudiante;}
-    public void setEstudiante(String estudiante) {this.estudiante = estudiante;}
+    public List<String> getEstudiantes() {return correoEstudiantes;}
+    public void addCorreoEstudiantes(String correoEstudiantes) {this.correoEstudiantes.add(correoEstudiantes);}
 
     public FormatoA getFormatoA() {return formatoA;}
     public void setFormatoA(FormatoA formatoA) {this.formatoA = formatoA;}

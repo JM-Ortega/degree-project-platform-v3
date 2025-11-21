@@ -5,9 +5,11 @@ import co.edu.unicauca.shared.contracts.model.Rol;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class PersonaDTO {
-    private Long id;
+    private UUID id;
     private String nombres;
     private String apellidos;
     private String celular;

@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface DocenteRepository extends JpaRepository<Docente, Long> {
+public interface DocenteRepository extends JpaRepository<Docente, UUID> {
     Optional<Docente> findByCorreo(String correo);
 
     @Query("""
@@ -18,6 +18,6 @@ public interface DocenteRepository extends JpaRepository<Docente, Long> {
         FROM Docente d
         WHERE d.id = :id
     """)
-    String findById(@Param("id") UUID id);
+    String findNombreDocenteById(@Param("id") UUID id);
 
 }

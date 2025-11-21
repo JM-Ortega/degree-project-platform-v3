@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface EstudianteRepository extends JpaRepository<Estudiante, Long> {
+public interface EstudianteRepository extends JpaRepository<Estudiante, UUID> {
     Optional<Estudiante> findByCorreoIgnoreCase(String correo);
 
     @Query("""

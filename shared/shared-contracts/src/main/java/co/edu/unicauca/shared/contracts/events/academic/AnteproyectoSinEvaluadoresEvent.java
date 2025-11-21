@@ -1,14 +1,15 @@
 package co.edu.unicauca.shared.contracts.events.academic;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * Evento emitido por academic-project-service cuando se crea un anteproyecto,
  * aún sin evaluadores asignados.
  */
 public record AnteproyectoSinEvaluadoresEvent(
-        Long proyectoId,         // ID del proyecto al que pertenece
-        Long anteproyectoId,     // ID del anteproyecto
+        UUID proyectoId,         // ID del proyecto al que pertenece
+        UUID anteproyectoId,     // ID del anteproyecto
         String titulo,           // Título del anteproyecto
         String descripcion,      // Descripción del anteproyecto
         LocalDate fechaCreacion, // Fecha de creación

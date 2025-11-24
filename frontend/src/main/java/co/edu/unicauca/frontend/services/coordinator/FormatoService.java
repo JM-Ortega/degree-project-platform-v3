@@ -3,6 +3,7 @@ package co.edu.unicauca.frontend.services.coordinator;
 import co.edu.unicauca.frontend.entities.FormatoAResumen;
 import co.edu.unicauca.frontend.entities.FormatoAResumenDTO;
 import co.edu.unicauca.frontend.infra.config.AppConfig;
+import co.edu.unicauca.frontend.infra.session.SessionManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -68,19 +69,22 @@ public class FormatoService {
      * Lista de Formato A (resumen) por programa vía Gateway
      */
     public List<FormatoAResumen> obtenerFormatosAResumen() {
-        // TODO: recibir 'programa' por parámetro en el futuro
         String programa = "INGENIERIA_DE_SISTEMAS";
         String programaEnc = URLEncoder.encode(programa.toUpperCase().trim(), StandardCharsets.UTF_8);
         String url = baseUrl + epListar.replace("{programa}", programaEnc);
 
         try {
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest.Builder builder = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .timeout(Duration.ofSeconds(6))
-                    .header("Accept", "application/json")
-                    // .header("Authorization", "Bearer " + token) // si luego usas JWT
-                    .GET()
-                    .build();
+                    .header("Accept", "application/json");
+
+            String token = SessionManager.getInstance().getAccessToken();
+            if (token != null && !token.isBlank()) {
+                builder.header("Authorization", "Bearer " + token);
+            }
+
+            HttpRequest request = builder.GET().build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             handleErrors(url, response);
@@ -105,29 +109,37 @@ public class FormatoService {
                     .collect(Collectors.toList());
 
         } catch (RuntimeException re) {
-            throw re; // repropaga notFound/client/server
+            throw re;
         } catch (Exception e) {
             e.printStackTrace();
             return List.of();
         }
     }
 
+
     /**
      * Descargar PDF vía Gateway (devuelve bytes)
      */
     public byte[] descargarFormatoA(Long id) throws IOException, InterruptedException {
         String url = baseUrl + epDownload.replace("{id}", String.valueOf(id));
-        HttpRequest request = HttpRequest.newBuilder()
+
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(10))
-                .header("Accept", "application/pdf")
-                .GET()
-                .build();
+                .header("Accept", "application/pdf");
+
+        String token = SessionManager.getInstance().getAccessToken();
+        if (token != null && !token.isBlank()) {
+            builder.header("Authorization", "Bearer " + token);
+        }
+
+        HttpRequest request = builder.GET().build();
 
         HttpResponse<byte[]> resp = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
         handleErrors(url, resp);
         return resp.body();
     }
+
 
     /**
      * PUT multipart/form-data vía Gateway
@@ -139,18 +151,24 @@ public class FormatoService {
         HttpRequest.BodyPublisher body = buildMultipartBody(archivo, nuevoEstado, nombreArchivo, horaActual);
         String url = baseUrl + epUpdate.replace("{id}", String.valueOf(formatoId));
 
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(20)) // subidas pueden tardar más
+                .timeout(Duration.ofSeconds(20))
                 .header("Content-Type", "multipart/form-data; boundary=" + BOUNDARY)
-                .header("Accept", "application/json")
-                .PUT(body)
-                .build();
+                .header("Accept", "application/json");
+
+        String token = SessionManager.getInstance().getAccessToken();
+        if (token != null && !token.isBlank()) {
+            builder.header("Authorization", "Bearer " + token);
+        }
+
+        HttpRequest request = builder.PUT(body).build();
 
         HttpResponse<String> resp = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         handleErrors(url, resp);
         return resp;
     }
+
 
     // ---------------------------------------------------------------------
     // API

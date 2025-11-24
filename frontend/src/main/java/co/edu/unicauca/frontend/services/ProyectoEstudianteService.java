@@ -40,12 +40,22 @@ public class ProyectoEstudianteService {
 
             String correo = estudiante.email();
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(BASE_URL + "/listar/" + correo))
-                    .GET()
-                    .build();
+            // Obtener el JWT
+            String token = SessionManager.getInstance().getAccessToken();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpRequest.Builder rb = HttpRequest.newBuilder()
+                    .uri(new URI(BASE_URL + "/listar/" + correo))
+                    .GET();
+
+            // Agregar token si existe
+            if (token != null && !token.isBlank()) {
+                rb.header("Authorization", "Bearer " + token);
+            }
+
+            HttpRequest request = rb.build();
+
+            HttpResponse<String> response =
+                    httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             List<ProyectoEstudianteJsonDTO> jsonList = mapper.readValue(
                     response.body(),
@@ -68,5 +78,6 @@ public class ProyectoEstudianteService {
             return List.of();
         }
     }
+
 
 }

@@ -1,6 +1,7 @@
 package co.edu.unicauca.frontend.services.coordinator;
 
 import co.edu.unicauca.frontend.infra.config.AppConfig;
+import co.edu.unicauca.frontend.infra.session.SessionManager;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -47,6 +48,11 @@ public class CoordinadorClient {
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(5))
                 .header("Accept", "application/json");
+
+        String token = SessionManager.getInstance().getAccessToken();
+        if (token != null && !token.isBlank()) {
+            rb.header("Authorization", "Bearer " + token);
+        }
 
         HttpResponse<String> response = client.send(
                 rb.GET().build(),

@@ -6,12 +6,24 @@ spring:
     name: gateway-service
 
   # ======================================================
+  # Seguridad (Keycloak + JWT)
+  # ======================================================
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # URL del realm (issuer real)
+          issuer-uri: http://localhost:8181/realms/unicauca
+          # Endpoint de claves públicas (si se requiere explícito)
+          # jwk-set-uri: http://localhost:8181/realms/unicauca/protocol/openid-connect/certs
+
+  # ======================================================
   # Spring Cloud Gateway
   # ======================================================
   cloud:
     gateway:
       # --------------------------------------------------
-      # Rutas (proxy inverso hacia cada microservicio)
+      # Rutas (proxy hacia microservicios)
       # --------------------------------------------------
       routes:
         # ---------------- Auth ----------------
@@ -29,11 +41,11 @@ spring:
             - Path=/api/academic/**
           filters:
             - StripPrefix=2
-            # Límite de tamaño para uploads grandes (PDFs, documentos)
+            # Límite uploads grandes
             - name: RequestSize
               args:
                 maxSize: 60MB
-            # Evita cache en navegadores / proxies (archivos sensibles)
+            # Evita cache
             - AddResponseHeader=Cache-Control, no-store
 
         # ---------------- Coordinator ----------------
@@ -43,11 +55,11 @@ spring:
             - Path=/api/coordinator/**
           filters:
             - StripPrefix=2
-            # Límite de tamaño para adjuntos o revisiones
+            # Límite adjuntos
             - name: RequestSize
               args:
                 maxSize: 60MB
-            # Evita cache de documentos revisados o dictámenes
+            # Evita cache
             - AddResponseHeader=Cache-Control, no-store
 
         # ---------------- Department Head ----------------
@@ -57,11 +69,11 @@ spring:
             - Path=/api/department/**
           filters:
             - StripPrefix=2
-            # Límite de tamaño para resoluciones o actas
+            # Límite documentos
             - name: RequestSize
               args:
                 maxSize: 60MB
-            # Previene cache de información sensible
+            # Evita cache
             - AddResponseHeader=Cache-Control, no-store
 
         # ---------------- Notification ----------------
@@ -73,61 +85,59 @@ spring:
             - StripPrefix=2
 
       # --------------------------------------------------
-      # Filtros globales (seguridad básica en headers)
+      # Filtros globales (headers seguros)
       # --------------------------------------------------
       default-filters:
-        # Evita detección automática de tipo MIME
         - name: AddResponseHeader
           args: { name: X-Content-Type-Options, value: nosniff }
-        # No expone URL de origen al reenviar peticiones
         - name: AddResponseHeader
           args: { name: Referrer-Policy, value: no-referrer }
 
       # --------------------------------------------------
-      # CORS global (para Postman / frontend externo)
+      # CORS global
       # --------------------------------------------------
       globalcors:
         add-to-simple-url-handler-mapping: true
         cors-configurations:
           '[/**]':
-            allowed-origins: "*"             # Permite todos los orígenes
-            allowed-methods: "*"             # Permite todos los métodos
-            allowed-headers: "*"             # Permite todos los encabezados
-            allow-credentials: false         # Obligatorio si se usa "*"
-            exposed-headers: # Headers visibles al cliente
+            allowed-origins: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: false
+            exposed-headers:
               - Content-Disposition
               - Content-Length
               - Content-Type
               - ETag
               - Last-Modified
-            max-age: 3600                    # Cache del preflight (1h)
+            max-age: 3600
 
       # --------------------------------------------------
-      # Cliente HTTP (timeouts del Gateway -> micros)
+      # Cliente HTTP (timeouts)
       # --------------------------------------------------
       httpclient:
-        connect-timeout: 3000                # Tiempo máx. de conexión (ms)
-        response-timeout: 5s                 # Tiempo máx. de respuesta (s)
+        connect-timeout: 3000
+        response-timeout: 5s
 
 # ======================================================
 # Servidor embebido (Netty)
 # ======================================================
 server:
-  port: 8080                                # Puerto del Gateway
+  port: 8080
 
 # ======================================================
-# Actuator (monitoreo y diagnóstico con CORS)
+# Actuator
 # ======================================================
 management:
   endpoint:
     gateway:
-      access: read-only                     # Exposición en modo lectura
+      access: read-only
     health:
-      show-details: always                  # Muestra componentes en /health
+      show-details: always
   endpoints:
     web:
       exposure:
-        include: health,info,gateway        # Endpoints visibles
+        include: health,info,gateway
       cors:
         allowed-origins: "*"
         allowed-methods: "*"
@@ -135,7 +145,7 @@ management:
         allow-credentials: false
 
 # ======================================================
-# Logging (niveles y salida a archivo)
+# Logging
 # ======================================================
 logging:
   level:

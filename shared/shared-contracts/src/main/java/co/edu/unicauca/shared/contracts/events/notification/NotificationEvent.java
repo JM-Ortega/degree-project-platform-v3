@@ -37,6 +37,7 @@ public class NotificationEvent {
     private String mensaje;
 
     /** Programa al que pertenece el estudainte. */
+    @NotBlank
     private Programa programa;
 
     /** Marca de tiempo del evento (formato ISO-8601). */

@@ -5,6 +5,7 @@ import co.edu.unicauca.frontend.dto.LoginRequestDto;
 import co.edu.unicauca.frontend.dto.SessionInfo;
 import co.edu.unicauca.frontend.entities.enums.Rol;
 import co.edu.unicauca.frontend.infra.operation.LoginValidator;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.presentation.navigation.ViewNavigator;
 import co.edu.unicauca.frontend.services.auth.AuthServiceFront;
@@ -108,8 +109,17 @@ public class SignInController {
             return;
         }
 
-        // 3) en este punto el login fue correcto y la sesión está en SessionManager
-        SessionInfo session = SessionManager.getInstance().getCurrentSession();
+        // 3) obtener SessionData desde el SessionManager
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo session = (data != null) ? data.getSessionInfo() : null;
+
+        if (session == null) {
+            // algo salió mal: no hay sesión aunque el login no devolvió errores
+            showError(errGeneral != null ? errGeneral : errContrasena,
+                    "No fue posible establecer la sesión. Intente de nuevo.");
+            return;
+        }
+
 
         // opcional: mostrar confirmación
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

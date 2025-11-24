@@ -13,7 +13,7 @@ public class RegistroPersonaDto {
     private String password;
     private String celular;
     private String programa;       // nombre exacto del enum en shared-contracts
-    private List<String> roles;    // p.ej. ["Estudiante","Docente"]
+    private List<String> roles;    // p.ej. ["ESTUDIANTE","DOCENTE"]
     private String departamento;   // nombre exacto del enum en shared-contracts
 
     public RegistroPersonaDto() {

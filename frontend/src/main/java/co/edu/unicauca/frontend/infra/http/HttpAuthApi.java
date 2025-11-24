@@ -168,6 +168,8 @@ public class HttpAuthApi implements AuthApi {
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("Accept", "application/json");
+
 
         try (OutputStream os = conn.getOutputStream()) {
             os.write(mapper.writeValueAsBytes(request));

@@ -1,0 +1,78 @@
+############################
+# Build
+############################
+target/
+**/target/
+*.jar
+*.war
+
+############################
+# Maven
+############################
+.mvn/
+mvnw
+mvnw.cmd
+
+############################
+# IDEs
+############################
+# IntelliJ
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# Eclipse
+.settings/
+.project
+.classpath
+
+############################
+# Docker
+############################
+docker-compose.override.yml
+*.pid
+
+############################
+# Logs
+############################
+*.log
+logs/
+**/logs/
+
+############################
+# Environment variables
+############################
+.env
+.env.*
+!env.example   # archivo de ejemplo permitido
+
+############################
+# OS files
+############################
+.DS_Store
+Thumbs.db
+Desktop.ini
+*~
+
+############################
+# Temp files
+############################
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+
+############################
+# JVM crash reports
+############################
+hs_err_pid*
+replay_pid*
+
+############################
+# Keycloak data
+############################
+keycloak/data/
+keycloak/export/

@@ -1,15 +1,17 @@
-version: "3.9"
-
 services:
+  # =========================
+  # Infraestructura
+  # =========================
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: rabbitmq
+    profiles: ["infra", "app"]
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     ports:
       - "5672:5672"
       - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: appuser
-      RABBITMQ_DEFAULT_PASS: apppass
     volumes:
       - rabbit_data:/var/lib/rabbitmq
     restart: unless-stopped
@@ -22,14 +24,15 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: pg
+    profiles: ["infra", "app"]
     environment:
-      POSTGRES_USER: root
+      POSTGRES_USER: root     # superusuario del contenedor
       POSTGRES_PASSWORD: root
     ports:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
-      - ./init/postgres:/docker-entrypoint-initdb.d # ← scripts SQL
+      - ./init/postgres:/docker-entrypoint-initdb.d
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U root -d postgres"]
@@ -40,6 +43,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
     container_name: keycloak
+    profiles: ["infra", "app"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,19 +55,17 @@ services:
       KC_DB_USERNAME: keycloak_user
       KC_DB_PASSWORD: keycloak_pass
 
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASS}
 
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
-
-    #command: ["start-dev"] # http://localhost:8081
-    command: [ "start-dev", "--import-realm" ]          # ← importa los JSON de /import
+    command: ["start-dev", "--import-realm"]
     ports:
-      - "8181:8080" # externo:interno
+      - "8181:8080"
     volumes:
       - kc_data:/opt/keycloak/data
-      - ./init/keycloak/realms:/opt/keycloak/data/import  # ← realms JSON
+      - ./init/keycloak/realms:/opt/keycloak/data/import
     restart: unless-stopped
     healthcheck:
       test: [
@@ -74,6 +76,182 @@ services:
       timeout: 5s
       retries: 30
       start_period: 40s
+
+  # =========================
+  # Microservicios
+  # =========================
+  auth-service:
+    build:
+      context: .
+      dockerfile: backend/auth-service/Dockerfile
+    container_name: auth-service
+    profiles: ["app"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${AUTH_DB_USER}
+      DB_PASS: ${AUTH_DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM}
+      KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS}
+      KEYCLOAK_DESKTOP_CLIENT_ID: ${KEYCLOAK_DESKTOP_CLIENT_ID}
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+  academic-project-service:
+    build:
+      context: .
+      dockerfile: backend/academic-project-service/Dockerfile
+    container_name: academic-project-service
+    profiles: ["app"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${PROJECT_DB_USER}
+      DB_PASS: ${PROJECT_DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+
+  coordinator-service:
+    build:
+      context: .
+      dockerfile: backend/coordinator-service/Dockerfile
+    container_name: coordinator-service
+    profiles: ["app"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${COORD_DB_USER}
+      DB_PASS: ${COORD_DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "8083:8083"
+    restart: unless-stopped
+
+  department-head-service:
+    build:
+      context: .
+      dockerfile: backend/department-head-service/Dockerfile
+    container_name: department-head-service
+    profiles: ["app"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DEPT_DB_USER}
+      DB_PASS: ${DEPT_DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "8084:8084"
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: backend/notification-service/Dockerfile
+    container_name: notification-service
+    profiles: ["app"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${NOTIF_DB_USER}
+      DB_PASS: ${NOTIF_DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "8085:8085"
+    restart: unless-stopped
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: backend/gateway/Dockerfile
+    container_name: gateway-service
+    profiles: ["app"]
+    depends_on:
+      auth-service:
+        condition: service_started
+      academic-project-service:
+        condition: service_started
+      coordinator-service:
+        condition: service_started
+      department-head-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      AUTH_SERVICE_HOST: ${AUTH_SERVICE_HOST}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+      ACADEMIC_SERVICE_HOST: ${ACADEMIC_SERVICE_HOST}
+      ACADEMIC_SERVICE_PORT: ${ACADEMIC_SERVICE_PORT}
+      COORD_SERVICE_HOST: ${COORD_SERVICE_HOST}
+      COORD_SERVICE_PORT: ${COORD_SERVICE_PORT}
+      DEPT_SERVICE_HOST: ${DEPT_SERVICE_HOST}
+      DEPT_SERVICE_PORT: ${DEPT_SERVICE_PORT}
+      NOTIF_SERVICE_HOST: ${NOTIF_SERVICE_HOST}
+      NOTIF_SERVICE_PORT: ${NOTIF_SERVICE_PORT}
+      GATEWAY_PORT: ${GATEWAY_PORT}
+    ports:
+      - "${GATEWAY_PORT}:8080"
+    restart: unless-stopped
+
 volumes:
   rabbit_data:
   pg_data:

@@ -12,10 +12,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # URL del realm (issuer real)
-          issuer-uri: http://localhost:8181/realms/unicauca
-          # Endpoint de claves públicas (si se requiere explícito)
-          # jwk-set-uri: http://localhost:8181/realms/unicauca/protocol/openid-connect/certs
+          # En dev: localhost:8181
+          # En Docker: KEYCLOAK_URL=http://keycloak:8080
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:${KEYCLOAK_URL:http://localhost:8181}/realms/${KEYCLOAK_REALM:unicauca}}
+          # jwk-set-uri opcional:
+          # jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_URL:http://localhost:8181}/realms/${KEYCLOAK_REALM:unicauca}/protocol/openid-connect/certs}
 
   # ======================================================
   # Spring Cloud Gateway
@@ -28,7 +29,7 @@ spring:
       routes:
         # ---------------- Auth ----------------
         - id: auth-service
-          uri: http://localhost:8081
+          uri: http://${AUTH_SERVICE_HOST:localhost}:${AUTH_SERVICE_PORT:8081}
           predicates:
             - Path=/api/auth/**
           filters:
@@ -36,49 +37,43 @@ spring:
 
         # ---------------- Academic ----------------
         - id: academic-project-service
-          uri: http://localhost:8082
+          uri: http://${ACADEMIC_SERVICE_HOST:localhost}:${ACADEMIC_SERVICE_PORT:8082}
           predicates:
             - Path=/api/academic/**
           filters:
             - StripPrefix=2
-            # Límite uploads grandes
             - name: RequestSize
               args:
                 maxSize: 60MB
-            # Evita cache
             - AddResponseHeader=Cache-Control, no-store
 
         # ---------------- Coordinator ----------------
         - id: coordinator-service
-          uri: http://localhost:8083
+          uri: http://${COORD_SERVICE_HOST:localhost}:${COORD_SERVICE_PORT:8083}
           predicates:
             - Path=/api/coordinator/**
           filters:
             - StripPrefix=2
-            # Límite adjuntos
             - name: RequestSize
               args:
                 maxSize: 60MB
-            # Evita cache
             - AddResponseHeader=Cache-Control, no-store
 
         # ---------------- Department Head ----------------
         - id: department-head-service
-          uri: http://localhost:8084
+          uri: http://${DEPT_SERVICE_HOST:localhost}:${DEPT_SERVICE_PORT:8084}
           predicates:
             - Path=/api/department/**
           filters:
             - StripPrefix=2
-            # Límite documentos
             - name: RequestSize
               args:
                 maxSize: 60MB
-            # Evita cache
             - AddResponseHeader=Cache-Control, no-store
 
         # ---------------- Notification ----------------
         - id: notification-service
-          uri: http://localhost:8085
+          uri: http://${NOTIF_SERVICE_HOST:localhost}:${NOTIF_SERVICE_PORT:8085}
           predicates:
             - Path=/api/notification/**
           filters:
@@ -123,7 +118,7 @@ spring:
 # Servidor embebido (Netty)
 # ======================================================
 server:
-  port: 8080
+  port: ${GATEWAY_PORT:8080}
 
 # ======================================================
 # Actuator

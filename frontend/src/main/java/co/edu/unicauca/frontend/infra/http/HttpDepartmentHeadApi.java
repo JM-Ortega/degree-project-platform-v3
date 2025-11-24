@@ -1,6 +1,7 @@
 package co.edu.unicauca.frontend.infra.http;
 
 import co.edu.unicauca.frontend.dto.AnteproyectoDto;
+import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.services.departmenthead.DepartmentHeadApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -56,6 +57,12 @@ public class HttpDepartmentHeadApi implements DepartmentHeadApi {
         HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
         conn.setRequestMethod("GET");
 
+        String token = SessionManager.getInstance().getAccessToken();
+        if (token != null && !token.isBlank()) {
+            conn.setRequestProperty("Authorization", "Bearer " + token);
+        }
+
+
         int status = conn.getResponseCode();
         if (status != HttpURLConnection.HTTP_OK) {
             String body = readBody(conn.getErrorStream());
@@ -87,6 +94,12 @@ public class HttpDepartmentHeadApi implements DepartmentHeadApi {
         String urlFinal = urlBuilder.toString();
         HttpURLConnection conn = (HttpURLConnection) new URL(urlFinal).openConnection();
         conn.setRequestMethod("GET");
+
+        String token = SessionManager.getInstance().getAccessToken();
+        if (token != null && !token.isBlank()) {
+            conn.setRequestProperty("Authorization", "Bearer " + token);
+        }
+
 
         int status = conn.getResponseCode();
         if (status != HttpURLConnection.HTTP_OK) {

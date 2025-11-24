@@ -3,15 +3,15 @@
 # ======================================================
 spring:
   application:
-    name: coordinator-service   # Cambiar por el nombre del micro
+    name: coordinator-service
 
   # ======================================================
   # Subidas multipart (límite del micro)
   # ======================================================
   servlet:
     multipart:
-      max-file-size: 60MB        # tamaño máx. por archivo
-      max-request-size: 60MB     # tamaño máx. del request completo (incluye metadatos multipart)
+      max-file-size: 60MB
+      max-request-size: 60MB
 
   # ======================================================
   #  Configuracion de base de datos (PostgreSQL)
@@ -34,10 +34,10 @@ spring:
   # Configuracion de mensajeria (RabbitMQ)
   # ======================================================
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: appuser
-    password: apppass
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:appuser}
+    password: ${RABBITMQ_PASS:apppass}
     publisher-confirm-type: correlated
     publisher-returns: true
     template:
@@ -51,8 +51,7 @@ spring:
         default-requeue-rejected: false
 
 # ======================================================
-# Topologia de mensajeria (nombres reutilizables)
-# ======================================================
+# Topologia de mensajeria
 # ======================================================
 messaging:
   exchange:
@@ -67,7 +66,7 @@ messaging:
     department: department-head-service.q
     notification: notification-service.q
 
-    # ===== Colas dedicadas a eventos auth.user.created =====
+    # ===== Colas dedicadas a auth.user.created =====
     projectAuth: academic.auth.q
     coordinatorAuth: coordinator.auth.q
     departmentAuth: department.auth.q
@@ -100,7 +99,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info   # /actuator/health vía gateway: /api/coordinator/actuator/health
+        include: health,info
 
 # ======================================================
 # Configuracion de Swagger / OpenAPI

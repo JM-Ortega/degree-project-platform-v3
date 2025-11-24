@@ -7,6 +7,7 @@ import co.edu.unicauca.frontend.dto.SessionInfo;
 import co.edu.unicauca.frontend.infra.http.HttpClientException;
 import co.edu.unicauca.frontend.infra.operation.LoginValidator;
 import co.edu.unicauca.frontend.infra.operation.RegistrationValidator;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 
 import java.util.HashMap;
@@ -61,44 +62,58 @@ public class AuthServiceFront {
      * @throws Exception si ocurre un error de E/S no controlado al llamar al backend.
      */
     public Map<String, String> register(RegistroPersonaDto dto) throws Exception {
-        // 1. validación en cliente
+
+        // 1. Validación en frontend
         Map<String, String> errors = RegistrationValidator.validate(dto);
         if (!errors.isEmpty()) {
             return errors;
         }
 
-        // 2. llamada al backend
         try {
+            // 2. Llamada al backend
             authApi.register(dto);
             return Map.of(); // éxito
+
         } catch (HttpClientException ex) {
-            // El backend devolvió un código de error (400, 401, 409, 500, ...)
-            String body = ex.getResponseBody();
             Map<String, String> mapped = new HashMap<>();
+            String body = ex.getResponseBody() != null ? ex.getResponseBody() : "";
+            String lower = body.toLowerCase();
 
-            if (ex.getStatus() == 400 && body != null) {
-                String lower = body.toLowerCase();
+            // ---- MANEJO DE STATUS 400 (errores esperados) ----
+            if (ex.getStatus() == 400) {
 
-                // casos típicos de tu AuthService
-                if (lower.contains("usuario con ese correo") || lower.contains("correo")) {
-                    // lo mostramos cerca del campo de correo (en el FXML se llama errUsuario)
+                // EMAIL DUPLICADO (microservicio)
+                if (lower.contains("usuario con ese correo")
+                        || lower.contains("correo ya existe")
+                        || lower.contains("email ya existe")
+                        || lower.contains("user exists")) { // <-- Keycloak
                     mapped.put("email", clean(body));
-                } else if (lower.contains("no está autorizado")
-                        || lower.contains("no esta autorizado")
-                        || lower.contains("rol")) {
-                    mapped.put("roles", clean(body));
-                } else {
-                    // cualquier otro 400 conocido
-                    mapped.put("general", clean(body));
+                    return mapped;
                 }
-            } else {
-                // 500, 404, 503, etc.
-                mapped.put("general", "El servidor devolvió un error (" + ex.getStatus() + ").");
+
+                // ROLES INVÁLIDOS
+                if (lower.contains("rol") && lower.contains("no")) {
+                    mapped.put("roles", clean(body));
+                    return mapped;
+                }
+
+                // PROBLEMAS CON KEYCLOAK: rol inexistente, cliente incorrecto, etc.
+                if (lower.contains("role") && lower.contains("not")) {
+                    mapped.put("roles", clean(body));
+                    return mapped;
+                }
+
+                // Otros errores conocidos → general
+                mapped.put("general", clean(body));
+                return mapped;
             }
 
+            // ---- MANEJO DE STATUS 500 / 404 / 503 ----
+            mapped.put("general", "El servidor devolvió un error (" + ex.getStatus() + ")");
             return mapped;
         }
     }
+
 
     /**
      * Variante de inicio de sesión orientada a la capa de presentación (JavaFX).
@@ -115,6 +130,7 @@ public class AuthServiceFront {
      * @return mapa vacío si login fue correcto; mapa con errores si algo falló.
      */
     public Map<String, String> loginAndReturnErrors(LoginRequestDto dto) {
+
         // 1. validar en cliente
         Map<String, String> errors = LoginValidator.validate(
                 dto.email(),
@@ -125,25 +141,31 @@ public class AuthServiceFront {
             return errors;
         }
 
-        // 2. llamar al backend
         try {
+            // 2. llamar al backend
             LoginResponseDto resp = authApi.login(dto);
 
-            SessionInfo s = resp.session();
-            SessionInfo session = new SessionInfo(
-                    s.email(),
-                    s.nombres(),
-                    s.rolActivo()
-            );
-            SessionManager.getInstance().setCurrentSession(session);
+            // Convertir SessionInfo REVISADA
+            SessionInfo info = resp.session();
 
-            return Map.of(); // sin errores
+            // Crear SessionData completo
+            SessionData sessionData = new SessionData(
+                    resp.accessToken(),
+                    resp.refreshToken(),
+                    resp.expiresIn(),
+                    resp.tokenType(),
+                    info,
+                    resp.roles()
+            );
+
+            // Guardar en el SessionManager
+            SessionManager.getInstance().setCurrentSession(sessionData);
+
+            return Map.of(); // ok
 
         } catch (HttpClientException ex) {
-            // errores esperables de auth
             String body = ex.getResponseBody();
             if (ex.getStatus() == 400 || ex.getStatus() == 401) {
-                // típicamente: credenciales inválidas o rol no asignado
                 return Map.of("general", clean(body));
             }
             return Map.of("general", "No fue posible iniciar sesión. Código: " + ex.getStatus());
@@ -151,6 +173,7 @@ public class AuthServiceFront {
             return Map.of("general", "No fue posible iniciar sesión. Intente más tarde.");
         }
     }
+
 
     /**
      * Variante de inicio de sesión directa (sin mapa de errores).
@@ -164,18 +187,23 @@ public class AuthServiceFront {
      * @throws Exception si el backend rechaza la autenticación o hay un problema de comunicación.
      */
     public void login(LoginRequestDto dto) throws Exception {
+
         LoginResponseDto resp = authApi.login(dto);
 
-        SessionInfo s = resp.session();
+        SessionInfo info = resp.session();
 
-        SessionInfo session = new SessionInfo(
-                s.email(),
-                s.nombres(),
-                s.rolActivo()
+        SessionData sessionData = new SessionData(
+                resp.accessToken(),
+                resp.refreshToken(),
+                resp.expiresIn(),
+                resp.tokenType(),
+                info,
+                resp.roles()
         );
 
-        SessionManager.getInstance().setCurrentSession(session);
+        SessionManager.getInstance().setCurrentSession(sessionData);
     }
+
 
     /**
      * Cierra la sesión local (no llama al backend).

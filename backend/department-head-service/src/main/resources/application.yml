@@ -3,7 +3,7 @@
 # ======================================================
 spring:
   application:
-    name: department-head-service   # Cambiar por el nombre del micro
+    name: department-head-service
 
   # ======================================================
   # Subidas multipart (límite del micro)
@@ -38,10 +38,10 @@ spring:
   # Configuracion de mensajeria (RabbitMQ)
   # ======================================================
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: appuser
-    password: apppass
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:appuser}
+    password: ${RABBITMQ_PASS:apppass}
     publisher-confirm-type: correlated
     publisher-returns: true
     template:

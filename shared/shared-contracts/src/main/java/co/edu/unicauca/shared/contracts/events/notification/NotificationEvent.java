@@ -1,6 +1,5 @@
 package co.edu.unicauca.shared.contracts.events.notification;
 
-
 import co.edu.unicauca.shared.contracts.model.Programa;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
@@ -23,17 +22,21 @@ public class NotificationEvent {
 
     /** Tipo de evento que originó la notificación (ej. project.created). */
     @NotBlank
-    private String type;
+    private String tipo;
+
+    /** Lista de direcciones de correo electrónico de los estudiantes y docentes relacionados. */
+    @NotEmpty
+    private List<String> correos;
 
     /** Asunto del mensaje de notificación. */
     @NotBlank
-    private String subject;
+    private String asunto;
 
     /** Contenido principal del mensaje. */
     @NotBlank
-    private String message;
+    private String mensaje;
 
-    /** Programa de los estudiantes. */
+    /** Programa de los estudiantes relacionados con la notificación. */
     @NotBlank
     private Programa programa;
 

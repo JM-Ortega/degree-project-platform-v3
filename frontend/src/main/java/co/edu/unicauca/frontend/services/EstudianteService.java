@@ -1,6 +1,7 @@
 package co.edu.unicauca.frontend.services;
 
 import co.edu.unicauca.frontend.infra.dto.AnteproyectoDTO;
+import co.edu.unicauca.frontend.infra.session.SessionManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -15,7 +16,16 @@ public class EstudianteService {
 
     public EstudianteService() {
         this.restTemplate = new RestTemplate();
+
+        this.restTemplate.getInterceptors().add((request, body, execution) -> {
+            String token = SessionManager.getInstance().getAccessToken();
+            if (token != null && !token.isBlank()) {
+                request.getHeaders().set("Authorization", "Bearer " + token);
+            }
+            return execution.execute(request, body);
+        });
     }
+
 
     /**
      * /estudiantes/libre/{correo} => { correo: String, libre: Boolean }

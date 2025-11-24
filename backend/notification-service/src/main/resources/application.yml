@@ -3,7 +3,7 @@
 # ======================================================
 spring:
   application:
-    name: notification-service   # Cambiar por el nombre del micro
+    name: notification-service
 
   # ======================================================
   #  Configuracion de base de datos (PostgreSQL)
@@ -25,10 +25,10 @@ spring:
   # Configuracion de mensajeria (RabbitMQ)
   # ======================================================
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: appuser
-    password: apppass
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:appuser}
+    password: ${RABBITMQ_PASS:apppass}
     publisher-confirm-type: correlated
     publisher-returns: true
     template:
@@ -65,7 +65,7 @@ messaging:
     projectUpdated: project.updated
     formatAApprovedByCoordinator: coordinator.formata.approved
     proposalApprovedByDeptHead: department.proposal.approved
-    notificationAny: notification.send.#   # <--- Dejé el routing intacto
+    notificationAny: notification.send.#   # <--- routing intacto
 
 # ======================================================
 # Configuracion del servidor embebido (Tomcat)

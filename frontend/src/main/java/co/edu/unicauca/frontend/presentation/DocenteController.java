@@ -2,6 +2,7 @@ package co.edu.unicauca.frontend.presentation;
 
 import co.edu.unicauca.frontend.FrontendServices;
 import co.edu.unicauca.frontend.dto.SessionInfo;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.presentation.navigation.ViewNavigator;
 import co.edu.unicauca.frontend.services.DocenteService;
@@ -24,14 +25,21 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class DocenteController implements Initializable {
+
     @FXML
     private Button btnPrincipal;
-    @FXML private Button btnFormatoA;
-    @FXML private Button btnAnteproyecto;
-    @FXML private Button btnSalir;
-    @FXML private Label nombreDocente;
-    @FXML private BorderPane bp;
-    @FXML private AnchorPane ap;
+    @FXML
+    private Button btnFormatoA;
+    @FXML
+    private Button btnAnteproyecto;
+    @FXML
+    private Button btnSalir;
+    @FXML
+    private Label nombreDocente;
+    @FXML
+    private BorderPane bp;
+    @FXML
+    private AnchorPane ap;
 
     private DocenteService docenteService;
     private ProyectoService proyectoService;
@@ -115,12 +123,15 @@ public class DocenteController implements Initializable {
             bp.setCenter(vista);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error al cargar FormatoADocente.fxml: " + e.getMessage());
+            System.err.println("Error al cargar AnteproyectoDocente.fxml: " + e.getMessage());
         }
     }
 
     public void cargarDatos() {
-        SessionInfo docente = SessionManager.getInstance().getCurrentSession();
+        // Antes: SessionInfo docente = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo docente = (data != null) ? data.getSessionInfo() : null;
+
         if (docente != null) {
             nombreDocente.setText(docente.nombres());
         } else {

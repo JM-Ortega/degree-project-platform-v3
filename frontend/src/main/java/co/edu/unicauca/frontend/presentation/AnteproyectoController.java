@@ -3,6 +3,7 @@ package co.edu.unicauca.frontend.presentation;
 import co.edu.unicauca.frontend.FrontendServices;
 import co.edu.unicauca.frontend.dto.AnteproyectoDto;
 import co.edu.unicauca.frontend.dto.SessionInfo;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.services.departmenthead.DepartmentHeadServiceFront;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,7 +11,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 
 import java.util.List;
 
@@ -71,13 +75,16 @@ public class AnteproyectoController {
      * Carga la información del usuario desde la sesión activa
      */
     private void cargarInformacionUsuario() {
-        SessionInfo session = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo session = (data != null) ? data.getSessionInfo() : null;
+
         if (session != null && nombreDocente != null) {
             nombreDocente.setText(session.nombres());
         } else if (nombreDocente != null) {
             nombreDocente.setText("Usuario no identificado");
         }
     }
+
 
     /**
      * Configura las columnas de la tabla para mostrar los datos de los anteproyectos

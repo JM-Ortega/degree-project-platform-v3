@@ -3,6 +3,7 @@ package co.edu.unicauca.frontend.presentation;
 import co.edu.unicauca.frontend.FrontendServices;
 import co.edu.unicauca.frontend.dto.SessionInfo;
 import co.edu.unicauca.frontend.infra.dto.AnteproyectoDTO;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.services.DocenteService;
 import co.edu.unicauca.frontend.services.EstudianteService;
@@ -121,11 +122,16 @@ public class AnteproyectoDocenteController implements Initializable {
     }
 
     public void carcarDatos(){
-        SessionInfo docente = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo docente = (data != null) ? data.getSessionInfo() : null;
+
         if (docente == null) {
             System.err.println("No hay sesión activa");
+            return;
         }
+
         nombreDocente.setText(docente.nombres());
+
         if (lblPdfNombre != null) lblPdfNombre.setText("Ningún archivo seleccionado");
         cargarTabla();
     }
@@ -190,7 +196,9 @@ public class AnteproyectoDocenteController implements Initializable {
     @FXML
     private void onCrearAnteproyecto(ActionEvent event) {
         lblNuevoAnteproyectoMsg.setText("");
-        SessionInfo docente = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo docente = (data != null) ? data.getSessionInfo() : null;
+
         if (docente == null) {
             setError(lblNuevoAnteproyectoMsg, "Sesión no válida");
             return;
@@ -258,11 +266,14 @@ public class AnteproyectoDocenteController implements Initializable {
     private void cargarTabla() {
         lblTablaMsg.setText("");
 
-        SessionInfo usuario = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo usuario = (data != null) ? data.getSessionInfo() : null;
+
         if (usuario == null) return;
 
         String filtro = safeText(txtBuscar);
         List<AnteproyectoDTO> proyectos = proyectoService.listarAnteproyectosDocente(usuario.email(), filtro);
+
 
         ObservableList<AnteproyectoDocenteController.RowVM> rows = FXCollections.observableArrayList();
         for (AnteproyectoDTO p : proyectos) {

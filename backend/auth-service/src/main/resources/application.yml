@@ -3,12 +3,13 @@
 # ======================================================
 spring:
   application:
-    name: auth-service   # Cambiar por el nombre del micro
+    name: auth-service   # Nombre del microservicio
 
   # ======================================================
   #  Configuracion de base de datos (PostgreSQL)
   # ======================================================
   datasource:
+    # En dev: localhost, en Docker: DB_HOST=postgres (por ejemplo)
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/auth_db
     username: ${DB_USER:auth_user}
     password: ${DB_PASS:auth_pass}
@@ -25,10 +26,11 @@ spring:
   # Configuracion de mensajeria (RabbitMQ)
   # ======================================================
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: appuser
-    password: apppass
+    # En dev: localhost, en Docker: RABBITMQ_HOST=rabbitmq
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:appuser}
+    password: ${RABBITMQ_PASS:apppass}
     publisher-confirm-type: correlated
     publisher-returns: true
     template:
@@ -66,6 +68,27 @@ messaging:
     formatAApprovedByCoordinator: coordinator.formata.approved
     proposalApprovedByDeptHead: department.proposal.approved
     notificationAny: notification.send.*
+
+# ======================================================
+# Configuracion de Keycloak (Admin Client + Login OIDC)
+# ======================================================
+keycloak:
+  # En dev: http://localhost:8181
+  # En Docker: KEYCLOAK_URL=http://keycloak:8181
+  server-url: ${KEYCLOAK_URL:http://localhost:8181}
+  realm: ${KEYCLOAK_REALM:unicauca}
+
+  # Cliente de negocio donde viven los roles (ESTUDIANTE, DOCENTE, etc.)
+  desktop-client-id: ${KEYCLOAK_DESKTOP_CLIENT_ID:sistema-desktop}
+
+  # Endpoint de tokens de Keycloak (para login con grant_type=password)
+  token-url: ${KEYCLOAK_TOKEN_URL:${KEYCLOAK_URL:http://localhost:8181}/realms/${KEYCLOAK_REALM:unicauca}/protocol/openid-connect/token}
+
+  admin:
+    realm: ${KEYCLOAK_ADMIN_REALM:master}          # donde vive admin-cli
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
+    username: ${KEYCLOAK_ADMIN_USER:admin}
+    password: ${KEYCLOAK_ADMIN_PASS:admin}
 
 # ======================================================
 # Configuracion del servidor embebido (Tomcat)

@@ -1,6 +1,7 @@
 package co.edu.unicauca.frontend.services;
 
 import co.edu.unicauca.frontend.infra.dto.UsuarioDTO;
+import co.edu.unicauca.frontend.infra.session.SessionManager;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,28 +37,40 @@ public class DocenteService {
     public UsuarioDTO obtenerDocenteActivo(String correo) {
         try {
             String url = baseUrlDocente + "/" + enc(correo);
-            HttpRequest req = HttpRequest.newBuilder(URI.create(url))
-                    .timeout(Duration.ofSeconds(8))
-                    .GET()
-                    .build();
+
+            HttpRequest.Builder rb = HttpRequest.newBuilder(URI.create(url))
+                    .timeout(Duration.ofSeconds(8));
+
+            String token = SessionManager.getInstance().getAccessToken();
+            if (token != null && !token.isBlank()) {
+                rb.header("Authorization", "Bearer " + token);
+            }
+
+            HttpRequest req = rb.GET().build();
 
             HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
             validar2xx(resp);
 
             return mapper.readValue(resp.body(), UsuarioDTO.class);
         } catch (Exception ex) {
-            // Loguea y/o muestra alerta UI según tu patrón
             throw new RuntimeException("Error consultando docente activo: " + ex.getMessage(), ex);
         }
     }
 
+
     public int countProyectosEnTramiteDocente(String correo) {
         try {
             String url = baseUrlDocente + "/countProyectos/" + enc(correo);
-            HttpRequest req = HttpRequest.newBuilder(URI.create(url))
-                    .timeout(Duration.ofSeconds(8))
-                    .GET()
-                    .build();
+
+            HttpRequest.Builder rb = HttpRequest.newBuilder(URI.create(url))
+                    .timeout(Duration.ofSeconds(8));
+
+            String token = SessionManager.getInstance().getAccessToken();
+            if (token != null && !token.isBlank()) {
+                rb.header("Authorization", "Bearer " + token);
+            }
+
+            HttpRequest req = rb.GET().build();
 
             HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
             validar2xx(resp);
@@ -67,6 +80,7 @@ public class DocenteService {
             throw new RuntimeException("Error consultando conteo de proyectos: " + ex.getMessage(), ex);
         }
     }
+
 
     public boolean docenteTieneCupo(String correo) {
         return countProyectosEnTramiteDocente(correo) < 7;

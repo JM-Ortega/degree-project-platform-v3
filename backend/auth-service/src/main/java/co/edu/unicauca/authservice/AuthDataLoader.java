@@ -5,10 +5,10 @@ import co.edu.unicauca.authservice.access.UsuarioRepository;
 import co.edu.unicauca.authservice.domain.entities.Persona;
 import co.edu.unicauca.authservice.domain.entities.Usuario;
 import co.edu.unicauca.authservice.dto.RegistroPersonaDto;
+import co.edu.unicauca.authservice.infra.keycloak.KeycloakUserClient;
 import co.edu.unicauca.authservice.infra.messaging.NotificationPublisher;
 import co.edu.unicauca.authservice.infra.messaging.UserEventsPublisher;
 import co.edu.unicauca.authservice.services.CodigoPersonaGenerator;
-import co.edu.unicauca.authservice.services.PasswordHasher;
 import co.edu.unicauca.authservice.services.PersonaFactory;
 import co.edu.unicauca.shared.contracts.events.auth.UserCreatedEvent;
 import co.edu.unicauca.shared.contracts.model.Departamento;
@@ -22,25 +22,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Cargador de datos de ejemplo para el microservicio de autenticación.
- *
- * <p>
- * Este componente se ejecuta al arrancar la aplicación (solo en perfiles
- * {@code dev} o {@code local}) y crea algunos usuarios de prueba en la base
- * de datos utilizando exactamente la misma infraestructura que el flujo real:
- * <ul>
- *     <li>mismo {@link PasswordHasher}</li>
- *     <li>misma {@link PersonaFactory}</li>
- *     <li>mismo {@link CodigoPersonaGenerator}</li>
- * </ul>
- * </p>
- *
- * <p>
- * A diferencia del endpoint público de registro, aquí SÍ creamos usuarios con
- * roles administrativos (Coordinador, JefeDeDepartamento) porque este código
- * no pasa por la validación de “solo Estudiante/Docente”. Esto permite tener
- * datos completos para probar los distintos dashboards del frontend.
- * </p>
+ * Carga usuarios de demo en BD + Keycloak
+ * como si hubieran pasado por el flujo normal de registro.
  */
 @Component
 //@Profile({"dev", "local"})
@@ -50,36 +33,34 @@ public class AuthDataLoader implements CommandLineRunner {
 
     private final UsuarioRepository usuarioRepo;
     private final PersonaRepository personaRepo;
-    private final PasswordHasher passwordHasher;
     private final PersonaFactory personaFactory;
     private final CodigoPersonaGenerator codigoPersonaGenerator;
+    private final KeycloakUserClient keycloakUserClient;
     private final UserEventsPublisher userEventsPublisher;
     private final NotificationPublisher notificationPublisher;
 
     public AuthDataLoader(UsuarioRepository usuarioRepo,
                           PersonaRepository personaRepo,
-                          PasswordHasher passwordHasher,
                           PersonaFactory personaFactory,
                           CodigoPersonaGenerator codigoPersonaGenerator,
+                          KeycloakUserClient keycloakUserClient,
                           UserEventsPublisher userEventsPublisher,
                           NotificationPublisher notificationPublisher) {
         this.usuarioRepo = usuarioRepo;
         this.personaRepo = personaRepo;
-        this.passwordHasher = passwordHasher;
         this.personaFactory = personaFactory;
         this.codigoPersonaGenerator = codigoPersonaGenerator;
+        this.keycloakUserClient = keycloakUserClient;
         this.userEventsPublisher = userEventsPublisher;
         this.notificationPublisher = notificationPublisher;
     }
 
     @Override
     public void run(String... args) {
-        log.info("=== Iniciando carga de datos de ejemplo para AuthService ===");
+        log.info("=== Iniciando carga de datos demo para AuthService ===");
 
-        // todos con la misma clave de demo
-        final String passwordPlano = "Uni123456*";
+        final String password = "Uni123456*";
 
-        // 1. Estudiante
         crearUsuarioDemo(
                 "estudiante.demo@unicauca.edu.co",
                 "Camila",
@@ -87,10 +68,9 @@ public class AuthDataLoader implements CommandLineRunner {
                 Programa.INGENIERIA_DE_SISTEMAS,
                 null,
                 List.of(Rol.ESTUDIANTE),
-                passwordPlano
+                password
         );
 
-        // 2. Docente
         crearUsuarioDemo(
                 "docente.demo@unicauca.edu.co",
                 "Andrés",
@@ -98,21 +78,19 @@ public class AuthDataLoader implements CommandLineRunner {
                 Programa.INGENIERIA_DE_SISTEMAS,
                 Departamento.SISTEMAS,
                 List.of(Rol.DOCENTE),
-                passwordPlano
+                password
         );
 
-        // 3. Coordinador
         crearUsuarioDemo(
                 "coordinador.demo@unicauca.edu.co",
                 "María",
                 "Pérez",
-                Programa.INGENIERIA_DE_SISTEMAS,   // también será su programa coordinado
+                Programa.INGENIERIA_DE_SISTEMAS,
                 null,
                 List.of(Rol.COORDINADOR),
-                passwordPlano
+                password
         );
 
-        // 4. Jefe de departamento
         crearUsuarioDemo(
                 "jefe.demo@unicauca.edu.co",
                 "Jorge",
@@ -120,10 +98,9 @@ public class AuthDataLoader implements CommandLineRunner {
                 Programa.INGENIERIA_ELECTRONICA_Y_TELECOMUNICACIONES,
                 Departamento.SISTEMAS,
                 List.of(Rol.JEFE_DE_DEPARTAMENTO),
-                passwordPlano
+                password
         );
 
-        // 5. Multi-rol (4 roles)
         crearUsuarioDemo(
                 "multi.demo@unicauca.edu.co",
                 "Laura",
@@ -136,22 +113,14 @@ public class AuthDataLoader implements CommandLineRunner {
                         Rol.COORDINADOR,
                         Rol.JEFE_DE_DEPARTAMENTO
                 ),
-                passwordPlano
+                password
         );
 
-        log.info("=== Carga de datos de ejemplo completada ===");
+        log.info("=== Datos demo creados correctamente ===");
     }
 
     /**
-     * Crea un usuario/persona de demo si no existe aún el correo.
-     *
-     * @param email        correo del usuario (se normaliza a lower/trim)
-     * @param nombres      nombres
-     * @param apellidos    apellidos
-     * @param programa     programa académico
-     * @param departamento departamento (solo para docente / jefe)
-     * @param roles        lista de roles que tendrá el usuario
-     * @param passwordPlano contraseña en texto plano
+     * Crea usuario demo en Keycloak + BD + eventos.
      */
     private void crearUsuarioDemo(String email,
                                   String nombres,
@@ -161,93 +130,89 @@ public class AuthDataLoader implements CommandLineRunner {
                                   List<Rol> roles,
                                   String passwordPlano) {
 
-        String emailNormalizado = email.trim().toLowerCase();
+        final String emailNorm = email.trim().toLowerCase();
 
-        // si ya existe, no lo volvemos a crear
-        boolean existe = usuarioRepo.existsByEmail(emailNormalizado);
-        if (existe) {
-            log.info("Omitido {} → ya existe en la base de datos", emailNormalizado);
+        if (usuarioRepo.existsByEmail(emailNorm)) {
+            log.info("Omitido (ya existe en BD): {}", emailNorm);
             return;
         }
 
         try {
-            // 1) armar un DTO igual que el que mandaría el frontend
+            // 1) DTO como si viniera del frontend
             RegistroPersonaDto dto = new RegistroPersonaDto(
                     nombres,
                     apellidos,
-                    emailNormalizado,
+                    emailNorm,
                     passwordPlano,
-                    null,            // celular opcional en este seed
+                    null, // celular
                     programa,
                     roles,
                     departamento
             );
 
-            // 2) crear la entidad Usuario
-            String passwordHash = passwordHasher.hash(passwordPlano.toCharArray());
-            Usuario usuario = new Usuario(emailNormalizado, passwordHash, roles);
+            // 2) Crear usuario en Keycloak (cuenta + password + roles)
+            List<String> roleNames = roles.stream()
+                    .map(Rol::name)
+                    .toList();
 
-            // 3) dejar que la factory elija la subclase de Persona
-            var persona = personaFactory.crearDesdeDto(dto, usuario);
+            String keycloakId = keycloakUserClient.createUser(
+                    emailNorm,
+                    nombres,
+                    apellidos,
+                    passwordPlano,
+                    roleNames
+            );
 
-            // 4) generar código institucional igual que en el flujo real
+            // 3) Crear Usuario interno con keycloakId
+            Usuario usuario = new Usuario(emailNorm, roles);
+            usuario.setKeycloakId(keycloakId);
+
+            // 4) Crear Persona concreta (Estudiante/Docente/etc.)
+            Persona persona = personaFactory.crearDesdeDto(dto, usuario);
             persona.setCodigo(codigoPersonaGenerator.generar());
 
-            // 5) persistir
-            usuarioRepo.save(usuario);
+            // 5) Guardar en BD (Persona cascada → Usuario)
             personaRepo.save(persona);
 
-            // 6) publicar los mismos eventos que en AuthService
+            // 6) Publicar eventos como en el flujo real
             publicarEventos(persona, usuario);
 
-            log.info("Usuario creado exitosamente: {}", emailNormalizado);
+            log.info("Usuario DEMO creado en BD + Keycloak: {}", emailNorm);
+
         } catch (Exception e) {
-            log.warn("No se pudo crear {} → {}", emailNormalizado, e.getMessage());
+            log.error("Error creando usuario demo {}: {}", emailNorm, e.getMessage(), e);
         }
     }
 
-    /**
-     * Publica los eventos de dominio y de notificación asociados a la creación de usuario,
-     * tal como lo hace el servicio principal.
-     *
-     * @param persona entidad de persona recién creada
-     * @param usuario entidad de usuario asociada
-     */
     private void publicarEventos(Persona persona, Usuario usuario) {
         try {
-            // 1) Evento funcional: user.created
-            UserCreatedEvent userEvent = new UserCreatedEvent(
+            Departamento departamento = switch (persona) {
+                case co.edu.unicauca.authservice.domain.entities.Docente d -> d.getDepartamento();
+                case co.edu.unicauca.authservice.domain.entities.JefeDeDepartamento j -> j.getDepartamento();
+                default -> null;
+            };
+
+            UserCreatedEvent event = new UserCreatedEvent(
                     persona.getId(),
                     persona.getNombres() + " " + persona.getApellidos(),
                     usuario.getEmail(),
                     persona.getPrograma(),
-                    switch (persona) {
-                        case co.edu.unicauca.authservice.domain.entities.Docente d -> d.getDepartamento();
-                        case co.edu.unicauca.authservice.domain.entities.JefeDeDepartamento j -> j.getDepartamento();
-                        default -> null;
-                    },
+                    departamento,
                     usuario.getRoles()
             );
-            userEventsPublisher.publishUserCreatedEvent(userEvent);
 
-            // 2) Evento de notificación (nuevo contrato)
-            // type define la cola lógica de notificación: "notification.send.auth.user.created"
-            String type = "auth.user.created";
-            String subject = "Bienvenido a la plataforma";
-            String message = "Tu cuenta ha sido creada correctamente.";
+            userEventsPublisher.publishUserCreatedEvent(event);
 
             notificationPublisher.publishNotification(
-                    type,
-                    List.of(usuario.getEmail()), // toEmails
-                    List.of(),                    // toPhones (vacío si no SMS)
-                    subject,
-                    message
+                    "auth.user.created",
+                    List.of(usuario.getEmail()),
+                    List.of(),
+                    "Bienvenido a la plataforma",
+                    "Tu usuario demo ha sido creado correctamente."
             );
 
-            log.info("Eventos publicados correctamente para usuario {}", usuario.getEmail());
         } catch (Exception e) {
-            log.error("Error al publicar eventos para {}: {}", usuario.getEmail(), e.getMessage(), e);
+            log.error("Error publicando eventos para {}: {}", usuario.getEmail(), e.getMessage(), e);
         }
     }
 }
-

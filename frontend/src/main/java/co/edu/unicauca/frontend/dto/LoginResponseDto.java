@@ -1,15 +1,25 @@
 package co.edu.unicauca.frontend.dto;
 
+import java.util.List;
+
 /**
  * Respuesta del backend tras un inicio de sesión exitoso.
  *
- * Contiene la información de sesión (email, nombre visible, rol)
- * y el token simbólico devuelto por el servicio de autenticación.
- *
- * Esta clase está pensada para el FRONT (JavaFX), por eso no
- * incluye anotaciones de Swagger.
+ * Incluye tokens OIDC entregados por Keycloak y la información
+ * de sesión interpretada por el backend.
  */
 public record LoginResponseDto(
+
+        String accessToken,
+
+        String refreshToken,
+
+        Long expiresIn,
+
+        String tokenType,
+
         SessionInfo session,
-        String token
+
+        List<String> roles
+
 ) { }

@@ -2,6 +2,7 @@ package co.edu.unicauca.frontend.presentation;
 
 import co.edu.unicauca.frontend.FrontendApp;
 import co.edu.unicauca.frontend.dto.SessionInfo;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -57,7 +58,12 @@ public class EstudianteController implements Initializable {
     }
 
     void cargarDatos() {
-        SessionInfo estudiante = SessionManager.getInstance().getCurrentSession();
+        // Obtener SessionData completo
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+
+        // Obtener el SessionInfo
+        SessionInfo estudiante = (data != null) ? data.getSessionInfo() : null;
+
         if (estudiante != null) {
             nombreEstudiante.setText(estudiante.nombres());
         } else {
@@ -96,13 +102,13 @@ public class EstudianteController implements Initializable {
     @FXML
     public void onSalir(javafx.event.ActionEvent event) {
         try {
+            // limpiar sesión
+            SessionManager.getInstance().clear();
+
             FXMLLoader loader = FrontendApp.newLoader("/co/edu/unicauca/frontend/view/SignIn.fxml");
             Parent root = loader.load();
 
-            // Obtener la ventana actual (Stage)
             Stage stage = (Stage) btnSalir.getScene().getWindow();
-
-            // Cambiar la escena por la del inicio de sesión
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -111,4 +117,5 @@ public class EstudianteController implements Initializable {
             e.printStackTrace();
         }
     }
+
 }

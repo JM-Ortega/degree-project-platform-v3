@@ -3,15 +3,15 @@
 # ======================================================
 spring:
   application:
-    name: academic-project-service   # Cambiar por el nombre del micro
+    name: academic-project-service
 
   # ======================================================
   # Subidas multipart (límite del micro)
   # ======================================================
   servlet:
     multipart:
-      max-file-size: 60MB        # tamaño máx. por archivo
-      max-request-size: 60MB     # tamaño máx. del request completo (incluye metadatos multipart)
+      max-file-size: 60MB
+      max-request-size: 60MB
 
   # ======================================================
   #  Configuracion de base de datos (PostgreSQL)
@@ -33,10 +33,10 @@ spring:
   # Configuracion de mensajeria (RabbitMQ)
   # ======================================================
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: appuser
-    password: apppass
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:appuser}
+    password: ${RABBITMQ_PASS:apppass}
     publisher-confirm-type: correlated
     publisher-returns: true
     template:
@@ -90,7 +90,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info   # /actuator/health vía gateway: /api/academic/actuator/health
+        include: health,info
 
 # ======================================================
 # Configuracion de Swagger / OpenAPI

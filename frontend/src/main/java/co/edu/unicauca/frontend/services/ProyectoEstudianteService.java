@@ -2,6 +2,7 @@ package co.edu.unicauca.frontend.services;
 
 import co.edu.unicauca.frontend.dto.SessionInfo;
 import co.edu.unicauca.frontend.infra.dto.ProyectoEstudianteDTO;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,19 +29,38 @@ public class ProyectoEstudianteService {
 
     public List<ProyectoEstudianteDTO> obtenerProyectosEstudiante() {
         try {
-            SessionInfo estudiante = SessionManager.getInstance().getCurrentSession();
+            // Obtener SessionData → SessionInfo
+            SessionData data = SessionManager.getInstance().getCurrentSession();
+            SessionInfo estudiante = (data != null) ? data.getSessionInfo() : null;
+
+            if (estudiante == null) {
+                System.err.println("No hay sesión activa");
+                return List.of();
+            }
+
             String correo = estudiante.email();
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(BASE_URL + "/listar/" + correo))
-                    .GET()
-                    .build();
+            // Obtener el JWT
+            String token = SessionManager.getInstance().getAccessToken();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpRequest.Builder rb = HttpRequest.newBuilder()
+                    .uri(new URI(BASE_URL + "/listar/" + correo))
+                    .GET();
+
+            // Agregar token si existe
+            if (token != null && !token.isBlank()) {
+                rb.header("Authorization", "Bearer " + token);
+            }
+
+            HttpRequest request = rb.build();
+
+            HttpResponse<String> response =
+                    httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             List<ProyectoEstudianteJsonDTO> jsonList = mapper.readValue(
                     response.body(),
-                    new TypeReference<List<ProyectoEstudianteJsonDTO>>() {}
+                    new TypeReference<List<ProyectoEstudianteJsonDTO>>() {
+                    }
             );
 
             return jsonList.stream()
@@ -58,4 +78,6 @@ public class ProyectoEstudianteService {
             return List.of();
         }
     }
+
+
 }

@@ -1,6 +1,7 @@
 package co.edu.unicauca.frontend.presentation;
 
 import co.edu.unicauca.frontend.dto.SessionInfo;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.presentation.navigation.ViewNavigator;
 import javafx.event.ActionEvent;
@@ -43,13 +44,16 @@ public class DepartmentHeadController {
     }
 
     private void cargarInformacionUsuario() {
-        SessionInfo session = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo session = (data != null) ? data.getSessionInfo() : null;
+
         if (session != null && NombreJefeDepartamento != null) {
             NombreJefeDepartamento.setText(session.nombres());
         } else if (NombreJefeDepartamento != null) {
             NombreJefeDepartamento.setText("Usuario no identificado");
         }
     }
+
 
     @FXML
     private void showInfoPrincipal(ActionEvent event) {

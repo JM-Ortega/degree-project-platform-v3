@@ -54,24 +54,26 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
 
-    command: ["start-dev"] # http://localhost:8081
-    #command: ["start-dev", "--import-realm"]          # ← importa los JSON de /import
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+
+    #command: ["start-dev"] # http://localhost:8081
+    command: [ "start-dev", "--import-realm" ]          # ← importa los JSON de /import
     ports:
       - "8181:8080" # externo:interno
     volumes:
       - kc_data:/opt/keycloak/data
-      # - ./init/keycloak/realms:/opt/keycloak/data/import  # ← realms JSON
+      - ./init/keycloak/realms:/opt/keycloak/data/import  # ← realms JSON
     restart: unless-stopped
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:8080/realms/master/.well-known/openid-configuration || exit 1",
-        ]
+      test: [
+        "CMD-SHELL",
+        "{ printf 'HEAD /health/ready HTTP/1.0\r\n\r\n' >&0; grep 'HTTP/1.0 200'; } 0<>/dev/tcp/localhost/9000"
+      ]
       interval: 10s
       timeout: 5s
       retries: 30
-
+      start_period: 40s
 volumes:
   rabbit_data:
   pg_data:

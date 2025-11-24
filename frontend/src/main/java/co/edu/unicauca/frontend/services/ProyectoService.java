@@ -1,22 +1,22 @@
 package co.edu.unicauca.frontend.services;
 
-import co.edu.unicauca.frontend.entities.*;
+import co.edu.unicauca.frontend.entities.EstadoArchivo;
+import co.edu.unicauca.frontend.entities.EstadoProyecto;
+import co.edu.unicauca.frontend.entities.TipoProyecto;
 import co.edu.unicauca.frontend.infra.config.PdfValidator;
 import co.edu.unicauca.frontend.infra.dto.AnteproyectoDTO;
 import co.edu.unicauca.frontend.infra.dto.FormatoADTO;
 import co.edu.unicauca.frontend.infra.dto.ProyectoDTO;
 import co.edu.unicauca.frontend.infra.dto.ProyectoInfoDTO;
+import co.edu.unicauca.frontend.infra.session.SessionManager;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ProyectoService implements ObservableService{
     private final String baseUrlProyectos = "http://localhost:8080/api/academic/proyectos";
@@ -27,9 +27,19 @@ public class ProyectoService implements ObservableService{
 
     public ProyectoService(DocenteService docenteService, EstudianteService estudianteService) {
         this.restTemplate = new RestTemplate();
+
+        this.restTemplate.getInterceptors().add((request, body, execution) -> {
+            String token = SessionManager.getInstance().getAccessToken();
+            if (token != null && !token.isBlank()) {
+                request.getHeaders().set("Authorization", "Bearer " + token);
+            }
+            return execution.execute(request, body);
+        });
+
         this.docenteService = docenteService;
         this.estudianteService = estudianteService;
     }
+
 
     public EstadoProyecto enforceAutoCancelIfNeeded(long proyectoId) {
         String url = baseUrlProyectos + "/" + proyectoId + "/enforceAutoCancel";

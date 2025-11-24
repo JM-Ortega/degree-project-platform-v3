@@ -6,19 +6,26 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-@Schema(description = "Credenciales para iniciar sesión.")
+/**
+ * DTO para iniciar sesión en el sistema.
+ *
+ * <p>Contiene las credenciales mínimas necesarias que se enviarán
+ * al endpoint de Keycloak (username/password) y el rol con el que
+ * el usuario desea autenticarse en esta sesión.</p>
+ */
+@Schema(description = "Credenciales utilizadas para iniciar sesión.")
 public record LoginRequest(
 
         @NotBlank
         @Email
-        @Schema(example = "juan@unicauca.edu.co")
+        @Schema(description = "Correo institucional del usuario.", example = "juan@unicauca.edu.co")
         String email,
 
         @NotBlank
-        @Schema(example = "Clave123*")
+        @Schema(description = "Contraseña del usuario.", example = "Clave123*")
         String password,
 
         @NotNull
-        @Schema(description = "Rol con el que desea entrar en esta sesión.")
+        @Schema(description = "Rol con el que desea iniciar sesión.", example = "DOCENTE")
         Rol rol
 ) { }

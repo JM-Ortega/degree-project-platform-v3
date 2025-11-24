@@ -38,6 +38,12 @@
         <!-- Build reproducible -->
         <project.build.outputTimestamp>${maven.build.timestamp}</project.build.outputTimestamp>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
+
+        <!-- Versión de Keycloak usada por el Admin Client -->
+        <keycloak.version>26.0.7</keycloak.version>
+
+        <java-jwt.version>4.4.0</java-jwt.version>
+
     </properties>
 
     <!--
@@ -102,6 +108,14 @@
                 <artifactId>shared-contracts</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <!-- JWT: decodificación/validación de tokens (usado en varios microservicios) -->
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>java-jwt</artifactId>
+                <version>${java-jwt.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

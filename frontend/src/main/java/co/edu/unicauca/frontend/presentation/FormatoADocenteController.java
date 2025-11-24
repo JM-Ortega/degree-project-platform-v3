@@ -2,8 +2,14 @@ package co.edu.unicauca.frontend.presentation;
 
 import co.edu.unicauca.frontend.FrontendServices;
 import co.edu.unicauca.frontend.dto.SessionInfo;
-import co.edu.unicauca.frontend.entities.*;
-import co.edu.unicauca.frontend.infra.dto.*;
+import co.edu.unicauca.frontend.entities.EstadoArchivo;
+import co.edu.unicauca.frontend.entities.EstadoProyecto;
+import co.edu.unicauca.frontend.entities.TipoProyecto;
+import co.edu.unicauca.frontend.infra.dto.CartaLaboralDTO;
+import co.edu.unicauca.frontend.infra.dto.FormatoADTO;
+import co.edu.unicauca.frontend.infra.dto.ProyectoDTO;
+import co.edu.unicauca.frontend.infra.dto.ProyectoInfoDTO;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.services.DocenteService;
 import co.edu.unicauca.frontend.services.EstudianteService;
@@ -27,7 +33,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -164,10 +169,14 @@ public class FormatoADocenteController implements Initializable {
 
     // =================== Carga inicial ===================
     public void cargarDatos() {
-        SessionInfo docente = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo docente = (data != null) ? data.getSessionInfo() : null;
+
         if (docente == null) {
             System.err.println("No hay sesión activa");
+            return;
         }
+
         nombreDocente.setText(docente.nombres());
         ocultarPanelNuevo();
         if (lblPdfNombre != null) lblPdfNombre.setText("Ningún archivo seleccionado");
@@ -275,11 +284,14 @@ public class FormatoADocenteController implements Initializable {
     @FXML
     private void onCrearProyecto() {
         lblNuevoProyectoMsg.setText("");
-        SessionInfo docente = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo docente = (data != null) ? data.getSessionInfo() : null;
+
         if (docente == null) {
             setError(lblNuevoProyectoMsg, "Sesión no válida");
             return;
         }
+
 
         String correo = safeText(txtEstudianteCorreo);
         String titulo = safeText(txtTitulo);
@@ -417,7 +429,9 @@ public class FormatoADocenteController implements Initializable {
     private void cargarTabla() {
         lblTablaMsg.setText("");
 
-        SessionInfo usuario = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo usuario = (data != null) ? data.getSessionInfo() : null;
+
         if (usuario == null) return;
 
         String filtro = safeText(txtBuscar);
@@ -501,12 +515,17 @@ public class FormatoADocenteController implements Initializable {
     }
 
     private void actualizarCupo() {
-        SessionInfo auth = SessionManager.getInstance().getCurrentSession();
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo auth = (data != null) ? data.getSessionInfo() : null;
+
         if (auth == null) {
             btnIniciarNuevoProyecto.setDisable(true);
+            lblCupoDocente.setText("Sesión no válida");
             return;
         }
+
         boolean cupo = docenteService.docenteTieneCupo(auth.email());
+
         btnIniciarNuevoProyecto.setDisable(!cupo);
         lblCupoDocente.setText(cupo ? "" : "Límite de 7 proyectos en curso alcanzado");
     }

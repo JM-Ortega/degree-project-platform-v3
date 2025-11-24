@@ -4,6 +4,7 @@ import co.edu.unicauca.frontend.FrontendServices;
 import co.edu.unicauca.frontend.dto.SessionInfo;
 import co.edu.unicauca.frontend.entities.CoordinadorResumen;
 import co.edu.unicauca.frontend.entities.FormatoAResumen;
+import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.presentation.navigation.ViewLoader;
 import co.edu.unicauca.frontend.presentation.navigation.ViewNavigator;
@@ -55,7 +56,10 @@ public class CoordinadorController implements Initializable {
 
     void cargarDatos() {
         try {
-            SessionInfo session = SessionManager.getInstance().getCurrentSession();
+            // Ahora leemos SessionData y sacamos el SessionInfo de dentro
+            SessionData data = SessionManager.getInstance().getCurrentSession();
+            SessionInfo session = (data != null) ? data.getSessionInfo() : null;
+
             if (session == null || session.email() == null || session.email().isBlank()) {
                 ViewNavigator.goTo("/co/edu/unicauca/frontend/view/SignIn.fxml", "Inicio de sesión");
                 return;
@@ -77,12 +81,16 @@ public class CoordinadorController implements Initializable {
             switch (info.getPrograma()) {
                 case "INGENIERIA_DE_SISTEMAS":
                     programa = "Ingenieria de Sistemas";
+                    break;
                 case "INGENIERIA_ELECTRONICA_Y_TELECOMUNICACIONES":
                     programa = "Ingenieria Electronica y Telecomunicaciones";
+                    break;
                 case "AUTOMATICA_INDUSTRIAL":
                     programa = "Automatica Industrial";
+                    break;
                 case "TECNOLOGIA_EN_TELEMATICA":
                     programa = "Tecnologia En Telematica";
+                    break;
                 default:
                     programa = "Unknown";
             }
@@ -92,6 +100,7 @@ public class CoordinadorController implements Initializable {
             e.printStackTrace();
         }
     }
+
 
     private void selectButton(Button button) {
         if (selectedButton != null) selectedButton.getStyleClass().remove("selected");

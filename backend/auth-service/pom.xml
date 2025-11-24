@@ -47,7 +47,15 @@
             <scope>runtime</scope>
         </dependency>
 
-<!--        &lt;!&ndash; Migraciones versionadas del esquema de base de datos (Flyway) &ndash;&gt;-->
+        <!-- Keycloak Admin Client (creación y gestión de usuarios/roles) -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+            <version>${keycloak.version}</version>
+        </dependency>
+
+
+        <!--        &lt;!&ndash; Migraciones versionadas del esquema de base de datos (Flyway) &ndash;&gt;-->
 <!--        <dependency>-->
 <!--            <groupId>org.flywaydb</groupId>-->
 <!--            <artifactId>flyway-core</artifactId>-->
@@ -136,6 +144,19 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- JWT parser para leer el access token -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+        </dependency>
+
+
+        <!-- WebClient para llamar al token endpoint de Keycloak -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
 

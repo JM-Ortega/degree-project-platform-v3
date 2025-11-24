@@ -7,9 +7,17 @@ import jakarta.persistence.*;
 /**
  * Representa a un estudiante registrado en el sistema.
  *
- * <p>Hereda todos los atributos de {@link Persona}, incluyendo
- * su código institucional, programa académico y cuenta de usuario
- * asociada. No define atributos adicionales.</p>
+ * <p>
+ * Extiende la clase {@link Persona}, heredando atributos como:
+ * código institucional, nombres, apellidos, celular,
+ * programa académico y el usuario asociado para autenticación.
+ * </p>
+ *
+ * <p>
+ * A diferencia de otras entidades como {@link Docente} o
+ * {@link JefeDeDepartamento}, un estudiante no define atributos
+ * adicionales propios; únicamente especializa el rol dentro del dominio.
+ * </p>
  */
 @Entity
 @Table(name = "estudiantes")

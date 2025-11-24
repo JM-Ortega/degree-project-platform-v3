@@ -1,13 +1,21 @@
 package co.edu.unicauca.authservice.domain.entities;
+
 import co.edu.unicauca.shared.contracts.model.Programa;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
 /**
- * Entidad base que representa a una persona registrada en el sistema.
+ * Entidad base abstracta que representa a una persona registrada en el sistema.
  *
- * <p>Incluye información general de identidad institucional,
- * contacto y su cuenta de usuario asociada.</p>
+ * <p>
+ * Define la información común de identidad institucional (código, nombres,
+ * apellidos), datos de contacto y la cuenta de usuario asociada.
+ * </p>
+ *
+ * <p>
+ * Es extendida por tipos concretos como {@link Estudiante}, {@link Docente},
+ * {@link Coordinador} y {@link JefeDeDepartamento}.
+ * </p>
  */
 @Entity
 @Table(name = "personas")
@@ -17,28 +25,46 @@ public abstract class Persona {
 
     @Id
     @Column(length = 36)
-    @Schema(description = "Identificador único (UUID) de la persona.", example = "f0b8c19a-21ac-4b3a-8e1b-8a3c256ca8cd")
+    @Schema(
+            description = "Identificador único (UUID) de la persona.",
+            example = "f0b8c19a-21ac-4b3a-8e1b-8a3c256ca8cd"
+    )
     private String id;
 
     @Column(nullable = false, unique = true, length = 30)
-    @Schema(description = "Código institucional único de la persona.", example = "202312345")
+    @Schema(
+            description = "Código institucional único de la persona.",
+            example = "202312345"
+    )
     private String codigo;
 
     @Column(nullable = false, length = 80)
-    @Schema(description = "Nombres de la persona.", example = "Juan Sebastián")
+    @Schema(
+            description = "Nombres de la persona.",
+            example = "Juan Sebastián"
+    )
     private String nombres;
 
     @Column(nullable = false, length = 80)
-    @Schema(description = "Apellidos de la persona.", example = "Ortega Narváez")
+    @Schema(
+            description = "Apellidos de la persona.",
+            example = "Ortega Narváez"
+    )
     private String apellidos;
 
     @Column(length = 20)
-    @Schema(description = "Número de celular de contacto.", example = "3145678901")
+    @Schema(
+            description = "Número de celular de contacto.",
+            example = "3145678901"
+    )
     private String celular;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 80)
-    @Schema(description = "Programa académico al que pertenece la persona.")
+    @Schema(
+            description = "Programa académico al que pertenece la persona.",
+            example = "INGENIERIA_DE_SISTEMAS"
+    )
     private Programa programa;
 
     @OneToOne(cascade = CascadeType.ALL, optional = false, fetch = FetchType.EAGER)
@@ -46,7 +72,9 @@ public abstract class Persona {
     @Schema(description = "Cuenta de usuario asociada a la persona.")
     private Usuario usuario;
 
-    protected Persona() {}
+    protected Persona() {
+        // Requerido por JPA
+    }
 
     public Persona(String id,
                    String codigo,

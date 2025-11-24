@@ -7,19 +7,24 @@ import jakarta.persistence.*;
 /**
  * Representa a un coordinador académico dentro de la universidad.
  *
- * <p>Hereda de {@link Persona} y especifica el {@link Programa}
- * académico que coordina. A diferencia de {@link JefeDeDepartamento},
- * no se asocia directamente a un {@code Departamento} sino a un
- * programa concreto.</p>
+ * <p>
+ * Hereda de {@link Persona} y añade el atributo {@link #programaCoordinado},
+ * que indica el programa académico que este usuario coordina.
+ * A diferencia de {@link JefeDeDepartamento}, un coordinador se asocia
+ * directamente a un <em>programa</em> específico y no a un departamento completo.
+ * </p>
  */
 @Entity
 @Table(name = "coordinadores")
-@Schema(description = "Entidad que representa a un coordinador de programa académico.")
+@Schema(description = "Entidad que representa a un coordinador de un programa académico.")
 public class Coordinador extends Persona {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
-    @Schema(description = "Programa académico que coordina este usuario.", example = "IngenieriaDeSistemas")
+    @Schema(
+            description = "Programa académico que coordina este usuario.",
+            example = "INGENIERIA_DE_SISTEMAS"
+    )
     private Programa programaCoordinado;
 
     protected Coordinador() {

@@ -5,6 +5,7 @@ spring:
   application:
     name: auth-service   # Cambiar por el nombre del micro
 
+
   # ======================================================
   #  Configuracion de base de datos (PostgreSQL)
   # ======================================================
@@ -68,6 +69,26 @@ messaging:
     notificationAny: notification.send.*
 
 # ======================================================
+# Configuracion de Keycloak (Admin Client + Login OIDC)
+# ======================================================
+keycloak:
+  server-url: http://localhost:8181
+  realm: unicauca          # tu realm de usuarios
+
+  # Cliente de negocio donde viven los roles (ESTUDIANTE, DOCENTE, etc.)
+  desktop-client-id: sistema-desktop
+
+  # Endpoint de tokens de Keycloak (para login con grant_type=password)
+  token-url: http://localhost:8181/realms/unicauca/protocol/openid-connect/token
+
+  admin:
+    realm: master          # donde vive admin-cli
+    client-id: admin-cli
+    username: admin
+    password: admin
+
+
+# ======================================================
 # Configuracion del servidor embebido (Tomcat)
 # ======================================================
 server:
@@ -103,3 +124,4 @@ logging:
     org.hibernate.SQL: DEBUG
   file:
     name: logs/${spring.application.name}.log
+

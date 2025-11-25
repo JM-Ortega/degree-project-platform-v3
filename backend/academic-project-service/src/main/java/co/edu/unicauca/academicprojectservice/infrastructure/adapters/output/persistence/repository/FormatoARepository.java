@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository;
+package co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository;
 
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;

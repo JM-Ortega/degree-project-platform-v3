@@ -1,11 +1,11 @@
 package co.edu.unicauca.academicprojectservice.Old.Service;
 
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Estudiante;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Estudiante;
 import co.edu.unicauca.shared.contracts.model.Programa;
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.EstudianteRepository;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.FormatoARepository;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.EstudianteRepository;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.FormatoARepository;
 import co.edu.unicauca.academicprojectservice.application.dto.EstudianteDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.infraestructura.adapter.input;
+package co.edu.unicauca.academicprojectservice.infrastructure.adapters.input.rest;
 
 import co.edu.unicauca.academicprojectservice.Old.Service.EstudianteService;
 import co.edu.unicauca.academicprojectservice.Old.Service.ProyectoService;

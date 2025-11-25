@@ -1,12 +1,12 @@
-package co.edu.unicauca.academicprojectservice.infraestructura.adapter.input;
+package co.edu.unicauca.academicprojectservice.infrastructure.adapters.input.rest;
 
 import co.edu.unicauca.academicprojectservice.application.dto.*;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.DocenteRepository;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.DocenteRepository;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.ProyectoRepository;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.ProyectoRepository;
 import co.edu.unicauca.academicprojectservice.Old.Service.ProyectoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;

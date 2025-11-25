@@ -1,9 +1,9 @@
-package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.messaging;
+package co.edu.unicauca.academicprojectservice.infrastructure.adapters.input.messaging;
 
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Docente;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Estudiante;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.DocenteRepository;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.EstudianteRepository;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Docente;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Estudiante;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.DocenteRepository;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.EstudianteRepository;
 import co.edu.unicauca.shared.contracts.events.auth.UserCreatedEvent;
 import co.edu.unicauca.shared.contracts.model.Rol;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;

@@ -1,8 +1,7 @@
 package co.edu.unicauca.academicprojectservice.Old.Service;
 
-import co.edu.unicauca.academicprojectservice.application.dto.ProyectoDTO;
 import co.edu.unicauca.academicprojectservice.application.dto.ProyectoInfoDTO;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.*;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.*;
 
 import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.DocenteDTOSend;
 import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.EstudianteDTOSend;
@@ -10,7 +9,7 @@ import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.FormatoADTOSend;
 import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.ProyectoDTOSend;
 import co.edu.unicauca.academicprojectservice.application.dto.AnteproyectoDTO;
 import co.edu.unicauca.academicprojectservice.application.dto.FormatoADTO;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.*;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.*;
 import co.edu.unicauca.shared.contracts.events.academic.AnteproyectoSinEvaluadoresEvent;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;

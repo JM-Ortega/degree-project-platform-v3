@@ -1,6 +1,6 @@
-package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository;
+package co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository;
 
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Estudiante;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Estudiante;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

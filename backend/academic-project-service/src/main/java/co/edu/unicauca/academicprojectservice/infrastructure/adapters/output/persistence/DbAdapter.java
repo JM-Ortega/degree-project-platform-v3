@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence;
+package co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence;
 
 import co.edu.unicauca.academicprojectservice.application.dto.DocenteDTO;
 import co.edu.unicauca.academicprojectservice.application.dto.DocenteInfoDTO;
@@ -14,8 +14,8 @@ import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.*;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.*;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.*;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.*;
 
 import jakarta.persistence.EntityNotFoundException;
 

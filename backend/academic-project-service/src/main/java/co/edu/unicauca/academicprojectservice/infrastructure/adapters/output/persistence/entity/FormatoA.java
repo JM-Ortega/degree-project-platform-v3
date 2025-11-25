@@ -1,7 +1,6 @@
-package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity;
+package co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity;
 
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;

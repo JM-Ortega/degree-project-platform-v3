@@ -1,11 +1,11 @@
-package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.messaging;
+package co.edu.unicauca.academicprojectservice.infrastructure.adapters.input.messaging;
 
 import co.edu.unicauca.academicprojectservice.application.port.output.messaging.MessagingPort;
 import co.edu.unicauca.academicprojectservice.domain.model.EstudianteId;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Docente;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Estudiante;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Docente;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Estudiante;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

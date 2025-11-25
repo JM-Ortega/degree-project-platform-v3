@@ -1,10 +1,10 @@
 package co.edu.unicauca.academicprojectservice.Old.Service;
 
 import co.edu.unicauca.shared.contracts.model.Departamento;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Docente;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Docente;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.DocenteRepository;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.ProyectoRepository;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.DocenteRepository;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.ProyectoRepository;
 import co.edu.unicauca.academicprojectservice.application.dto.DocenteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

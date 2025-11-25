@@ -1,10 +1,10 @@
-package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.notification;
+package co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.notification;
 
 import co.edu.unicauca.academicprojectservice.application.port.output.DbPort;
 import co.edu.unicauca.academicprojectservice.application.port.output.notification.NotificationPort;
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Docente;
-import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.entity.Estudiante;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Docente;
+import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Estudiante;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

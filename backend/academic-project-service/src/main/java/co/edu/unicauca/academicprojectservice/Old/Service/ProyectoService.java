@@ -57,25 +57,31 @@ public class ProyectoService {
     @Value("${messaging.routing.projectUpdated}")
     private String routingKeyProjectUpdated;
 
+    //  =======================  Migrado ===================================
     public List<ProyectoInfoDTO> listarInfoPorCorreoDocente(String correo, String filtro) {
         Docente docente = docenteRepository.findByCorreo(correo)
                 .orElseThrow(() -> new RuntimeException("Docente no encontrado con correo: " + correo));
 
         return proyectoRepository.listarInfoPorDocente(docente.getId(), filtro);
     }
+    //  ==========================================================
 
-    // Pasado a la clase Proyecto del dominio
+
+
+    //En ello... (Laura)
     public int getMaxVersionFormatoA(UUID proyectoId) {
         Integer maxVersion = formatoARepository.findMaxVersionByProyectoId(proyectoId);
         return maxVersion != null ? maxVersion : 0;
     }
 
-    // Pasado a la clase Proyecto del dominio
+    //  =======================  Migrado  ===================================
     private FormatoA getUltimoFormatoA(UUID proyectoId) {
         List<FormatoA> resultados = formatoARepository.findUltimoFormatoA(proyectoId, PageRequest.of(0, 1));
         return resultados.isEmpty() ? null : resultados.get(0);
     }
+    //  ==========================================================
 
+    //  =======================  Juan  ===================================
     public EstadoProyecto enforceAutoCancelIfNeeded(UUID proyectoId) {
         int observados = formatoARepository.countByProyectoIdAndEstado(proyectoId, EstadoFormatoA.OBSERVADO);
         if (observados >= 3) {
@@ -84,7 +90,7 @@ public class ProyectoService {
         String est = proyectoRepository.getEstadoProyecto(proyectoId);
         return EstadoProyecto.valueOf(est);
     }
-
+//  ==========================================================
     public boolean canResubmit(UUID proyectoId) {
         String estado = proyectoRepository.getEstadoProyecto(proyectoId);
         if (estado.equalsIgnoreCase(EstadoProyecto.FORMATOA_RECHAZADO.name())) {

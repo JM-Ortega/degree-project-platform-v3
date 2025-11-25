@@ -44,6 +44,9 @@ public class Proyecto {
         if (tipoProyecto == null) {
             throw new DomainException("El tipo de proyecto es obligatorio.");
         }
+        if (estudiantesId.size() > 2) {
+            throw new DomainException("Un proyecto no puede tener más de 2 estudiantes.");
+        }
 
         this.id = UUID.randomUUID();
         this.titulo = titulo;
@@ -176,16 +179,6 @@ public class Proyecto {
             throw new DomainException("El anteproyecto solo puede pasar a revisión desde ANTEPROYECTO_ENVIADO.");
         }
         this.estadoProyecto = EstadoProyecto.EN_REVISION_ANTEPROYECTO;
-    }
-
-    public int getMaxVersionFormatoA() {
-        Integer maxVersion = formatosA.getLast().getNroVersion();
-        return maxVersion != null ? maxVersion : 0;
-    }
-
-    public FormatoA getUltimoFormatoA() {
-        FormatoA formatoA = formatosA.getLast();
-        return  formatoA;
     }
 
     public UUID getId() {

@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.application.port.input;
+package co.edu.unicauca.academicprojectservice.infraestructura.adapter.input;
 
 import co.edu.unicauca.academicprojectservice.Old.Service.DocenteService;
 import co.edu.unicauca.academicprojectservice.application.dto.DocenteDTO;

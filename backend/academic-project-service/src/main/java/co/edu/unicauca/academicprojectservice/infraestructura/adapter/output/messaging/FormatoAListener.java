@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.ui.controller;
+package co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.messaging;
 
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;

@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.ui.controller;
+package co.edu.unicauca.academicprojectservice.application.port.input;
 
 import co.edu.unicauca.academicprojectservice.application.dto.*;
 import co.edu.unicauca.academicprojectservice.infraestructura.adapter.output.persistence.repository.DocenteRepository;

@@ -1,13 +1,12 @@
 package co.edu.unicauca.academicprojectservice.infrastructure.adapters.input.rest;
 
+
+
 import co.edu.unicauca.academicprojectservice.application.dto.*;
-import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.DocenteRepository;
-import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
+import co.edu.unicauca.academicprojectservice.application.services.ProyectoService;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
-import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.ProyectoRepository;
-import co.edu.unicauca.academicprojectservice.Old.Service.ProyectoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,16 +19,13 @@ import java.util.UUID;
 @RequestMapping("/proyectos")
 public class ProyectoController {
     private final ProyectoService proyectoService;
-    private final ProyectoRepository proyectoRepository;
-    private final DocenteRepository docneteRespository;
 
-    public ProyectoController(ProyectoService proyectoService, ProyectoRepository proyectoRepository,
-                              DocenteRepository docneteRespository) {
+
+    public ProyectoController(ProyectoService proyectoService) {
         this.proyectoService = proyectoService;
-        this.proyectoRepository = proyectoRepository;
-        this.docneteRespository = docneteRespository;
     }
 
+    // ============================ migrados =====================================
     @GetMapping("/docente/{correo}")
     public ResponseEntity<List<ProyectoInfoDTO>> listarPorDocente(
             @PathVariable("correo") String correo,
@@ -41,20 +37,13 @@ public class ProyectoController {
 
     @GetMapping("/listar/{correo}")
     public ResponseEntity<List<ProyectoEstudianteDTO>> listarPorEstudiante(@PathVariable String correo) {
-        List<Proyecto> proyectos = proyectoRepository.findByEstudianteCorreo(correo);
-
-        List<ProyectoEstudianteDTO> lista = proyectos.stream()
-                .map(p -> new ProyectoEstudianteDTO(
-                        p.getId(),
-                        p.getTitulo(),
-                        docneteRespository.findById(p.getDirector().value()),
-                        p.getTipoProyecto().toString(),
-                        p.getEstadoProyecto().toString()
-                ))
-                .toList();
-
+        List<ProyectoEstudianteDTO> lista = proyectoService.listarInfoPorCorreoDocente(correo);
         return ResponseEntity.ok(lista);
     }
+
+
+    // ============================ en proceso =====================================
+
 
     @PostMapping("/crearConArchivos")
     public ResponseEntity<String> crearProyecto(@RequestBody ProyectoDTO dto) {
@@ -68,6 +57,21 @@ public class ProyectoController {
                     .body("Error al crear el proyecto: " + e.getMessage());
         }
     }
+
+
+
+
+
+
+
+
+
+    // ============================ viejos =====================================
+
+
+
+
+
 
     @GetMapping("/{id}/enforceAutoCancel")
     public ResponseEntity<EstadoProyecto> enforceAutoCancelIfNeeded(@PathVariable("id") UUID proyectoId) {
@@ -161,7 +165,7 @@ public class ProyectoController {
     }
 
     @GetMapping("/{proyectoId}/ultimo-formatoA-observado")
-    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(@PathVariable long proyectoId) {
+    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(@PathVariable UUID proyectoId) {
         try {
             FormatoADTO formatoADTO = proyectoService.obtenerUltimoFormatoAConObservaciones(proyectoId);
             return ResponseEntity.ok(formatoADTO);

@@ -1,11 +1,11 @@
-package co.edu.unicauca.academicprojectservice.infrastructure.adapters.input.rest;
-
+package co.edu.unicauca.academicprojectservice.adapter.in.rest;
 
 
 import co.edu.unicauca.academicprojectservice.application.dto.*;
 import co.edu.unicauca.academicprojectservice.application.services.ProyectoService;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
-import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
+import co.edu.unicauca.academicprojectservice.port.in.rest.ProyectoPort;
+import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -17,7 +17,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/proyectos")
-public class ProyectoController {
+
+public class ProyectoController implements ProyectoPort {
     private final ProyectoService proyectoService;
 
 
@@ -26,27 +27,17 @@ public class ProyectoController {
     }
 
     // ============================ migrados =====================================
-    @GetMapping("/docente/{correo}")
-    public ResponseEntity<List<ProyectoInfoDTO>> listarPorDocente(
-            @PathVariable("correo") String correo,
-            @RequestParam(value = "filtro", required = false) String filtro
-    ) {
+    public ResponseEntity<List<ProyectoInfoDTO>> listarPorDocente(String correo, String filtro) {
         List<ProyectoInfoDTO> proyectos = proyectoService.listarInfoPorCorreoDocente(correo, filtro);
         return ResponseEntity.ok(proyectos);
     }
 
-    @GetMapping("/listar/{correo}")
-    public ResponseEntity<List<ProyectoEstudianteDTO>> listarPorEstudiante(@PathVariable String correo) {
+    public ResponseEntity<List<ProyectoEstudianteDTO>> listarPorEstudiante(String correo) {
         List<ProyectoEstudianteDTO> lista = proyectoService.listarInfoPorCorreoDocente(correo);
         return ResponseEntity.ok(lista);
     }
 
-
-    // ============================ en proceso =====================================
-
-
-    @PostMapping("/crearConArchivos")
-    public ResponseEntity<String> crearProyecto(@RequestBody ProyectoDTO dto) {
+    public ResponseEntity<String> crearProyecto(ProyectoDTO dto) {
         try {
             proyectoService.crearProyectoConArchivos(dto);
             return ResponseEntity.ok("Proyecto creado exitosamente");
@@ -58,65 +49,45 @@ public class ProyectoController {
         }
     }
 
-
-
-
-
-
-
-
-
-    // ============================ viejos =====================================
-
-
-
-
-
-
-    @GetMapping("/{id}/enforceAutoCancel")
-    public ResponseEntity<EstadoProyecto> enforceAutoCancelIfNeeded(@PathVariable("id") UUID proyectoId) {
+    public ResponseEntity<EstadoProyecto> enforceAutoCancelIfNeeded(UUID proyectoId) {
         EstadoProyecto estado = proyectoService.enforceAutoCancelIfNeeded(proyectoId);
         return ResponseEntity.ok(estado);
     }
+    // ============================ en proceso =====================================
 
-    @GetMapping("/{proyectoId}/formatoA/max-version")
-    public ResponseEntity<Integer> getMaxVersionFormatoA(@PathVariable UUID proyectoId) {
+    public ResponseEntity<Integer> getMaxVersionFormatoA(UUID proyectoId) {
         int maxVersion = proyectoService.getMaxVersionFormatoA(proyectoId);
         return ResponseEntity.ok(maxVersion);
     }
+    // ============================ viejos =====================================
 
-    @GetMapping("/resubmit/{proyectoId}")
-    public ResponseEntity<Boolean> canResubmit(@PathVariable UUID proyectoId) {
+
+    public ResponseEntity<Boolean> canResubmit(UUID proyectoId) {
         boolean puede = proyectoService.canResubmit(proyectoId);
         return ResponseEntity.ok(puede);
     }
 
-    @GetMapping("/observacionesFA/{proyectoId}")
-    public ResponseEntity<Boolean> tieneObservacionesFA(@PathVariable UUID proyectoId) {
+    public ResponseEntity<Boolean> tieneObservacionesFA(UUID proyectoId) {
         boolean tiene = proyectoService.tieneObservaciones(proyectoId);
         return ResponseEntity.ok(tiene);
     }
 
-    @GetMapping("/existeProyecto/{proyectoId}")
-    public ResponseEntity<Boolean> existeProyecto(@PathVariable UUID proyectoId) {
+    public ResponseEntity<Boolean> existeProyecto(UUID proyectoId) {
         boolean tiene = proyectoService.existeProyecto(proyectoId);
         return ResponseEntity.ok(tiene);
     }
 
-    @GetMapping("/estadoProyecto/{proyectoId}")
-    public ResponseEntity<String> estadoProyecto(@PathVariable UUID proyectoId) {
+    public ResponseEntity<String> estadoProyecto(UUID proyectoId) {
         String estado = proyectoService.estadoProyecto(proyectoId);
         return ResponseEntity.ok(estado);
     }
 
-    @PostMapping("/insertarFormatoAProyecto/{proyectoId}")
-    public ResponseEntity<String> insertarFormatoAProyecto(@PathVariable Long proyectoId, @RequestBody FormatoA formatoA) {
+    public ResponseEntity<String> insertarFormatoAProyecto(Long proyectoId, FormatoA formatoA) {
         proyectoService.insertarFormatoAEnProyecto(proyectoId, formatoA);
         return ResponseEntity.ok("Formato A insertado correctamente");
     }
 
-    @GetMapping("/ultimoFormatoAConObservaciones/{proyectoId}")
-    public ResponseEntity<?> obtenerUltimoFormatoAConObservaciones(@PathVariable UUID proyectoId) {
+    public ResponseEntity<?> obtenerUltimoFormatoAConObservaciones(UUID proyectoId) {
         try {
             FormatoA formato = proyectoService.obtenerUltimoFormatoAConObservaciones(proyectoId);
             if (formato == null) {
@@ -130,30 +101,23 @@ public class ProyectoController {
         }
     }
 
-    @PostMapping("/actualizarFormatoA/{proyectoId}")
-    public ResponseEntity<String> actualizarFormatoA(@PathVariable UUID proyectoId, @RequestBody EstadoRequest request) {
+    public ResponseEntity<String> actualizarFormatoA(UUID proyectoId, EstadoRequest request) {
         proyectoService.actualizarFormatoA(proyectoId, request.getEstado());
         return ResponseEntity.ok("Formato A actualizado correctamente");
     }
 
-    @GetMapping("/countProyectosBy")
-    public ResponseEntity<Integer> countProyectosByEstadoYTipo(@RequestParam TipoProyecto tipoProyecto, @RequestParam EstadoProyecto estadoProyecto, @RequestParam String correoDocente) {
+    public ResponseEntity<Integer> countProyectosByEstadoYTipo(TipoProyecto tipoProyecto, EstadoProyecto estadoProyecto, @RequestParam String correoDocente) {
         int count = proyectoService.countProyectosByEstadoYTipo(tipoProyecto, estadoProyecto, correoDocente);
         return ResponseEntity.ok(count);
     }
 
 
-    @GetMapping("/docente/{correo}/anteproyectos")
-    public ResponseEntity<List<AnteproyectoDTO>> listarAnteproyectosDocente(
-            @PathVariable("correo") String correo,
-            @RequestParam(value = "filtro", required = false) String filtro
-    ) {
+    public ResponseEntity<List<AnteproyectoDTO>> listarAnteproyectosDocente(String correo, String filtro) {
         List<AnteproyectoDTO> lista = proyectoService.listarAnteproyectosDocente(correo, filtro);
         return ResponseEntity.ok(lista);
     }
 
-    @GetMapping("/{proyectoId}/anteproyecto")
-    public ResponseEntity<AnteproyectoDTO> obtenerAnteproyecto(@PathVariable long proyectoId) {
+    public ResponseEntity<AnteproyectoDTO> obtenerAnteproyecto(long proyectoId) {
         try {
             AnteproyectoDTO anteproyecto = proyectoService.obtenerAnteproyecto(proyectoId);
             return ResponseEntity.ok(anteproyecto);
@@ -164,8 +128,8 @@ public class ProyectoController {
         }
     }
 
-    @GetMapping("/{proyectoId}/ultimo-formatoA-observado")
-    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(@PathVariable UUID proyectoId) {
+    //Mapeando
+    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(UUID proyectoId) {
         try {
             FormatoADTO formatoADTO = proyectoService.obtenerUltimoFormatoAConObservaciones(proyectoId);
             return ResponseEntity.ok(formatoADTO);

@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.application.port.output;
+package co.edu.unicauca.academicprojectservice.port.out.persistence;
 
 import co.edu.unicauca.academicprojectservice.domain.model.EstudianteId;
 

@@ -65,8 +65,6 @@ public class ProyectoService {
     //  ==========================================================
 
 
-
-    //En ello... (Laura)
     public int getMaxVersionFormatoA(UUID proyectoId) {
         Integer maxVersion = formatoARepository.findMaxVersionByProyectoId(proyectoId);
         return maxVersion != null ? maxVersion : 0;

@@ -1,11 +1,11 @@
-package co.edu.unicauca.academicprojectservice.infrastructure.adapters.input.messaging;
+package co.edu.unicauca.academicprojectservice.adapter.in.messaging;
 
-import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
+import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.FormatoADTOSend;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.DocenteRepository;
 import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.EstudianteRepository;
 import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.FormatoARepository;
-import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.FormatoADTOSend;
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;

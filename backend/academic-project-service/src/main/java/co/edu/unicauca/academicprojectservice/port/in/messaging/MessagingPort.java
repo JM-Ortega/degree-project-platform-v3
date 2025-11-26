@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.application.port.output.messaging;
+package co.edu.unicauca.academicprojectservice.port.in.messaging;
 
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
 

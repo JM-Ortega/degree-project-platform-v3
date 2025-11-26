@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.infrastructure.adapters.input.messaging;
+package co.edu.unicauca.academicprojectservice.adapter.in.messaging;
 
 import co.edu.unicauca.academicprojectservice.application.port.output.messaging.MessagingPort;
 import co.edu.unicauca.academicprojectservice.domain.model.EstudianteId;

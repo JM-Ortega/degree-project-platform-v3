@@ -11,6 +11,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ProyectoPort {
+
+    // ===== se mantiene pero se camia la logica
+    @PostMapping("/crearProyecto")
+    public ResponseEntity<String> crearProyecto(@RequestBody ProyectoDTO dto);
+    // ===============
+
+
     @GetMapping("/docente/{correo}")
     public ResponseEntity<List<ProyectoInfoDTO>> listarPorDocente(
             @PathVariable("correo") String correo,
@@ -19,12 +26,6 @@ public interface ProyectoPort {
 
     @GetMapping("/listar/{correo}")
     public ResponseEntity<List<ProyectoEstudianteDTO>> listarPorEstudiante(@PathVariable String correo);
-
-    // ===== se mantiene pero se camia la logica
-    @PostMapping("/crearConArchivos")
-    public ResponseEntity<String> crearProyecto(@RequestBody ProyectoDTO dto);
-    // ===============
-
 
     @GetMapping("/{id}/enforceAutoCancel")
     public ResponseEntity<EstadoProyecto> enforceAutoCancelIfNeeded(@PathVariable("id") UUID proyectoId);
@@ -45,13 +46,10 @@ public interface ProyectoPort {
     public ResponseEntity<String> estadoProyecto(@PathVariable UUID proyectoId);
 
     @PostMapping("/insertarFormatoAProyecto/{proyectoId}")
-    public ResponseEntity<String> insertarFormatoAProyecto(@PathVariable Long proyectoId, @RequestBody FormatoA formatoA);
+    public ResponseEntity<String> insertarFormatoAProyecto(@PathVariable Long proyectoId, @RequestBody FormatoADTO formatoA);
 
     @GetMapping("/ultimoFormatoAConObservaciones/{proyectoId}")
     public ResponseEntity<?> obtenerUltimoFormatoAConObservaciones(@PathVariable UUID proyectoId);
-
-    @PostMapping("/actualizarFormatoA/{proyectoId}")
-    public ResponseEntity<String> actualizarFormatoA(@PathVariable UUID proyectoId, @RequestBody EstadoRequest request);
 
     @GetMapping("/countProyectosBy")
     public ResponseEntity<Integer> countProyectosByEstadoYTipo(@RequestParam TipoProyecto tipoProyecto, @RequestParam EstadoProyecto estadoProyecto, @RequestParam String correoDocente);
@@ -65,6 +63,10 @@ public interface ProyectoPort {
     @GetMapping("/{proyectoId}/anteproyecto")
     public ResponseEntity<AnteproyectoDTO> obtenerAnteproyecto(@PathVariable long proyectoId);
 
-    @GetMapping("/{proyectoId}/ultimo-formatoA-observado")
-    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(@PathVariable UUID proyectoId);
+
+
+
+    @PostMapping("/actualizarFormatoA/{proyectoId}")
+    public ResponseEntity<String> actualizarFormatoA(@PathVariable UUID proyectoId, @RequestBody EstadoRequest request);
+
 }

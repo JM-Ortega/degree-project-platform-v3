@@ -2,6 +2,7 @@ package co.edu.unicauca.academicprojectservice.adapter.out.persistence;
 
 import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.*;
 import co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository.*;
+import co.edu.unicauca.academicprojectservice.application.mapper.AnteproyectoMapper;
 import co.edu.unicauca.academicprojectservice.application.mapper.FormatoAMapper;
 import co.edu.unicauca.academicprojectservice.application.dto.*;
 import co.edu.unicauca.academicprojectservice.application.mapper.ProyectoMapper;
@@ -32,10 +33,11 @@ public class DbAdapterProyecto implements DbPortProyecto {
     private final AnteproyectoRepository anteproyectoRepository;
     private final FormatoAMapper formatoAMapper;
     private final ProyectoMapper proyectoMapper;
+    private final AnteproyectoMapper anteproyectoMapper;
 
     public DbAdapterProyecto(EstudianteRepository estudianteRepository, DocenteRepository docenteRepository,
                              ProyectoRepository proyectoRepository, FormatoARepository formatoARepository, AnteproyectoRepository anteproyectoRepository,
-                             FormatoAMapper formatoAMapper, ProyectoMapper proyectoMapper) {
+                             FormatoAMapper formatoAMapper, ProyectoMapper proyectoMapper, AnteproyectoMapper anteproyectoMapper) {
         this.estudianteRepository = estudianteRepository;
         this.docenteRepository = docenteRepository;
         this.proyectoRepository = proyectoRepository;
@@ -43,6 +45,7 @@ public class DbAdapterProyecto implements DbPortProyecto {
         this.anteproyectoRepository = anteproyectoRepository;
         this.formatoAMapper = formatoAMapper;
         this.proyectoMapper = proyectoMapper;
+        this.anteproyectoMapper = anteproyectoMapper;
     }
 
     // ===================== ESTUDIANTE =====================
@@ -105,22 +108,16 @@ public class DbAdapterProyecto implements DbPortProyecto {
         List<FormatoA> formatosA = formatoAMapper.toEntityList(proyecto.getFormatosA());
 
         // Se incluyo el guardado del anteproyecto
-        Anteproyecto antep = new Anteproyecto();
-        antep.setId(proyecto.getAnteproyecto().getId());
-        antep.setNombreArchivo(proyecto.getAnteproyecto().getNombreArchivo());
-        antep.setDescripcion(proyecto.getAnteproyecto().getDescripcion());
-        antep.setTitulo(proyecto.getAnteproyecto().getTitulo());
-        antep.setBlob(proyecto.getAnteproyecto().getBlob());
-        antep.setFechaCreacion(proyecto.getAnteproyecto().getFechaCreacion());
+        Anteproyecto anteproyecto = anteproyectoMapper.domainToEntity(proyecto.getAnteproyecto());
 
         List<Docente> evaluadores = proyecto.getAnteproyecto().getEvaluadores().stream()
                 .map(e -> docenteRepository.findById(e.value())
                         .orElseThrow(() -> new IllegalArgumentException("Evaluador no encontrado")))
                 .toList();
 
-        antep.setEvaluadores(evaluadores);
+        anteproyecto.setEvaluadores(evaluadores);
 
-        Proyecto p = new Proyecto(proyecto.getId(), proyecto.getTitulo(), listaEstudiantes, docente, null, formatosA, proyecto.getCartaLaboral(), antep, proyecto.getTipoProyecto(), proyecto.getEstadoProyecto());
+        Proyecto p = new Proyecto(proyecto.getId(), proyecto.getTitulo(), listaEstudiantes, docente, null, formatosA, proyecto.getCartaLaboral(), anteproyecto, proyecto.getTipoProyecto(), proyecto.getEstadoProyecto());
         proyectoRepository.save(p);
     }
 

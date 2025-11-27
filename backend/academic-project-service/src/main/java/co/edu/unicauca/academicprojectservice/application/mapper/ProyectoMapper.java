@@ -10,9 +10,9 @@ import org.mapstruct.Mapping;
 import java.util.List;
 
 
-@Mapper(componentModel = "spring", uses = { FormatoAMapper.class })
+@Mapper(componentModel = "spring", uses = { FormatoAMapper.class, AnteproyectoMapper.class })
 public interface ProyectoMapper {
-     Proyecto entityToDomain(co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Proyecto proyecto);
+    Proyecto entityToDomain(co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Proyecto proyecto);
 
     default EstudianteId map(
             co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Estudiante e

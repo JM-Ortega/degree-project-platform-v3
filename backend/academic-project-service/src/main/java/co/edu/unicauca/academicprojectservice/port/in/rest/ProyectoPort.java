@@ -1,7 +1,6 @@
 package co.edu.unicauca.academicprojectservice.port.in.rest;
 
 import co.edu.unicauca.academicprojectservice.application.dto.*;
-import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 import org.springframework.http.ResponseEntity;
@@ -10,13 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-public interface ProyectoPort {
 
+public interface ProyectoPort {
     // ===== se mantiene pero se camia la logica
     @PostMapping("/crearProyecto")
     public ResponseEntity<String> crearProyecto(@RequestBody ProyectoDTO dto);
-    // ===============
-
 
     @GetMapping("/docente/{correo}")
     public ResponseEntity<List<ProyectoInfoDTO>> listarPorDocente(
@@ -39,21 +36,21 @@ public interface ProyectoPort {
     @GetMapping("/observacionesFA/{proyectoId}")
     public ResponseEntity<Boolean> tieneObservacionesFA(@PathVariable UUID proyectoId);
 
-    @GetMapping("/existeProyecto/{proyectoId}")
-    public ResponseEntity<Boolean> existeProyecto(@PathVariable UUID proyectoId);
-
+    /*No se usa, ya se valida en otra parte
     @GetMapping("/estadoProyecto/{proyectoId}")
     public ResponseEntity<String> estadoProyecto(@PathVariable UUID proyectoId);
+     */
 
     @PostMapping("/insertarFormatoAProyecto/{proyectoId}")
     public ResponseEntity<String> insertarFormatoAProyecto(@PathVariable Long proyectoId, @RequestBody FormatoADTO formatoA);
 
     @GetMapping("/ultimoFormatoAConObservaciones/{proyectoId}")
-    public ResponseEntity<?> obtenerUltimoFormatoAConObservaciones(@PathVariable UUID proyectoId);
+    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(@PathVariable UUID proyectoId);
 
     @GetMapping("/countProyectosBy")
     public ResponseEntity<Integer> countProyectosByEstadoYTipo(@RequestParam TipoProyecto tipoProyecto, @RequestParam EstadoProyecto estadoProyecto, @RequestParam String correoDocente);
 
+    //Mapeando...
     @GetMapping("/docente/{correo}/anteproyectos")
     public ResponseEntity<List<AnteproyectoDTO>> listarAnteproyectosDocente(
             @PathVariable("correo") String correo,
@@ -61,12 +58,11 @@ public interface ProyectoPort {
     );
 
     @GetMapping("/{proyectoId}/anteproyecto")
-    public ResponseEntity<AnteproyectoDTO> obtenerAnteproyecto(@PathVariable long proyectoId);
+    public ResponseEntity<AnteproyectoDTO> obtenerAnteproyecto(@PathVariable UUID proyectoId);
 
 
-
-
+    /*
     @PostMapping("/actualizarFormatoA/{proyectoId}")
     public ResponseEntity<String> actualizarFormatoA(@PathVariable UUID proyectoId, @RequestBody EstadoRequest request);
-
+*/
 }

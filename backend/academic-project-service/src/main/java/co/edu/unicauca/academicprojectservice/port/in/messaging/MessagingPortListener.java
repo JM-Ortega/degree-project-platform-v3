@@ -1,7 +1,7 @@
-package co.edu.unicauca.academicprojectservice.port.out.messaging;
+package co.edu.unicauca.academicprojectservice.port.in.messaging;
 
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
 
-public interface MessagingPort {
+public interface MessagingPortListener {
     void publicarMensajeRMQ(Proyecto proyectoCreado);
 }

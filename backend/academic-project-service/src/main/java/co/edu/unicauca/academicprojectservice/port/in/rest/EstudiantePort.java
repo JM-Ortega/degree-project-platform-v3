@@ -25,4 +25,7 @@ public interface EstudiantePort {
     @PostMapping("/asociarAnteproyecto/{correo}")
     public ResponseEntity<String> asociarAnteproyectoAProyecto(@PathVariable String correo,
             @RequestBody AnteproyectoDTO anteproyectoDTO);
+
+    @GetMapping("/{correo}/tieneAnteproyecto")
+    public ResponseEntity<Boolean> estudianteTieneAnteproyecto(@PathVariable String correo);
 }

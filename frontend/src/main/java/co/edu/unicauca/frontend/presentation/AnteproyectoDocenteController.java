@@ -147,11 +147,13 @@ public class AnteproyectoDocenteController implements Initializable {
             return;
         }
         try {
+
             if (!estudianteService.estudianteExistePorCorreo(correo)) {
                 setError(lblEstudianteNombre, "El estudiante con el correo ingresado no existe");
                 return;
             }
-            boolean tieneProyecto = estudianteService.estudianteTieneProyectoEnTramitePorCorreo(correo);
+
+            boolean tieneProyecto = estudianteService.estudianteTieneProyectoActivo(correo);
             if (!tieneProyecto) {
                 setError(lblEstudianteNombre, "El estudiante no tiene proyectos asociados");
                 return;

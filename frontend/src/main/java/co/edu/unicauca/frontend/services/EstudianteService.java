@@ -30,6 +30,7 @@ public class EstudianteService {
     /**
      * /estudiantes/libre/{correo} => { correo: String, libre: Boolean }
      */
+
     public boolean estudianteLibrePorCorreo(String correo) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrlEstudiante)
                 .path("/libre/{correo}")
@@ -63,7 +64,7 @@ public class EstudianteService {
         }
     }
 
-    public boolean estudianteTieneProyectoEnTramitePorCorreo(String correo) {
+    public boolean estudianteTieneProyectoActivo(String correo) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrlEstudiante)
                 .path("/tieneProyectoEnTramite/{correo}")
                 .buildAndExpand(correo)
@@ -91,6 +92,7 @@ public class EstudianteService {
         }
     }
 
+
     public boolean estudianteTieneAnteproyectoAsociado(String correo) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrlEstudiante)
                 .path("/{correo}/tieneAnteproyecto")
@@ -107,13 +109,16 @@ public class EstudianteService {
         }
     }
 
+
     public void setAntepAProyectoEst(AnteproyectoDTO a) {
         String correo = a.getEstudianteCorreo();
 
+        /*
+        - Mapeadas
         if (!estudianteExistePorCorreo(correo)) {
             throw new IllegalArgumentException("El estudiante con el correo ingresado no existe");
         }
-        if (!estudianteTieneProyectoEnTramitePorCorreo(correo)) {
+        if (!estudianteTieneProyectoActivo(correo)) {
             // mensaje alineado con la verificación real
             throw new IllegalArgumentException("El estudiante no tiene un proyecto en estado EN_TRAMITE");
         }
@@ -123,6 +128,7 @@ public class EstudianteService {
         if (estudianteTieneAnteproyectoAsociado(correo)) {
             throw new IllegalArgumentException("El estudiante ya tiene un anteproyecto asociado");
         }
+         */
 
         String url = UriComponentsBuilder.fromHttpUrl(baseUrlEstudiante)
                 .path("/asociarAnteproyecto/{correo}")

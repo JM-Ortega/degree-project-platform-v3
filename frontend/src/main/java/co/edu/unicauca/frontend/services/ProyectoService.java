@@ -64,17 +64,22 @@ public class ProyectoService implements ObservableService{
 
     public void crearProyecto(ProyectoDTO proyecto) {
         try {
+            /*
+            Validacion mepeada al back
             if (!docenteService.docenteTieneCupo(proyecto.getDirector())) {
                 throw new IllegalStateException("El docente alcanzó el límite de 7 proyectos en curso");
             }
 
+            Esta validacion ya existia en el back
             if (!estudianteService.estudianteExistePorCorreo(proyecto.getEstudiante())) {
                 throw new IllegalArgumentException("El correo no pertenece a un estudiante");
             }
 
+            Validacion mapeada al back
             if (!estudianteService.estudianteLibrePorCorreo(proyecto.getEstudiante())) {
                 throw new IllegalStateException("El estudiante ya tiene un proyecto en curso");
             }
+             */
 
             restTemplate.postForEntity(baseUrlProyectos + "/crearProyecto", proyecto, String.class);
             notifyObservers();
@@ -84,12 +89,6 @@ public class ProyectoService implements ObservableService{
         } catch (Exception e) {
             throw new RuntimeException("Error inesperado al crear el proyecto "+ e.getMessage(), e);
         }
-    }
-
-    public int maxVersionFormatoA(long id) {
-        String url = baseUrlProyectos + "/" + id + "/formatoA/max-version";
-        ResponseEntity<Integer> response = restTemplate.getForEntity(url, Integer.class);
-        return response.getBody() != null ? response.getBody() : 0;
     }
 
     public boolean canResubmit(long proyectoId) {
@@ -114,11 +113,6 @@ public class ProyectoService implements ObservableService{
         return restTemplate.getForObject(url, String.class);
     }
     */
-
-    public void insertarFormatoA(FormatoADTO formatoADTO, long proyectoId){
-        String url = baseUrlProyectos + "/insertarFormatoAProyecto/" + proyectoId;
-        restTemplate.postForEntity(url, formatoADTO, String.class);
-    }
 
     public int countProyectosByEstadoYTipo(String tipo, String estado, String correo) {
         TipoProyecto tipoEnum = TipoProyecto.valueOf(tipo.toUpperCase().replace(" ", "_"));
@@ -146,11 +140,15 @@ public class ProyectoService implements ObservableService{
         if (!"EN_TRAMITE".equalsIgnoreCase(estado))
             throw new IllegalStateException("El proyecto no está en curso");
          */
-        int max = maxVersionFormatoA(proyectoId);
+        /*
+        - Validacion mapeada al back
         if (max >= 3)
             throw new IllegalStateException("Se alcanzó el máximo de 3 versiones del Formato A");
+         */
 
         PdfValidator.assertPdf(formatoADTO.getNombreFormato(), formatoADTO.getBlob());
+
+        int max = maxVersionFormatoA(proyectoId);
 
         formatoADTO.setNroVersion(max + 1);
         formatoADTO.setEstado(EstadoArchivo.PENDIENTE);
@@ -158,6 +156,17 @@ public class ProyectoService implements ObservableService{
         insertarFormatoA(formatoADTO, proyectoId);
         notifyObservers();
         return formatoADTO;
+    }
+
+    public int maxVersionFormatoA(long id) {
+        String url = baseUrlProyectos + "/" + id + "/formatoA/max-version";
+        ResponseEntity<Integer> response = restTemplate.getForEntity(url, Integer.class);
+        return response.getBody() != null ? response.getBody() : 0;
+    }
+
+    public void insertarFormatoA(FormatoADTO formatoADTO, long proyectoId){
+        String url = baseUrlProyectos + "/insertarFormatoAProyecto/" + proyectoId;
+        restTemplate.postForEntity(url, formatoADTO, String.class);
     }
 
     public List<AnteproyectoDTO> listarAnteproyectosDocente(String correo, String filtro) {

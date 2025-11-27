@@ -292,7 +292,6 @@ public class FormatoADocenteController implements Initializable {
             return;
         }
 
-
         String correo = safeText(txtEstudianteCorreo);
         String titulo = safeText(txtTitulo);
         TipoProyecto tipoTrabajo = cbTipoTrabajo != null ? cbTipoTrabajo.getValue() : TipoProyecto.PRACTICA_PROFESIONAL;
@@ -319,8 +318,6 @@ public class FormatoADocenteController implements Initializable {
         }
 
         try {
-            //SE CREA EL PROYECTO
-
             ProyectoDTO p = new ProyectoDTO();
             p.setTipoProyecto(tipoTrabajo);
             p.setTitulo(titulo);

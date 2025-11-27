@@ -1,34 +1,45 @@
 package co.edu.unicauca.academicprojectservice.application.services;
 
-import co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository.EstudianteRepository;
-import co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository.FormatoARepository;
+import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
+import co.edu.unicauca.academicprojectservice.port.out.persistence.DbPortEstudiante;
+import co.edu.unicauca.academicprojectservice.port.out.persistence.DbPortProyecto;
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EstudianteService {
-    @Autowired
-    private EstudianteRepository estudianteRepository;
+    private final DbPortEstudiante dbPortEstudiante;
+    private final DbPortProyecto dbPortProyecto;
 
-    @Autowired
-    private FormatoARepository formatoARepository;
+    public EstudianteService(DbPortEstudiante dbPortEstudiante, DbPortProyecto dbPortProyecto) {
+        this.dbPortEstudiante = dbPortEstudiante;
+        this.dbPortProyecto = dbPortProyecto;
+    }
 
     public boolean existeEstudiantePorCorreo(String correo) {
         if (correo == null || correo.trim().isEmpty()) {
             return false;
         }
-        return estudianteRepository.findByCorreoIgnoreCase(correo).isPresent();
+        return dbPortEstudiante.findIdByCorreo(correo).isPresent();
     }
 
     public boolean estudianteTieneProyectoEnTramitePorCorreo(String correo) {
         if (correo == null || correo.trim().isEmpty()) {
             return false;
         }
-        return estudianteRepository.tieneProyectoEnTramite(correo);
+        return dbPortEstudiante.proyectoEnTramite(correo);
     }
 
     public boolean estudianteTieneFormatoAAprobado(String correo) {
-        return formatoARepository.existeFormatoAAprobadoPorCorreo(correo, EstadoFormatoA.APROBADO);
+        return dbPortEstudiante.formatoAAprobadoPorCorreo(correo, EstadoFormatoA.APROBADO);
+    }
+
+    public boolean estudianteTieneAnteproyectoAsociado(String correo) {
+        Proyecto proyecto = dbPortProyecto.buscarPorCorreo(correo);
+        if(proyecto.getAnteproyecto() != null){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

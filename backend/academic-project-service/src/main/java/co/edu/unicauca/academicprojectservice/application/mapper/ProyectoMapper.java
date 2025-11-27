@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.application.services;
+package co.edu.unicauca.academicprojectservice.application.mapper;
 
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
 import org.mapstruct.Mapper;

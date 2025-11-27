@@ -9,7 +9,7 @@ public interface DbPortEstudiante {
 
     Optional<EstudianteId> findIdByCorreo(String correo);
 
-    boolean proyectoEnTramite(String correo);
+    boolean proyectoActivo(String correo);
 
     boolean formatoAAprobadoPorCorreo(String correo, EstadoFormatoA estado);
 }

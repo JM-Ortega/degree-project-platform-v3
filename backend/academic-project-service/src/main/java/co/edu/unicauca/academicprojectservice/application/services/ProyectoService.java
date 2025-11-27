@@ -2,16 +2,17 @@ package co.edu.unicauca.academicprojectservice.application.services;
 
 
 import co.edu.unicauca.academicprojectservice.application.dto.*;
-
 import co.edu.unicauca.academicprojectservice.application.exceptions.ProyectoNoEncontradoException;
-import co.edu.unicauca.academicprojectservice.domain.model.*;
-
+import co.edu.unicauca.academicprojectservice.domain.model.DocenteId;
+import co.edu.unicauca.academicprojectservice.domain.model.EstudianteId;
+import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
+import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
 import co.edu.unicauca.academicprojectservice.port.out.messaging.MessagingPort;
 import co.edu.unicauca.academicprojectservice.port.out.notification.NotificationPort;
 import co.edu.unicauca.academicprojectservice.port.out.persistence.DbPortDocente;
-
 import co.edu.unicauca.academicprojectservice.port.out.persistence.DbPortEstudiante;
 import co.edu.unicauca.academicprojectservice.port.out.persistence.DbPortProyecto;
+import co.edu.unicauca.shared.contracts.events.departmenthead.AnteproyectoConEvaluadoresEvent;
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
@@ -19,7 +20,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 
 import java.util.List;
 import java.util.UUID;
@@ -45,9 +45,20 @@ public class ProyectoService {
         List<EstudianteId> estudiantesId = dto.getEstudiantes().stream()
                 .map(correo ->
                         dbPortEstudiante.findIdByCorreo(correo)
-                                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado: " + correo))
+                                .orElseThrow(() -> new IllegalArgumentException("Este correo no pertenece a un estudiante: " + correo))
                 )
                 .toList();
+
+        // Validación mapeada del front validar que el director no tenga mas de 7 proyectos activos
+        int numeroProyectos = countProyectosByEstadoYTipo(dto.getTipoProyecto(), dto.getEstadoProyecto(), dto.getDirector());
+        if (numeroProyectos > 7)
+            throw new IllegalStateException("El docente alcanzó el límite de 7 proyectos en curso");
+
+        // Validacion mapeada del front: Que el estudiante no tenga otro proyecto en curso
+        for (String correo : dto.getEstudiantes()) {
+            if (dbPortEstudiante.proyectoActivo(correo))
+                throw new IllegalStateException("El estudiante ya tiene un proyecto en curso");
+        }
 
         Proyecto proyecto = Proyecto.crear(
                 dto.getTitulo(),
@@ -68,8 +79,8 @@ public class ProyectoService {
         }
 
         dbPortProyecto.guardarProyecto(proyecto);
-        messagingPort.publicarMensajeRMQ(proyecto);
-        notificationPort.notificarACoordinadores(proyecto);
+        messagingPort.publicarProyectoCreado(proyecto);
+        notificationPort.notificarProyectoCreado(proyecto);
     }
 
     // ======================  nuevo
@@ -123,18 +134,49 @@ public class ProyectoService {
             throw new ProyectoNoEncontradoException(proyectoId);
         }
 
+        // Validacion mapeada del front para que no se exceda la version del formato a
+        int maxVersion = getMaxVersionFormatoA(proyectoId);
+        if (maxVersion >= 3)
+            throw new IllegalStateException("Se alcanzó el máximo de 3 versiones del Formato A");
+
         proyecto.agregarNuevaVersionFormatoA(
                 formatoA.nombreFormato(),
                 formatoA.blob()
         );
 
         dbPortProyecto.guardarProyecto(proyecto);
+        notificationPort.notificarFormatoActualizado(proyecto);
+        //TODO Falta enviar mensaje al coordinador para que rechace o apruebe
+        // el formato cuando se actualice el formato aqui
     }
 
     public void asociarAnteproyectoAProyecto(String correo, AnteproyectoDTO dto) {
+        // Validaciones mapeadas del front
+        dbPortEstudiante.findIdByCorreo(correo)
+                .orElseThrow(() -> new IllegalArgumentException("El estudiante con el correo ingresado no existe"));
+
+        if (!dbPortEstudiante.proyectoActivo(correo)) {
+            throw new IllegalArgumentException("El estudiante no tiene un proyecto activo");
+        }
+
+        if (!dbPortEstudiante.formatoAAprobadoPorCorreo(correo, EstadoFormatoA.APROBADO)) {
+            throw new IllegalArgumentException("El Formato A del estudiante no está en estado APROBADO");
+        }
+
         Proyecto proyecto = dbPortProyecto.buscarPorCorreo(correo);
+
+        if (proyecto.getAnteproyecto() != null) {
+            throw new IllegalArgumentException("El estudiante ya tiene un anteproyecto asociado");
+        }
+
         proyecto.crearAnteproyecto(dto.getNombreArchivo(), dto.getDescripcion(), dto.getTitulo(), dto.getBlob());
         dbPortProyecto.guardarProyecto(proyecto);
+
+        // Crear unos especificos para el anteproyecto
+        //messagingPort.publicarProyectoCreado(proyecto);
+        messagingPort.publicarAnteproyectoSinEvaluadores(proyecto);
+
+        notificationPort.notificarAJefes(proyecto);
     }
 
     public int getMaxVersionFormatoA(UUID proyectoId) {
@@ -181,6 +223,51 @@ public class ProyectoService {
 
     public AnteproyectoDTO obtenerAnteproyecto (UUID proyectoId) {
         return dbPortProyecto.obtenerAnteproyecto (proyectoId);
+    }
+
+    public void registrarResultadoRevisionFormatoADesdeEvento(UUID proyectoId, EstadoFormatoA nuevoEstado) {
+        Proyecto proyecto = dbPortProyecto.findById(proyectoId);
+        if (proyecto == null) {
+            throw new ProyectoNoEncontradoException(proyectoId);
+        }
+
+        proyecto.registrarResultadoRevisionFormatoA(nuevoEstado);
+
+        dbPortProyecto.guardarProyecto(proyecto);
+    }
+
+
+
+      public void asignarEvaluadoresAnteproyectoDesdeDeptHead(AnteproyectoConEvaluadoresEvent event) {
+        if (event == null) {
+            throw new IllegalArgumentException("El evento no puede ser nulo");
+        }
+
+        Proyecto proyecto = dbPortProyecto.findById(event.proyectoId());
+        if (proyecto == null) {
+            throw new ProyectoNoEncontradoException(event.proyectoId());
+        }
+
+        if (proyecto.getAnteproyecto() == null) {
+            throw new IllegalStateException("El proyecto no tiene anteproyecto asociado");
+        }
+
+        if (!proyecto.getAnteproyecto().getId().equals(event.anteproyectoId())) {
+            throw new IllegalStateException("El anteproyecto del evento no coincide con el anteproyecto del proyecto");
+        }
+
+        // Mapear correos -> DocenteId usando el puerto de persistencia
+        var evaluadores = event.evaluadores().stream()
+                .map(correo -> dbPortDocente.findIdByCorreo(correo)
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "No existe docente con correo: " + correo)))
+                .toList();
+
+        // Usar lógica del dominio
+        proyecto.getAnteproyecto().asignarEvaluadores(evaluadores);
+        proyecto.marcarAnteproyectoEnRevision();
+
+        dbPortProyecto.guardarProyecto(proyecto);
     }
 }
 

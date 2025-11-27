@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 public interface EstudiantePort {
-    // se debe mantener pero actualizar
     @GetMapping("/libre/{correo}")
     public ResponseEntity<?> estudianteLibre(@PathVariable String correo);
-    // =========================================
 
     @GetMapping("/existe/{correo}")
     public ResponseEntity<Boolean> existeEstudiante(@PathVariable String correo);

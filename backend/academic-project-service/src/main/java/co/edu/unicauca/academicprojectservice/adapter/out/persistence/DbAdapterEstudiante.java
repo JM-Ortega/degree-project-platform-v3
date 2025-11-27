@@ -27,8 +27,8 @@ public class DbAdapterEstudiante implements DbPortEstudiante {
     }
 
     @Override
-    public boolean proyectoEnTramite(String correo){
-        return estudianteRepository.tieneProyectoEnTramite(correo);
+    public boolean proyectoActivo(String correo){
+        return estudianteRepository.tieneProyectoActivo(correo);
     }
 
     @Override

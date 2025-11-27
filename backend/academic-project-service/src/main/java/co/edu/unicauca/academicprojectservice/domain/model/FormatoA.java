@@ -22,31 +22,36 @@ public class FormatoA {
     private EstadoFormatoA estado;
 
 
-    public FormatoA(int nroVersion, String nombreFormato, byte[] blob) {
-        if (nroVersion <= 0) {
-            throw new DomainException("El numero de version del FormatoA debe ser positivo.");
-        }
+    public FormatoA(UUID id, int nroVersion, String nombreFormato, LocalDate fechaCreacion, byte[] blob, EstadoFormatoA estado) {
+        this.id = id;
+        this.nroVersion = nroVersion;
+        this.nombreFormato = nombreFormato;
+        this.fechaCreacion = fechaCreacion;
+        this.blob = blob;
+        this.estado = estado;
+    }
+
+    public static FormatoA crearInicial(String nombreFormato, byte[] blob) {
         if (nombreFormato == null || nombreFormato.isBlank()) {
             throw new DomainException("El nombre del FormatoA es obligatorio.");
         }
         if (blob == null || blob.length == 0) {
             throw new DomainException("El archivo del FormatoA es obligatorio.");
         }
-
-        this.id = UUID.randomUUID();
-        this.nroVersion = nroVersion;
-        this.nombreFormato = nombreFormato;
-        this.fechaCreacion = LocalDate.now();
-        this.blob = blob;
-        this.estado = EstadoFormatoA.PENDIENTE;
-    }
-
-    public static FormatoA crearInicial(String nombreFormato, byte[] blob) {
-        return new FormatoA(1, nombreFormato, blob);
+        return new FormatoA(UUID.randomUUID(), 1, nombreFormato, LocalDate.now(), blob, EstadoFormatoA.PENDIENTE);
     }
 
     public static FormatoA crearNuevaVersion(int nuevaVersion, String nombreFormato, byte[] blob) {
-        return new FormatoA(nuevaVersion, nombreFormato, blob);
+        if (nombreFormato == null || nombreFormato.isBlank()) {
+            throw new DomainException("El nombre del FormatoA es obligatorio.");
+        }
+        if (blob == null || blob.length == 0) {
+            throw new DomainException("El archivo del FormatoA es obligatorio.");
+        }
+        if (nuevaVersion <= 0) {
+            throw new DomainException("El numero de version del FormatoA debe ser positivo.");
+        }
+        return new FormatoA(UUID.randomUUID(), nuevaVersion, nombreFormato, LocalDate.now(), blob, EstadoFormatoA.PENDIENTE);
     }
 
     public void cambiarEstado(EstadoFormatoA nuevoEstado) {

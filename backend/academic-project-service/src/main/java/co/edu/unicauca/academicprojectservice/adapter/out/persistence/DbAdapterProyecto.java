@@ -105,10 +105,22 @@ public class DbAdapterProyecto implements DbPortProyecto {
         List<FormatoA> formatosA = formatoAMapper.toEntityList(proyecto.getFormatosA());
 
         // Se incluyo el guardado del anteproyecto
-        Proyecto proyectoMap = proyectoMapper.toDomain(proyecto);
-        Anteproyecto anteproyecto = proyectoMap.getAnteproyecto();
+        Anteproyecto antep = new Anteproyecto();
+        antep.setId(proyecto.getAnteproyecto().getId());
+        antep.setNombreArchivo(proyecto.getAnteproyecto().getNombreArchivo());
+        antep.setDescripcion(proyecto.getAnteproyecto().getDescripcion());
+        antep.setTitulo(proyecto.getAnteproyecto().getTitulo());
+        antep.setBlob(proyecto.getAnteproyecto().getBlob());
+        antep.setFechaCreacion(proyecto.getAnteproyecto().getFechaCreacion());
 
-        Proyecto p = new Proyecto(proyecto.getId(), proyecto.getTitulo(), listaEstudiantes, docente, null, formatosA, proyecto.getCartaLaboral(), anteproyecto, proyecto.getTipoProyecto(), proyecto.getEstadoProyecto());
+        List<Docente> evaluadores = proyecto.getAnteproyecto().getEvaluadores().stream()
+                .map(e -> docenteRepository.findById(e.value())
+                        .orElseThrow(() -> new IllegalArgumentException("Evaluador no encontrado")))
+                .toList();
+
+        antep.setEvaluadores(evaluadores);
+
+        Proyecto p = new Proyecto(proyecto.getId(), proyecto.getTitulo(), listaEstudiantes, docente, null, formatosA, proyecto.getCartaLaboral(), antep, proyecto.getTipoProyecto(), proyecto.getEstadoProyecto());
         proyectoRepository.save(p);
     }
 
@@ -150,14 +162,14 @@ public class DbAdapterProyecto implements DbPortProyecto {
     @Override
     public co.edu.unicauca.academicprojectservice.domain.model.Proyecto findById(UUID proyectoId) {
         Proyecto p = proyectoRepository.findById(proyectoId).orElseThrow(() -> new EntityNotFoundException("Proyecto no encontrado"));
-        co.edu.unicauca.academicprojectservice.domain.model.Proyecto proyecto = proyectoMapper.toEntity(p);
+        co.edu.unicauca.academicprojectservice.domain.model.Proyecto proyecto = proyectoMapper.entityToDomain(p);
         return proyecto;
     }
 
     @Override
     public co.edu.unicauca.academicprojectservice.domain.model.Proyecto buscarPorCorreo(String correo){
         Proyecto p = proyectoRepository.findByEstudianteCorreoTramite(correo).orElseThrow(() -> new EntityNotFoundException("Proyecto no encontrado"));
-        co.edu.unicauca.academicprojectservice.domain.model.Proyecto proyecto = proyectoMapper.toEntity(p);
+        co.edu.unicauca.academicprojectservice.domain.model.Proyecto proyecto = proyectoMapper.entityToDomain(p);
         return proyecto;
     }
 

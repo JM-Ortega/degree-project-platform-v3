@@ -17,11 +17,17 @@ public class Anteproyecto {
 
     private static final int MAX_EVALUADORES = 2;
 
-    public Anteproyecto(String nombreArchivo,
-                         String descripcion,
-                         String titulo,
-                         byte[] blob) {
+    public Anteproyecto(UUID id, String nombreArchivo, String descripcion, String titulo, byte[] blob, LocalDate fechaCreacion, List<DocenteId> evaluadores) {
+        this.id = id;
+        this.nombreArchivo = nombreArchivo;
+        this.descripcion = descripcion;
+        this.titulo = titulo;
+        this.blob = blob;
+        this.fechaCreacion = fechaCreacion;
+        this.evaluadores = evaluadores;
+    }
 
+    public static Anteproyecto crear(String nombreArchivo, String descripcion, String titulo, byte[] blob) {
         if (nombreArchivo == null || nombreArchivo.isBlank()) {
             throw new DomainException("El nombre de archivo del anteproyecto es obligatorio.");
         }
@@ -35,20 +41,7 @@ public class Anteproyecto {
             throw new DomainException("El archivo del anteproyecto es obligatorio.");
         }
 
-        this.id = UUID.randomUUID();
-        this.nombreArchivo = nombreArchivo;
-        this.descripcion = descripcion;
-        this.titulo = titulo;
-        this.blob = blob;
-        this.fechaCreacion = LocalDate.now();
-        this.evaluadores = new ArrayList<>();
-    }
-
-    public static Anteproyecto crear(String nombreArchivo,
-                                     String descripcion,
-                                     String titulo,
-                                     byte[] blob) {
-        return new Anteproyecto(nombreArchivo, descripcion, titulo, blob);
+        return new Anteproyecto(UUID.randomUUID(), nombreArchivo, descripcion, titulo, blob, LocalDate.now(), new ArrayList<>());
     }
 
     public void asignarEvaluadores(List<DocenteId> nuevosEvaluadores) {

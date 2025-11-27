@@ -23,11 +23,13 @@ public class EstudianteService {
         return dbPortEstudiante.findIdByCorreo(correo).isPresent();
     }
 
+    // - Se usaba como respuesta de una peticion rest para validar que el estudiante no tuviera otro proyecto activo en
+    // - el front
     public boolean estudianteTieneProyectoEnTramitePorCorreo(String correo) {
         if (correo == null || correo.trim().isEmpty()) {
             return false;
         }
-        return dbPortEstudiante.proyectoEnTramite(correo);
+        return dbPortEstudiante.proyectoActivo(correo);
     }
 
     public boolean estudianteTieneFormatoAAprobado(String correo) {

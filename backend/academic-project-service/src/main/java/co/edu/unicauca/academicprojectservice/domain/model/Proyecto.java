@@ -24,8 +24,20 @@ public class Proyecto {
     private Anteproyecto anteproyecto;
     private EstadoProyecto estadoProyecto;
 
-    public Proyecto(String titulo, List<EstudianteId> estudiantesId, DocenteId directorId, TipoProyecto tipoProyecto) {
+    public Proyecto(UUID id, String titulo, List<EstudianteId> estudiantesId, DocenteId directorId, List<FormatoA> formatosA, TipoProyecto tipoProyecto, DocenteId codirectorId, byte[] cartaLaboral, Anteproyecto anteproyecto, EstadoProyecto estadoProyecto) {
+        this.id = id;
+        this.titulo = titulo;
+        this.estudiantesId = List.copyOf(estudiantesId);
+        this.directorId = directorId;
+        this.formatosA = formatosA;
+        this.tipoProyecto = tipoProyecto;
+        this.codirectorId = codirectorId;
+        this.cartaLaboral = cartaLaboral;
+        this.anteproyecto = anteproyecto;
+        this.estadoProyecto = estadoProyecto;
+    }
 
+    public static Proyecto crear(String titulo, List<EstudianteId> estudiantesId, DocenteId directorId, TipoProyecto tipoProyecto) {
         if (titulo == null || titulo.isBlank()) {
             throw new DomainException("El título del proyecto es obligatorio.");
         }
@@ -48,21 +60,7 @@ public class Proyecto {
             throw new DomainException("Un proyecto no puede tener más de 2 estudiantes.");
         }
 
-        this.id = UUID.randomUUID();
-        this.titulo = titulo;
-        this.estudiantesId = List.copyOf(estudiantesId);
-        this.directorId = directorId;
-        this.tipoProyecto = tipoProyecto;
-
-        this.codirectorId = null;
-        this.formatosA = new ArrayList<>();
-        this.cartaLaboral = null;
-        this.anteproyecto = null;
-        this.estadoProyecto = EstadoProyecto.PRIMERA_REVISION_FORMATOA;
-    }
-
-    public static Proyecto crear(String titulo, List<EstudianteId> estudiantesId, DocenteId directorId, TipoProyecto tipoProyecto) {
-        return new Proyecto(titulo, estudiantesId, directorId, tipoProyecto);
+        return new Proyecto(UUID.randomUUID(), titulo, estudiantesId, directorId, new ArrayList<>(), tipoProyecto, null, null, null, EstadoProyecto.PRIMERA_REVISION_FORMATOA);
     }
 
     public void asignarCodirector(DocenteId codirectorId) {

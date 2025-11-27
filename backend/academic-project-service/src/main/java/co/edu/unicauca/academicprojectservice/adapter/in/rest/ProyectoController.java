@@ -105,10 +105,14 @@ public class ProyectoController implements ProyectoPort {
         }
     }
 
+    /*
+    Se usaba para validar que no hubieran más de 7 proyectos activos para el docente en el front pero ya se paso la validacion al back
+
     public ResponseEntity<Integer> countProyectosByEstadoYTipo(TipoProyecto tipoProyecto, EstadoProyecto estadoProyecto, String correoDocente) {
         int count = proyectoService.countProyectosByEstadoYTipo(tipoProyecto, estadoProyecto, correoDocente);
         return ResponseEntity.ok(count);
     }
+     */
 
     public ResponseEntity<List<AnteproyectoDTO>> listarAnteproyectosDocente(String correo, String filtro) {
         List<AnteproyectoDTO> lista = proyectoService.listarAnteproyectosDocente(correo, filtro);

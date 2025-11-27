@@ -12,11 +12,6 @@ import java.util.UUID;
 
 @Repository
 public interface DocenteRepository extends JpaRepository<Docente, UUID> {
-
-
-    //----
-
-
     Optional<Docente> findByCorreo(String correo);
 
     @Query("""

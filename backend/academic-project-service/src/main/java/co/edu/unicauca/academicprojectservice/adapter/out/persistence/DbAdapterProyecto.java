@@ -1,27 +1,22 @@
 package co.edu.unicauca.academicprojectservice.adapter.out.persistence;
 
-import co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository.DocenteRepository;
-import co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository.EstudianteRepository;
-import co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository.FormatoARepository;
-import co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository.ProyectoRepository;
-import co.edu.unicauca.academicprojectservice.application.dto.DocenteDTO;
-import co.edu.unicauca.academicprojectservice.application.dto.DocenteInfoDTO;
-import co.edu.unicauca.academicprojectservice.application.dto.EstudianteDTO;
-import co.edu.unicauca.academicprojectservice.application.dto.ProyectoInfoDTO;
+import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.*;
+import co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository.*;
+import co.edu.unicauca.academicprojectservice.application.mapper.FormatoAMapper;
+import co.edu.unicauca.academicprojectservice.application.dto.*;
+import co.edu.unicauca.academicprojectservice.application.mapper.ProyectoMapper;
+import co.edu.unicauca.academicprojectservice.domain.model.DocenteId;
+import co.edu.unicauca.academicprojectservice.domain.model.EstudianteId;
 import co.edu.unicauca.academicprojectservice.port.out.persistence.DbPortProyecto;
-import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
-import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 
-import co.edu.unicauca.academicprojectservice.domain.model.*;
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
+import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.*;
-import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.*;
-
 import jakarta.persistence.EntityNotFoundException;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -34,13 +29,20 @@ public class DbAdapterProyecto implements DbPortProyecto {
     private final DocenteRepository docenteRepository;
     private final ProyectoRepository proyectoRepository;
     private final FormatoARepository formatoARepository;
+    private final AnteproyectoRepository anteproyectoRepository;
+    private final FormatoAMapper formatoAMapper;
+    private final ProyectoMapper proyectoMapper;
 
     public DbAdapterProyecto(EstudianteRepository estudianteRepository, DocenteRepository docenteRepository,
-                             ProyectoRepository proyectoRepository, FormatoARepository formatoARepository) {
+                             ProyectoRepository proyectoRepository, FormatoARepository formatoARepository, AnteproyectoRepository anteproyectoRepository,
+                             FormatoAMapper formatoAMapper, ProyectoMapper proyectoMapper) {
         this.estudianteRepository = estudianteRepository;
         this.docenteRepository = docenteRepository;
         this.proyectoRepository = proyectoRepository;
         this.formatoARepository = formatoARepository;
+        this.anteproyectoRepository = anteproyectoRepository;
+        this.formatoAMapper = formatoAMapper;
+        this.proyectoMapper = proyectoMapper;
     }
 
     // ===================== ESTUDIANTE =====================
@@ -52,15 +54,8 @@ public class DbAdapterProyecto implements DbPortProyecto {
     }
 
     @Override
-    public Optional<EstudianteDTO> obtenerEstudiantePorId(UUID id) {
-        return estudianteRepository.findById(id)
-                .map(e -> new EstudianteDTO(
-                        e.getNombres(),
-                        e.getApellidos(),
-                        e.getCelular(),
-                        e.getCorreo(),
-                        e.getPrograma().toString()
-                ));
+    public Estudiante obtenerEstudiantePorId(UUID id) {
+        return estudianteRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Estudiante no encontrado "));
     }
 
     // ======================= DOCENTE =======================
@@ -71,16 +66,8 @@ public class DbAdapterProyecto implements DbPortProyecto {
     }
 
     @Override
-    public Optional<DocenteInfoDTO> obtenerDocenteInfoPorId(UUID id) {
-        return docenteRepository.findById(id)
-                .map(d -> new DocenteInfoDTO(
-                        d.getId(),
-                        d.getNombres(),
-                        d.getApellidos(),
-                        d.getCelular(),
-                        d.getCorreo(),
-                        d.getDepartamento().name()
-                ));
+    public Docente obtenerDocenteInfoPorId(UUID id) {
+        return docenteRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Docente no encontrado "));
     }
 
     @Override
@@ -104,10 +91,26 @@ public class DbAdapterProyecto implements DbPortProyecto {
         return proyectoRepository.listarInfoPorDocente(docente.getId(), filtro);
     }
 
-    public Proyecto guardarProyecto(Proyecto proyecto) {
-        return proyectoRepository.save(proyecto);
-    }
+    @Override
+    public void guardarProyecto(co.edu.unicauca.academicprojectservice.domain.model.Proyecto proyecto) {
+        List<UUID> idsEstudiantes = proyecto.getEstudiantesId().stream()
+                .map(EstudianteId::value)
+                .toList();
 
+        List<Estudiante> listaEstudiantes = estudianteRepository.findAllById(idsEstudiantes);
+
+        Docente docente = docenteRepository.findById(proyecto.getDirectorId().value())
+                .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado"));
+
+        List<FormatoA> formatosA = formatoAMapper.toEntityList(proyecto.getFormatosA());
+
+        // Se incluyo el guardado del anteproyecto
+        Proyecto proyectoMap = proyectoMapper.toDomain(proyecto);
+        Anteproyecto anteproyecto = proyectoMap.getAnteproyecto();
+
+        Proyecto p = new Proyecto(proyecto.getId(), proyecto.getTitulo(), listaEstudiantes, docente, null, formatosA, proyecto.getCartaLaboral(), anteproyecto, proyecto.getTipoProyecto(), proyecto.getEstadoProyecto());
+        proyectoRepository.save(p);
+    }
 
     @Override
     public void actualizarEstadoProyecto(UUID proyectoId, EstadoProyecto estado) {
@@ -144,11 +147,24 @@ public class DbAdapterProyecto implements DbPortProyecto {
                 .toList();
     }
 
-    public Proyecto findById(UUID proyectoId){
-        return proyectoRepository.findById(proyectoId)
-                .orElseThrow(() -> new EntityNotFoundException("No se encontró el proyecto con ID: " + proyectoId));
+    @Override
+    public co.edu.unicauca.academicprojectservice.domain.model.Proyecto findById(UUID proyectoId) {
+        Proyecto p = proyectoRepository.findById(proyectoId).orElseThrow(() -> new EntityNotFoundException("Proyecto no encontrado"));
+        co.edu.unicauca.academicprojectservice.domain.model.Proyecto proyecto = proyectoMapper.toEntity(p);
+        return proyecto;
     }
 
+    @Override
+    public co.edu.unicauca.academicprojectservice.domain.model.Proyecto buscarPorCorreo(String correo){
+        Proyecto p = proyectoRepository.findByEstudianteCorreoTramite(correo).orElseThrow(() -> new EntityNotFoundException("Proyecto no encontrado"));
+        co.edu.unicauca.academicprojectservice.domain.model.Proyecto proyecto = proyectoMapper.toEntity(p);
+        return proyecto;
+    }
+
+    @Override
+    public int countProyectosByEstadoYTipo(TipoProyecto tipo, EstadoProyecto estado, String correoDocente) {
+        return proyectoRepository.countProyectosByEstadoYTipo(tipo, estado, correoDocente);
+    }
 
     // ===================== FORMATO A =====================
 
@@ -159,10 +175,11 @@ public class DbAdapterProyecto implements DbPortProyecto {
     }
 
     @Override
-    public FormatoA obtenerUltimoFormatoA(UUID proyectoId) {
+    public co.edu.unicauca.academicprojectservice.domain.model.FormatoA obtenerUltimoFormatoA(UUID proyectoId) {
         List<FormatoA> resultados =
                 formatoARepository.findUltimoFormatoA(proyectoId, PageRequest.of(0, 1));
-        return resultados.isEmpty() ? null : resultados.get(0);
+        co.edu.unicauca.academicprojectservice.domain.model.FormatoA f = formatoAMapper.toDomain(resultados.isEmpty() ? null : resultados.get(0));
+        return f;
     }
 
 
@@ -172,6 +189,34 @@ public class DbAdapterProyecto implements DbPortProyecto {
                 proyectoId,
                 EstadoFormatoA.OBSERVADO
         );
+    }
+
+    // ============== ANTEPROYECTO ===============
+
+    @Override
+    public List<AnteproyectoDTO> listarAnteproyectosPorCorreoDocente(String correo, String filtro){
+        return anteproyectoRepository.listarAnteproyectosPorCorreoDocente(correo, filtro);
+    }
+
+    @Override
+    public AnteproyectoDTO obtenerAnteproyecto (UUID proyectoId){
+        Proyecto proyecto = proyectoRepository.findById(proyectoId).orElseThrow(() -> new EntityNotFoundException("Proyecto no encontrado"));
+        Anteproyecto anteproyecto = proyecto.getAnteproyecto();
+
+        AnteproyectoDTO dto = new AnteproyectoDTO();
+        dto.setId(anteproyecto.getId());
+        dto.setNombreArchivo(anteproyecto.getNombreArchivo());
+        dto.setDescripcion(anteproyecto.getDescripcion());
+        dto.setTitulo(anteproyecto.getTitulo());
+        dto.setBlob(anteproyecto.getBlob());
+        dto.setFechaCreacion(anteproyecto.getFechaCreacion());
+
+        if (proyecto.getEstudiantes() != null && !proyecto.getEstudiantes().isEmpty()) {
+            dto.setEstudianteNombre(proyecto.getEstudiantes().get(0).getNombres());
+            dto.setEstudianteCorreo(proyecto.getEstudiantes().get(0).getCorreo());
+        }
+
+        return dto;
     }
 }
 

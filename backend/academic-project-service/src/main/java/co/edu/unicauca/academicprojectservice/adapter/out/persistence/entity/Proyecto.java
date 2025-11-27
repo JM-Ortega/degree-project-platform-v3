@@ -52,6 +52,19 @@ public class Proyecto {
 
     public Proyecto() {}
 
+    public Proyecto(UUID id, String titulo, List<Estudiante> estudiantes, Docente director, Docente codirector, List<FormatoA> formatosA, byte[] cartaLaboral, Anteproyecto anteproyecto, TipoProyecto tipoProyecto, EstadoProyecto estadoProyecto) {
+        this.id = id;
+        this.titulo = titulo;
+        this.estudiantes = estudiantes;
+        this.director = director;
+        this.codirector = codirector;
+        this.formatosA = formatosA;
+        this.cartaLaboral = cartaLaboral;
+        this.anteproyecto = anteproyecto;
+        this.tipoProyecto = tipoProyecto;
+        this.estadoProyecto = estadoProyecto;
+    }
+
     public UUID getId() { return id; }
     public void setId(UUID id) {this.id = id;}
 

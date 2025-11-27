@@ -1,10 +1,11 @@
 package co.edu.unicauca.academicprojectservice.adapter.out.notification;
 
-import co.edu.unicauca.academicprojectservice.application.port.output.DbPortProyecto;
-import co.edu.unicauca.academicprojectservice.application.port.output.notification.NotificationPort;
+import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Docente;
+import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Estudiante;
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
-import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Docente;
-import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Estudiante;
+
+import co.edu.unicauca.academicprojectservice.port.out.notification.NotificationPort;
+import co.edu.unicauca.academicprojectservice.port.out.persistence.DbPortProyecto;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -25,17 +26,17 @@ public class NotificationAdapter implements NotificationPort {
     @Value("${messaging.exchange.main}")
     private String mainExchange;
 
-    private final DbPortProyecto dbPort;
+    private final DbPortProyecto dbPortProyecto;
 
     public NotificationAdapter(DbPortProyecto dbPort) {
-        this.dbPort = dbPort;
+        this.dbPortProyecto = dbPort;
     }
 
     public void notificarACoordinadores(Proyecto proyectoCreado){
         try {
-            Estudiante estudiante1 = dbPort.obtenerEstudiantePorId(proyectoCreado.getEstudiantesId().getFirst().value());
+            Estudiante estudiante1 = dbPortProyecto.obtenerEstudiantePorId(proyectoCreado.getEstudiantesId().getFirst().value());
 
-            Docente director = dbPort.obtenerDocentePorId(proyectoCreado.getDirectorId().value());
+            Docente director = dbPortProyecto.obtenerDocenteInfoPorId(proyectoCreado.getDirectorId().value());
 
             String est1 = estudiante1.getNombres() + " " + estudiante1.getApellidos();
             String est2 = "";
@@ -44,7 +45,7 @@ public class NotificationAdapter implements NotificationPort {
             correos.add(estudiante1.getCorreo());
 
             if(proyectoCreado.getEstudiantesId().size()==2){
-                Estudiante estudiante2 = dbPort.obtenerEstudiantePorId(proyectoCreado.getEstudiantesId().getLast().value());
+                Estudiante estudiante2 = dbPortProyecto.obtenerEstudiantePorId(proyectoCreado.getEstudiantesId().getLast().value());
                 est2 = estudiante2.getNombres() + " " + estudiante2.getApellidos();
                 correos.add(estudiante2.getCorreo());
             }

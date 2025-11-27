@@ -71,9 +71,7 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, UUID> {
         AND p.estadoProyecto = :estadoProyecto
         AND d.correo = :correoDocente
     """)
-    int countProyectosByEstadoYTipo(@Param("tipo") TipoProyecto tipo,
-                                    @Param("estadoProyecto") EstadoProyecto estadoProyecto,
-                                    @Param("correoDocente") String correoDocente);
+    int countProyectosByEstadoYTipo(@Param("tipo") TipoProyecto tipo, @Param("estadoProyecto") EstadoProyecto estadoProyecto, @Param("correoDocente") String correoDocente);
 
 
     @Query("""
@@ -83,8 +81,7 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, UUID> {
         WHERE LOWER(e.correo) = LOWER(:correo)
         AND p.estadoProyecto = :estado
     """)
-    Optional<Proyecto> findByEstudiantesCorreoIgnoreCaseAndEstadoProyecto(@Param("correo") String correo,
-                                                                          @Param("estado") EstadoProyecto estado);
+    Optional<Proyecto> findByEstudiantesCorreoIgnoreCaseAndEstadoProyecto(@Param("correo") String correo, @Param("estado") EstadoProyecto estado);
 
 
     @Query("""
@@ -95,5 +92,14 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, UUID> {
     """)
     List<Proyecto> findByEstudianteCorreo(@Param("correo") String correo);
 
+    // Eh si algo falla capz y es esta query, la hice al ojo
+    @Query("""
+        SELECT p
+        FROM Proyecto p
+        JOIN p.estudiantes e
+        WHERE LOWER(e.correo) = LOWER(:correo)
+        AND p.estadoProyecto != "FORMATOA_RECHAZADO"
+    """)
+    Optional<Proyecto> findByEstudianteCorreoTramite(@Param("correo") String correo);
 }
 

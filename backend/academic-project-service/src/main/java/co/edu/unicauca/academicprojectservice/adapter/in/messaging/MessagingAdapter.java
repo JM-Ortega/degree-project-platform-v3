@@ -1,11 +1,10 @@
 package co.edu.unicauca.academicprojectservice.adapter.in.messaging;
 
-import co.edu.unicauca.academicprojectservice.application.port.output.messaging.MessagingPort;
 import co.edu.unicauca.academicprojectservice.domain.model.EstudianteId;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.academicprojectservice.domain.model.Proyecto;
-import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Docente;
-import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.entity.Estudiante;
+import co.edu.unicauca.academicprojectservice.port.out.messaging.MessagingPort;
+import co.edu.unicauca.academicprojectservice.port.out.persistence.DbPortProyecto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -26,6 +25,8 @@ public class MessagingAdapter implements MessagingPort {
     @Value("${messaging.routing.projectCreated}")
     private String routingKeyProjectCreated;
 
+    private final DbPortProyecto dbPortProyecto;
+
     public void publicarMensajeRMQ(Proyecto proyectoCreado) {
         UUID proyectoId = proyectoCreado.getId();
         ProyectoDTOSend pDtoSend = new ProyectoDTOSend();
@@ -39,7 +40,7 @@ public class MessagingAdapter implements MessagingPort {
         List<EstudianteId> idsEstudiantes = proyectoCreado.getEstudiantesId();
 
         for (EstudianteId estId : idsEstudiantes) {
-            Estudiante estudiante = dbPort.obtenerEstudiantePorId(estId.value());
+            //Estudiante estudiante = dbPortProyecto.obtenerEstudiantePorId(estId.value());
 
             EstudianteDTOSend estDto = new EstudianteDTOSend();
             estDto.setId(estudiante.getId());

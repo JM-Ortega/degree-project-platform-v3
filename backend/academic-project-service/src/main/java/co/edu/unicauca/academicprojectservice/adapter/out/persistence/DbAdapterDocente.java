@@ -11,11 +11,7 @@ import java.util.Optional;
 
 @Service
 public class DbAdapterDocente implements DbPortDocente {
-
     private final DocenteRepository docenteRepository;
-
-
-    /// --
 
     public DbAdapterDocente(DocenteRepository docenteRepository) {
         this.docenteRepository = docenteRepository;

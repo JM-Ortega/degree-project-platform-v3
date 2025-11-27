@@ -3,7 +3,6 @@ package co.edu.unicauca.academicprojectservice.adapter.in.rest;
 
 import co.edu.unicauca.academicprojectservice.application.dto.*;
 import co.edu.unicauca.academicprojectservice.application.services.ProyectoService;
-import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.academicprojectservice.port.in.rest.ProyectoPort;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
@@ -15,26 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/proyectos")
-
 public class ProyectoController implements ProyectoPort {
     private final ProyectoService proyectoService;
 
-
     public ProyectoController(ProyectoService proyectoService) {
         this.proyectoService = proyectoService;
-    }
-
-    // ============================ migrados =====================================
-    public ResponseEntity<List<ProyectoInfoDTO>> listarPorDocente(String correo, String filtro) {
-        List<ProyectoInfoDTO> proyectos = proyectoService.listarInfoPorCorreoDocente(correo, filtro);
-        return ResponseEntity.ok(proyectos);
-    }
-
-    public ResponseEntity<List<ProyectoEstudianteDTO>> listarPorEstudiante(String correo) {
-        List<ProyectoEstudianteDTO> lista = proyectoService.listarInfoPorCorreoDocente(correo);
-        return ResponseEntity.ok(lista);
     }
 
     public ResponseEntity<String> crearProyecto(ProyectoDTO dto) {
@@ -48,19 +32,57 @@ public class ProyectoController implements ProyectoPort {
                     .body("Error al crear el proyecto: " + e.getMessage());
         }
     }
+    public ResponseEntity<String> insertarFormatoAProyecto(Long proyectoId, FormatoADTO formatoA) {
+        proyectoService.insertarFormatoAEnProyecto(UUID.fromString(proyectoId.toString()), formatoA);
+        return ResponseEntity.ok("Formato A insertado correctamente");
+    }
+
+   // no se usa
+        /*
+        public ResponseEntity<String> actualizarFormatoA(UUID proyectoId, EstadoRequest request) {
+            proyectoService.actualizarFormatoA(proyectoId, request.getEstado());
+            return ResponseEntity.ok("Formato A actualizado correctamente");
+        }
+        */
+
+        //No se debería usar porque se valida que exista el proyecto antes de insertar el formato
+        /*
+        public ResponseEntity<Boolean> existeProyecto(UUID proyectoId) {
+            boolean tiene = proyectoService.existeProyecto(proyectoId);
+            return ResponseEntity.ok(tiene);
+        }
+        */
+
+        /* Se valida esto al insertar el proyecto por tanto ya no se usa
+        public ResponseEntity<String> estadoProyecto(UUID proyectoId) {
+            String estado = proyectoService.estadoProyecto(proyectoId);
+            return ResponseEntity.ok(estado);
+        }
+         */
+
+    // ============================ migrados =====================================
+    public ResponseEntity<List<ProyectoInfoDTO>> listarPorDocente(String correo, String filtro) {
+        List<ProyectoInfoDTO> proyectos = proyectoService.listarInfoPorCorreoDocente(correo, filtro);
+        return ResponseEntity.ok(proyectos);
+    }
+
+    public ResponseEntity<List<ProyectoEstudianteDTO>> listarPorEstudiante(String correo) {
+        List<ProyectoEstudianteDTO> lista = proyectoService.listarPorEstudiante(correo);
+        return ResponseEntity.ok(lista);
+    }
+
+
+
 
     public ResponseEntity<EstadoProyecto> enforceAutoCancelIfNeeded(UUID proyectoId) {
         EstadoProyecto estado = proyectoService.enforceAutoCancelIfNeeded(proyectoId);
         return ResponseEntity.ok(estado);
     }
-    // ============================ en proceso =====================================
 
     public ResponseEntity<Integer> getMaxVersionFormatoA(UUID proyectoId) {
         int maxVersion = proyectoService.getMaxVersionFormatoA(proyectoId);
         return ResponseEntity.ok(maxVersion);
     }
-    // ============================ viejos =====================================
-
 
     public ResponseEntity<Boolean> canResubmit(UUID proyectoId) {
         boolean puede = proyectoService.canResubmit(proyectoId);
@@ -72,55 +94,10 @@ public class ProyectoController implements ProyectoPort {
         return ResponseEntity.ok(tiene);
     }
 
-    public ResponseEntity<Boolean> existeProyecto(UUID proyectoId) {
-        boolean tiene = proyectoService.existeProyecto(proyectoId);
-        return ResponseEntity.ok(tiene);
-    }
-
-    public ResponseEntity<String> estadoProyecto(UUID proyectoId) {
-        String estado = proyectoService.estadoProyecto(proyectoId);
-        return ResponseEntity.ok(estado);
-    }
-
-    public ResponseEntity<String> insertarFormatoAProyecto(Long proyectoId, FormatoA formatoA) {
-        proyectoService.insertarFormatoAEnProyecto(proyectoId, formatoA);
-        return ResponseEntity.ok("Formato A insertado correctamente");
-    }
-
-    public ResponseEntity<?> obtenerUltimoFormatoAConObservaciones(UUID proyectoId) {
+    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(UUID proyectoId) {
         try {
-            FormatoA formato = proyectoService.obtenerUltimoFormatoAConObservaciones(proyectoId);
-            if (formato == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No se encontró un Formato A con observaciones para el proyecto " + proyectoId);
-            }
-            return ResponseEntity.ok(formato);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al obtener el Formato A: " + e.getMessage());
-        }
-    }
-
-    public ResponseEntity<String> actualizarFormatoA(UUID proyectoId, EstadoRequest request) {
-        proyectoService.actualizarFormatoA(proyectoId, request.getEstado());
-        return ResponseEntity.ok("Formato A actualizado correctamente");
-    }
-
-    public ResponseEntity<Integer> countProyectosByEstadoYTipo(TipoProyecto tipoProyecto, EstadoProyecto estadoProyecto, @RequestParam String correoDocente) {
-        int count = proyectoService.countProyectosByEstadoYTipo(tipoProyecto, estadoProyecto, correoDocente);
-        return ResponseEntity.ok(count);
-    }
-
-
-    public ResponseEntity<List<AnteproyectoDTO>> listarAnteproyectosDocente(String correo, String filtro) {
-        List<AnteproyectoDTO> lista = proyectoService.listarAnteproyectosDocente(correo, filtro);
-        return ResponseEntity.ok(lista);
-    }
-
-    public ResponseEntity<AnteproyectoDTO> obtenerAnteproyecto(long proyectoId) {
-        try {
-            AnteproyectoDTO anteproyecto = proyectoService.obtenerAnteproyecto(proyectoId);
-            return ResponseEntity.ok(anteproyecto);
+            FormatoADTO formatoADTO = proyectoService.obtenerUltimoFormatoAConObservaciones(proyectoId);
+            return ResponseEntity.ok(formatoADTO);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception ex) {
@@ -128,11 +105,20 @@ public class ProyectoController implements ProyectoPort {
         }
     }
 
-    //Mapeando
-    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(UUID proyectoId) {
+    public ResponseEntity<Integer> countProyectosByEstadoYTipo(TipoProyecto tipoProyecto, EstadoProyecto estadoProyecto, String correoDocente) {
+        int count = proyectoService.countProyectosByEstadoYTipo(tipoProyecto, estadoProyecto, correoDocente);
+        return ResponseEntity.ok(count);
+    }
+
+    public ResponseEntity<List<AnteproyectoDTO>> listarAnteproyectosDocente(String correo, String filtro) {
+        List<AnteproyectoDTO> lista = proyectoService.listarAnteproyectosDocente(correo, filtro);
+        return ResponseEntity.ok(lista);
+    }
+
+    public ResponseEntity<AnteproyectoDTO> obtenerAnteproyecto(UUID proyectoId) {
         try {
-            FormatoADTO formatoADTO = proyectoService.obtenerUltimoFormatoAConObservaciones(proyectoId);
-            return ResponseEntity.ok(formatoADTO);
+            AnteproyectoDTO anteproyecto = proyectoService.obtenerAnteproyecto(proyectoId);
+            return ResponseEntity.ok(anteproyecto);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception ex) {

@@ -1,6 +1,6 @@
 package co.edu.unicauca.academicprojectservice.adapter.in.messaging;
 
-import co.edu.unicauca.academicprojectservice.Old.infra.DTOs.FormatoADTOSend;
+import co.edu.unicauca.shared.contracts.events.academic.DTOs.FormatoADTO;
 import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
 import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.DocenteRepository;
 import co.edu.unicauca.academicprojectservice.infrastructure.adapters.output.persistence.repository.EstudianteRepository;
@@ -35,7 +35,7 @@ public class FormatoAListener {
      */
     @RabbitListener(queues = "${messaging.queues.coordinator}")
     @Transactional
-    public void handleFormatoAEvent(FormatoADTOSend dto) {
+    public void handleFormatoAEvent(FormatoADTO dto) {
         try {
             if (dto == null) {
                 System.err.println("[RabbitMQ] FormatoA DTO nulo — se ignora");

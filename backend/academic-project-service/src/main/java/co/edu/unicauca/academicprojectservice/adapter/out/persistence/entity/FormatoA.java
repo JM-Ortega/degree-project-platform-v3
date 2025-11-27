@@ -75,4 +75,8 @@ public class FormatoA {
     public void setNroVersion(int nroVersion) {
         this.nroVersion = nroVersion;
     }
+
+
+
+
 }

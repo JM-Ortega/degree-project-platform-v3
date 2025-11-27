@@ -1,7 +1,7 @@
 package co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository;
 
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
-import co.edu.unicauca.academicprojectservice.domain.model.FormatoA;
+import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.FormatoA;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

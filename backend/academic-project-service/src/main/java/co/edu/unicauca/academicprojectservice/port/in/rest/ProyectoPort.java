@@ -47,12 +47,12 @@ public interface ProyectoPort {
     @GetMapping("/ultimoFormatoAConObservaciones/{proyectoId}")
     public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(@PathVariable UUID proyectoId);
 
-    /*
-    - Se usaba para validar que no hubieran más de 7 proyectos activos para el docente en el front pero ya se paso la
-    - validacion al back
+
+    //- Se usaba para validar que no hubieran más de 7 proyectos activos para el docente en el front pero ya se paso la validacion al back
+    //- PERO además se usa para mostrar las estadisticas, entonces se deja, pero solo se usa en este caso
     @GetMapping("/countProyectosBy")
     public ResponseEntity<Integer> countProyectosByEstadoYTipo(@RequestParam TipoProyecto tipoProyecto, @RequestParam EstadoProyecto estadoProyecto, @RequestParam String correoDocente);
-     */
+
     @GetMapping("/docente/{correo}/anteproyectos")
     public ResponseEntity<List<AnteproyectoDTO>> listarAnteproyectosDocente(
             @PathVariable("correo") String correo,

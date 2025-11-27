@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.Old.infra.DTOs;
+package co.edu.unicauca.shared.contracts.events.academic.DTOs;
 
 import co.edu.unicauca.shared.contracts.model.Programa;
 import co.edu.unicauca.shared.contracts.model.Rol;

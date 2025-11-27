@@ -319,6 +319,8 @@ public class FormatoADocenteController implements Initializable {
         }
 
         try {
+            //SE CREA EL PROYECTO
+
             ProyectoDTO p = new ProyectoDTO();
             p.setTipoProyecto(tipoTrabajo);
             p.setTitulo(titulo);

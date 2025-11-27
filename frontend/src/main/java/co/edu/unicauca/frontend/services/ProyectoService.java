@@ -40,7 +40,6 @@ public class ProyectoService implements ObservableService{
         this.estudianteService = estudianteService;
     }
 
-
     public EstadoProyecto enforceAutoCancelIfNeeded(long proyectoId) {
         String url = baseUrlProyectos + "/" + proyectoId + "/enforceAutoCancel";
         return restTemplate.getForObject(url, EstadoProyecto.class);
@@ -77,7 +76,7 @@ public class ProyectoService implements ObservableService{
                 throw new IllegalStateException("El estudiante ya tiene un proyecto en curso");
             }
 
-            restTemplate.postForEntity(baseUrlProyectos + "/crearConArchivos", proyecto, String.class);
+            restTemplate.postForEntity(baseUrlProyectos + "/crearProyecto", proyecto, String.class);
             notifyObservers();
 
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -103,15 +102,18 @@ public class ProyectoService implements ObservableService{
         return restTemplate.getForObject(url, Boolean.class);
     }
 
+    /*Esta validacion ya se hace en el back al insertar un nuevo proyecto
     public boolean existeProyecto(long proyectoId){
         String url = baseUrlProyectos + "/existeProyecto/" + proyectoId;
         return restTemplate.getForObject(url, Boolean.class);
     }
-
+     */
+    /*Esta validacion ya se hace en el back al insertar un nuevo proyecto
     public String getEstadoProyecto(long proyectoId){
         String url = baseUrlProyectos + "/estadoProyecto/" + proyectoId;
         return restTemplate.getForObject(url, String.class);
     }
+    */
 
     public void insertarFormatoA(FormatoADTO formatoADTO, long proyectoId){
         String url = baseUrlProyectos + "/insertarFormatoAProyecto/" + proyectoId;
@@ -135,13 +137,15 @@ public class ProyectoService implements ObservableService{
     }
 
     public FormatoADTO subirNuevaVersionFormatoA(long proyectoId, FormatoADTO formatoADTO){
+        /*Esta validacion ya se hace en el back al insertar un nuevo proyecto
         if (!existeProyecto(proyectoId))
             throw new IllegalArgumentException("Proyecto no existe");
-
+         */
+        /*Esto se valida en el back
         String estado = getEstadoProyecto(proyectoId);
         if (!"EN_TRAMITE".equalsIgnoreCase(estado))
             throw new IllegalStateException("El proyecto no está en curso");
-
+         */
         int max = maxVersionFormatoA(proyectoId);
         if (max >= 3)
             throw new IllegalStateException("Se alcanzó el máximo de 3 versiones del Formato A");

@@ -4,7 +4,7 @@ import co.edu.unicauca.academicprojectservice.domain.exceptions.DomainException;
 
 import java.util.UUID;
 
-public class EstudianteId {
+public final class EstudianteId {
 
     private final UUID value;
 
@@ -15,5 +15,23 @@ public class EstudianteId {
 
     public UUID value() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EstudianteId)) return false;
+        EstudianteId that = (EstudianteId) o;
+        return value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return value.toString();
     }
 }

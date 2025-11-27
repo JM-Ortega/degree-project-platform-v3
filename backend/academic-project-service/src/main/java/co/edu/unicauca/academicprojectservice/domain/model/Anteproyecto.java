@@ -106,6 +106,10 @@ public class Anteproyecto {
         return fechaCreacion;
     }
 
+    public byte[] getBlob() {
+        return blob;
+    }
+
     public List<DocenteId> getEvaluadores() {
         return Collections.unmodifiableList(evaluadores);
     }

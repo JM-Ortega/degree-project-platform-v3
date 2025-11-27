@@ -126,22 +126,26 @@ public class Proyecto {
             throw new DomainException("El proyecto no tiene Formato A para revisar.");
         }
 
-        if (estadoProyecto == EstadoProyecto.FORMATOA_RECHAZADO || estadoProyecto == EstadoProyecto.ANTEPROYECTO_ENVIADO || estadoProyecto == EstadoProyecto.EN_REVISION_ANTEPROYECTO || estadoProyecto == EstadoProyecto.FORMATOA_ACEPTADO) {
+        if (estadoProyecto == EstadoProyecto.FORMATOA_RECHAZADO
+                || estadoProyecto == EstadoProyecto.ANTEPROYECTO_ENVIADO
+                || estadoProyecto == EstadoProyecto.EN_REVISION_ANTEPROYECTO
+                || estadoProyecto == EstadoProyecto.FORMATOA_ACEPTADO) {
             throw new DomainException("El estado del proyecto no permite revisar Formato A.");
         }
 
+        if (nuevoEstado == EstadoFormatoA.PENDIENTE) {
+            throw new DomainException("No se puede registrar revisión con estado PENDIENTE.");
+        }
+
         FormatoA ultimo = formatosA.getLast();
-        ultimo.cambiarEstado(nuevoEstado);
 
         if (nuevoEstado == EstadoFormatoA.APROBADO) {
             if (tipoProyecto == TipoProyecto.PRACTICA_PROFESIONAL && cartaLaboral == null) {
                 throw new DomainException("La práctica profesional requiere carta laboral antes de aprobar el Formato A.");
             }
-            this.estadoProyecto = EstadoProyecto.FORMATOA_ACEPTADO;
-            return;
-        }
 
-        if (nuevoEstado == EstadoFormatoA.OBSERVADO) {
+            this.estadoProyecto = EstadoProyecto.FORMATOA_ACEPTADO;
+        } else if (nuevoEstado == EstadoFormatoA.OBSERVADO) {
             if (estadoProyecto == EstadoProyecto.PRIMERA_REVISION_FORMATOA) {
                 this.estadoProyecto = EstadoProyecto.SEGUNDA_REVISION_FORMATOA;
             } else if (estadoProyecto == EstadoProyecto.SEGUNDA_REVISION_FORMATOA) {
@@ -149,13 +153,12 @@ public class Proyecto {
             } else if (estadoProyecto == EstadoProyecto.TERCERA_REVISION_FORMATOA) {
                 this.estadoProyecto = EstadoProyecto.FORMATOA_RECHAZADO;
             }
-            return;
         }
 
-        if (nuevoEstado == EstadoFormatoA.PENDIENTE) {
-            throw new DomainException("No se puede registrar revisión con estado PENDIENTE.");
-        }
+
+        ultimo.cambiarEstado(nuevoEstado);
     }
+
 
     public void crearAnteproyecto(String nombreArchivo, String descripcion, String titulo, byte[] archivo) {
         if (estadoProyecto != EstadoProyecto.FORMATOA_ACEPTADO) {

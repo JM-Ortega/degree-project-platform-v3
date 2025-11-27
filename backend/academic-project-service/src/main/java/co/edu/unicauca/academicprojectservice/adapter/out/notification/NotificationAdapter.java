@@ -32,7 +32,7 @@ public class NotificationAdapter implements NotificationPort {
         this.dbPortProyecto = dbPort;
     }
 
-    public void notificarACoordinadores(Proyecto proyectoCreado){
+    public void notificarProyectoCreado(Proyecto proyectoCreado){
         try {
             Estudiante estudiante1 = dbPortProyecto.obtenerEstudiantePorId(proyectoCreado.getEstudiantesId().getFirst().value());
 
@@ -68,7 +68,7 @@ public class NotificationAdapter implements NotificationPort {
             );
 
             NotificationEvent notificationEvent = new NotificationEvent(
-                    "project.created",
+                    "coordinador",
                     correos,
                     subject,
                     message,
@@ -76,7 +76,119 @@ public class NotificationAdapter implements NotificationPort {
                     OffsetDateTime.now()
             );
 
-            rabbitTemplate.convertAndSend(mainExchange, "notification.send.project.created", notificationEvent);
+            rabbitTemplate.convertAndSend(mainExchange, "notification.send", notificationEvent);
+
+            log.info("📨 Notificación enviada: {}", notificationEvent.getAsunto());
+
+        } catch (Exception e) {
+            log.error("Error al enviar notificación: {}", e.getMessage(), e);
+        }
+    }
+
+    public void notificarFormatoActualizado(Proyecto proyectoCreado){
+        try {
+            Estudiante estudiante1 = dbPortProyecto.obtenerEstudiantePorId(proyectoCreado.getEstudiantesId().getFirst().value());
+
+            Docente director = dbPortProyecto.obtenerDocenteInfoPorId(proyectoCreado.getDirectorId().value());
+
+            String est1 = estudiante1.getNombres() + " " + estudiante1.getApellidos();
+            String est2 = "";
+
+            List<String> correos = new ArrayList<>();
+            correos.add(estudiante1.getCorreo());
+
+            if(proyectoCreado.getEstudiantesId().size()==2){
+                Estudiante estudiante2 = dbPortProyecto.obtenerEstudiantePorId(proyectoCreado.getEstudiantesId().getLast().value());
+                est2 = estudiante2.getNombres() + " " + estudiante2.getApellidos();
+                correos.add(estudiante2.getCorreo());
+            }
+
+            String subject = "FormatoA actualizado";
+            String message = String.format(
+                    """
+                            📚 Se ha actualizado un formatoA:
+                            %s
+                            🖋️ al proyecto:
+                            '%s'
+                            🧑‍🎓Estudiante(s):
+                            %s
+                            %s
+                            👨‍🏫 Bajo la dirección de:
+                            %s %s
+                    """,
+                    proyectoCreado.getFormatosA().getLast().getNombreFormato(),
+                    proyectoCreado.getTitulo(),
+                    est1,
+                    est2,
+                    director.getNombres(), director.getApellidos()
+            );
+
+            NotificationEvent notificationEvent = new NotificationEvent(
+                    "coordinador",
+                    correos,
+                    subject,
+                    message,
+                    estudiante1.getPrograma(),
+                    OffsetDateTime.now()
+            );
+
+            rabbitTemplate.convertAndSend(mainExchange, "notification.send", notificationEvent);
+
+            log.info("📨 Notificación enviada: {}", notificationEvent.getAsunto());
+
+        } catch (Exception e) {
+            log.error("Error al enviar notificación: {}", e.getMessage(), e);
+        }
+    }
+
+    public void notificarAJefes(Proyecto proyectoCreado){
+        try {
+            Estudiante estudiante1 = dbPortProyecto.obtenerEstudiantePorId(proyectoCreado.getEstudiantesId().getFirst().value());
+
+            Docente director = dbPortProyecto.obtenerDocenteInfoPorId(proyectoCreado.getDirectorId().value());
+
+            String est1 = estudiante1.getNombres() + " " + estudiante1.getApellidos();
+            String est2 = "";
+
+            List<String> correos = new ArrayList<>();
+            correos.add(estudiante1.getCorreo());
+
+            if(proyectoCreado.getEstudiantesId().size()==2){
+                Estudiante estudiante2 = dbPortProyecto.obtenerEstudiantePorId(proyectoCreado.getEstudiantesId().getLast().value());
+                est2 = estudiante2.getNombres() + " " + estudiante2.getApellidos();
+                correos.add(estudiante2.getCorreo());
+            }
+
+            String subject = "Nuevo Anteproyecto subido";
+            String message = String.format(
+                    """
+                            📚 Se ha asociado un anteproyecto:
+                            %s
+                            🖋️ al proyecto:
+                            '%s'
+                            🧑‍🎓Estudiante(s):
+                            %s
+                            %s
+                            👨‍🏫 Bajo la dirección de:
+                            %s %s
+                    """,
+                    proyectoCreado.getAnteproyecto().getTitulo(),
+                    proyectoCreado.getTitulo(),
+                    est1,
+                    est2,
+                    director.getNombres(), director.getApellidos()
+            );
+
+            NotificationEvent notificationEvent = new NotificationEvent(
+                    "anteproyecto.created",
+                    correos,
+                    subject,
+                    message,
+                    estudiante1.getPrograma(),
+                    OffsetDateTime.now()
+            );
+
+            rabbitTemplate.convertAndSend(mainExchange, "notification.send.anteproyecto.created", notificationEvent);
 
             log.info("📨 Notificación enviada: {}", notificationEvent.getAsunto());
 

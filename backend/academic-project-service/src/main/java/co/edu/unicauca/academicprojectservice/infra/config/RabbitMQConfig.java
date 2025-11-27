@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static co.edu.unicauca.shared.contracts.messaging.RoutingKeys.*;
+
 /**
  * Configuración de RabbitMQ para el microservicio Academic Project Service.
  * Define colas, exchange principal, bindings y convertidor de mensajes JSON.
@@ -34,14 +36,8 @@ public class RabbitMQConfig {
     @Value("${messaging.queues.projectFormatoA}")
     private String projectFormatoAQueue;
 
-    @Value("${messaging.routing.projectCreated}")
-    private String projectCreatedRoutingKey;
-
-    @Value("${messaging.routing.projectUpdated}")
-    private String projectUpdatedRoutingKey;
-
-    @Value("${messaging.routing.formatAApprovedByCoordinator}")
-    private String formatAApprovedByCoordinatorRoutingKey;
+    @Value("${messaging.queues.projectAuth}")
+    private String projectAuthQueueName;
 
     // =====================================================
     // 2. Exchange principal y DLX (Dead Letter Exchange)
@@ -82,8 +78,8 @@ public class RabbitMQConfig {
 
     // --- NUEVA COLA dedicada a los eventos de creación de usuarios ---
     @Bean
-    public Queue academicAuthQueue() {
-        return QueueBuilder.durable("academic.auth.q") // nombre único para este micro
+    public Queue projectAuthQueue() {
+        return QueueBuilder.durable(projectAuthQueueName)
                 .withArgument("x-dead-letter-exchange", dlxExchange)
                 .withArgument("x-dead-letter-routing-key", projectDlq)
                 .build();
@@ -94,25 +90,39 @@ public class RabbitMQConfig {
     // =====================================================
     @Bean
     public Binding bindingProjectCreated(Queue projectQueue, TopicExchange mainExchange) {
-        return BindingBuilder.bind(projectQueue).to(mainExchange).with(projectCreatedRoutingKey);
+        return BindingBuilder.bind(projectQueue)
+                .to(mainExchange)
+                .with(PROJECT_CREATED);
     }
 
     @Bean
     public Binding bindingProjectUpdated(Queue projectQueue, TopicExchange mainExchange) {
-        return BindingBuilder.bind(projectQueue).to(mainExchange).with(projectUpdatedRoutingKey);
+        return BindingBuilder.bind(projectQueue)
+                .to(mainExchange)
+                .with(PROJECT_UPDATED);
     }
 
     @Bean
     public Binding bindingFormatoAApproved(Queue projectFormatoAQueue, TopicExchange mainExchange) {
-        return BindingBuilder.bind(projectFormatoAQueue).to(mainExchange).with(formatAApprovedByCoordinatorRoutingKey);
+        return BindingBuilder.bind(projectFormatoAQueue)
+                .to(mainExchange)
+                .with(COORDINATOR_FORMAT_A_APPROVED);
     }
 
-    // --- NUEVO: binding para auth.user.created ---
     @Bean
-    public Binding bindAuthUserCreated(Queue academicAuthQueue, TopicExchange mainExchange) {
-        return BindingBuilder.bind(academicAuthQueue)
+    public Binding bindAuthUserCreated(
+            @Qualifier("projectAuthQueue") Queue projectAuthQueue,
+            TopicExchange mainExchange) {
+        return BindingBuilder.bind(projectAuthQueue)
                 .to(mainExchange)
-                .with("auth.user.created");
+                .with(AUTH_USER_CREATED);
+    }
+
+    @Bean
+    public Binding bindingDepartmentProposalApproved(Queue projectQueue, TopicExchange mainExchange) {
+        return BindingBuilder.bind(projectQueue)
+                .to(mainExchange)
+                .with(DEPARTMENT_PROPOSAL_APPROVED);
     }
 
     // =====================================================

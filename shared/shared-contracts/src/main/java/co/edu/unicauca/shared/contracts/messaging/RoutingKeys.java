@@ -15,6 +15,10 @@ public final class RoutingKeys {
     public static final String COORDINATOR_FORMAT_A_APPROVED = "coordinator.formata.approved";
     public static final String DEPARTMENT_PROPOSAL_APPROVED = "department.proposal.approved";
 
+    // ===== evento del anteproyecto =====
+    public static final String ACADEMIC_ANTEPROYECTO_CREATED = "academic.anteproyecto.created";
+    public static final String DEPARTMENT_EVALUADORES_ASIGNADOS = "department.anteproyecto.evaluadores.asignados";
+
     // ===== notificaciones (solo para notification-service) =====
     public static final String NOTIFICATION_SEND = "notification.send";
     public static final String NOTIFICATION_SEND_ANY = "notification.send.*";

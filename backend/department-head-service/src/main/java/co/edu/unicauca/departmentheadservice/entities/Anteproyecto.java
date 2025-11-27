@@ -4,21 +4,25 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Table(
-        name = "anteproyectos",
-        uniqueConstraints = @UniqueConstraint(columnNames = "anteproyectoId") // evita duplicados al reenviar eventos
-)
+@Table(name = "anteproyectos")
 public class Anteproyecto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    // --- Campos provenientes del evento ---
-    private Long anteproyectoId;   // id global del anteproyecto (viene del academic-service)
-    private Long proyectoId;       // id del proyecto original
+    @Id
+    @GeneratedValue
+    @Column(name = "internal_id", columnDefinition = "uuid")
+    private UUID id;
+
+
+    @Column(name = "anteproyecto_id", columnDefinition = "uuid", unique = true, nullable = false)
+    private UUID anteproyectoId;
+
+    @Column(name = "proyecto_id", columnDefinition = "uuid", nullable = false)
+    private UUID proyectoId;
+
     private String titulo;
     private String descripcion;
     private LocalDate fechaCreacion;
@@ -26,16 +30,19 @@ public class Anteproyecto {
     private String directorCorreo;
     private String departamento;
 
-    // --- Relación con docentes evaluadores ---
     @ManyToMany
-    private List<Docente> evaluadores; // inicialmente vacío
+    @JoinTable(
+            name = "anteproyecto_docentes",
+            joinColumns = @JoinColumn(name = "anteproyecto_internal_id"),
+            inverseJoinColumns = @JoinColumn(name = "docente_id")
+    )
+    private List<Docente> evaluadores;
 
-    // --- Constructores ---
     protected Anteproyecto() {
     }
 
-    public Anteproyecto(Long anteproyectoId,
-                        Long proyectoId,
+    public Anteproyecto(UUID anteproyectoId,
+                        UUID proyectoId,
                         String titulo,
                         String descripcion,
                         LocalDate fechaCreacion,
@@ -54,24 +61,27 @@ public class Anteproyecto {
         this.departamento = departamento;
     }
 
-    // --- Getters y Setters ---
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public Long getAnteproyectoId() {
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getAnteproyectoId() {
         return anteproyectoId;
     }
 
-    public void setAnteproyectoId(Long anteproyectoId) {
+    public void setAnteproyectoId(UUID anteproyectoId) {
         this.anteproyectoId = anteproyectoId;
     }
 
-    public Long getProyectoId() {
+    public UUID getProyectoId() {
         return proyectoId;
     }
 
-    public void setProyectoId(Long proyectoId) {
+    public void setProyectoId(UUID proyectoId) {
         this.proyectoId = proyectoId;
     }
 
@@ -131,3 +141,4 @@ public class Anteproyecto {
         this.evaluadores = evaluadores;
     }
 }
+

@@ -48,8 +48,8 @@ public class UserEventsPublisher {
                         props.setHeader("x-schema-version", "1");
 
                         // usamos personaId como identificador del mensaje
-                        if (event.personaId() != null) {
-                            props.setMessageId(event.personaId());
+                        if (event.id() != null) {
+                            props.setMessageId(event.id().toString());
                         }
 
                         return message;
@@ -57,7 +57,7 @@ public class UserEventsPublisher {
             );
 
             log.info("[Auth] ✅ Evento publicado ex={} rk={} personaId={}",
-                    exchangeName, RoutingKeys.AUTH_USER_CREATED, event.personaId());
+                    exchangeName, RoutingKeys.AUTH_USER_CREATED, event.id());
         } catch (Exception ex) {
             log.error("[Auth] ❌ Error al publicar {}: {}", RoutingKeys.AUTH_USER_CREATED, ex.getMessage(), ex);
         }

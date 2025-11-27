@@ -73,6 +73,7 @@ messaging:
     userCreated: auth.user.created
     projectCreated: project.created
     projectUpdated: project.updated
+    anteproyectoCreated: anteproyecto.created
     formatAApprovedByCoordinator: coordinator.formata.approved
     proposalApprovedByDeptHead: department.proposal.approved
     notificationAny: notification.send.*

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface AnteproyectoRepository extends JpaRepository<Anteproyecto, Long> {
@@ -18,7 +19,7 @@ public interface AnteproyectoRepository extends JpaRepository<Anteproyecto, Long
     // Método para buscar por ID
     List<Anteproyecto> findByEvaluadoresIsEmptyAndId(Long id);
 
-    boolean existsByAnteproyectoId(Long anteproyectoId);
+    boolean existsByAnteproyectoId(UUID anteproyectoId);
 
 
 }

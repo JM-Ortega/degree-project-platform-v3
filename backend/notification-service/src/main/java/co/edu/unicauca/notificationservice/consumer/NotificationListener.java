@@ -51,9 +51,9 @@ public class NotificationListener {
                         ├─ Tipo: {}
                         ├─ Destinatarios: {}
                         └─ Mensaje: {}
-                        """, event.getType(),
-                String.join(", ", event.getRecipientEmails()),
-                event.getMessage());
+                        """, event.getTipo(),
+                String.join(", ", event.getCorreos()),
+                event.getMensaje());
 
         try {
             boolean hasPhones = event.getRecipientPhones() != null && !event.getRecipientPhones().isEmpty();

@@ -14,7 +14,7 @@ public class EmailService {
     private InformationService informationService;
 
     public void sendEmail(NotificationEvent event) {
-        if (event.getTipo().equals("project.created") || event.getTipo().equals("project.updated")){
+        if (event.getTipo().equals("coordinador")){
             List<String> emails = event.getCorreos();
             String emailCoordinador = informationService.getEmailCoordinador(event.getPrograma().toString());
             emails.add(emailCoordinador);

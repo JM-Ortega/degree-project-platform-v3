@@ -1,132 +1,121 @@
 package co.edu.unicauca.academicprojectservice.adapter.in.rest;
 
-
 import co.edu.unicauca.academicprojectservice.application.dto.*;
 import co.edu.unicauca.academicprojectservice.application.services.ProyectoService;
 import co.edu.unicauca.academicprojectservice.port.in.rest.ProyectoPort;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
+@RestController
+@RequestMapping("/proyectos")
 public class ProyectoController implements ProyectoPort {
+
     private final ProyectoService proyectoService;
 
     public ProyectoController(ProyectoService proyectoService) {
         this.proyectoService = proyectoService;
     }
 
-    public ResponseEntity<String> crearProyecto(ProyectoDTO dto) {
-        try {
-            proyectoService.crearProyectoConArchivos(dto);
-            return ResponseEntity.ok("Proyecto creado exitosamente");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al crear el proyecto: " + e.getMessage());
-        }
+    // =================== CREAR PROYECTO ===================
+    @PostMapping("/crearProyecto")
+    @Override
+    public ResponseEntity<String> crearProyecto(@RequestBody ProyectoDTO dto) {
+        proyectoService.crearProyectoConArchivos(dto);
+        return ResponseEntity.ok("Proyecto creado exitosamente");
     }
-    public ResponseEntity<String> insertarFormatoAProyecto(Long proyectoId, FormatoADTO formatoA) {
+
+    // =================== FORMATOS A ===================
+    @PostMapping("/insertarFormatoAProyecto/{proyectoId}")
+    @Override
+    public ResponseEntity<String> insertarFormatoAProyecto(
+            @PathVariable Long proyectoId,
+            @RequestBody FormatoADTO formatoA
+    ) {
         proyectoService.insertarFormatoAEnProyecto(UUID.fromString(proyectoId.toString()), formatoA);
         return ResponseEntity.ok("Formato A insertado correctamente");
     }
 
-   // no se usa
-        /*
-        public ResponseEntity<String> actualizarFormatoA(UUID proyectoId, EstadoRequest request) {
-            proyectoService.actualizarFormatoA(proyectoId, request.getEstado());
-            return ResponseEntity.ok("Formato A actualizado correctamente");
-        }
-        */
+    @GetMapping("/{proyectoId}/formatoA/max-version")
+    @Override
+    public ResponseEntity<Integer> getMaxVersionFormatoA(@PathVariable UUID proyectoId) {
+        return ResponseEntity.ok(proyectoService.getMaxVersionFormatoA(proyectoId));
+    }
 
-        //No se debería usar porque se valida que exista el proyecto antes de insertar el formato
-        /*
-        public ResponseEntity<Boolean> existeProyecto(UUID proyectoId) {
-            boolean tiene = proyectoService.existeProyecto(proyectoId);
-            return ResponseEntity.ok(tiene);
-        }
-        */
+    @GetMapping("/observacionesFA/{proyectoId}")
+    @Override
+    public ResponseEntity<Boolean> tieneObservacionesFA(@PathVariable UUID proyectoId) {
+        return ResponseEntity.ok(proyectoService.tieneObservaciones(proyectoId));
+    }
 
-        /* Se valida esto al insertar el proyecto por tanto ya no se usa
-        public ResponseEntity<String> estadoProyecto(UUID proyectoId) {
-            String estado = proyectoService.estadoProyecto(proyectoId);
-            return ResponseEntity.ok(estado);
-        }
-         */
+    @GetMapping("/ultimoFormatoAConObservaciones/{proyectoId}")
+    @Override
+    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(@PathVariable UUID proyectoId) {
+        FormatoADTO dto = proyectoService.obtenerUltimoFormatoAConObservaciones(proyectoId);
+        return ResponseEntity.ok(dto);
+    }
 
-    // ============================ migrados =====================================
-    public ResponseEntity<List<ProyectoInfoDTO>> listarPorDocente(String correo, String filtro) {
+    @GetMapping("/resubmit/{proyectoId}")
+    @Override
+    public ResponseEntity<Boolean> canResubmit(@PathVariable UUID proyectoId) {
+        return ResponseEntity.ok(proyectoService.canResubmit(proyectoId));
+    }
+
+    // =================== LISTAR PROYECTOS ===================
+    @GetMapping("/docente/{correo}")
+    @Override
+    public ResponseEntity<List<ProyectoInfoDTO>> listarPorDocente(
+            @PathVariable String correo,
+            @RequestParam(required = false) String filtro
+    ) {
         List<ProyectoInfoDTO> proyectos = proyectoService.listarInfoPorCorreoDocente(correo, filtro);
         return ResponseEntity.ok(proyectos);
     }
 
-    public ResponseEntity<List<ProyectoEstudianteDTO>> listarPorEstudiante(String correo) {
-        List<ProyectoEstudianteDTO> lista = proyectoService.listarPorEstudiante(correo);
-        return ResponseEntity.ok(lista);
+    @GetMapping("/listar/{correo}")
+    @Override
+    public ResponseEntity<List<ProyectoEstudianteDTO>> listarPorEstudiante(@PathVariable String correo) {
+        return ResponseEntity.ok(proyectoService.listarPorEstudiante(correo));
     }
 
-
-
-
-    public ResponseEntity<EstadoProyecto> enforceAutoCancelIfNeeded(UUID proyectoId) {
-        EstadoProyecto estado = proyectoService.enforceAutoCancelIfNeeded(proyectoId);
-        return ResponseEntity.ok(estado);
+    // =================== ESTADO DEL PROYECTO ===================
+    @GetMapping("/{id}/enforceAutoCancel")
+    @Override
+    public ResponseEntity<EstadoProyecto> enforceAutoCancelIfNeeded(@PathVariable("id") UUID proyectoId) {
+        return ResponseEntity.ok(proyectoService.enforceAutoCancelIfNeeded(proyectoId));
     }
 
-    public ResponseEntity<Integer> getMaxVersionFormatoA(UUID proyectoId) {
-        int maxVersion = proyectoService.getMaxVersionFormatoA(proyectoId);
-        return ResponseEntity.ok(maxVersion);
+    // =================== ESTADISTICAS ===================
+    @GetMapping("/countProyectosBy")
+    @Override
+    public ResponseEntity<Integer> countProyectosByEstadoYTipo(
+            @RequestParam TipoProyecto tipoProyecto,
+            @RequestParam EstadoProyecto estadoProyecto,
+            @RequestParam String correoDocente
+    ) {
+        return ResponseEntity.ok(
+                proyectoService.countProyectosByEstadoYTipo(tipoProyecto, estadoProyecto, correoDocente)
+        );
     }
 
-    public ResponseEntity<Boolean> canResubmit(UUID proyectoId) {
-        boolean puede = proyectoService.canResubmit(proyectoId);
-        return ResponseEntity.ok(puede);
+    // =================== ANTEPROYECTOS ===================
+    @GetMapping("/docente/{correo}/anteproyectos")
+    @Override
+    public ResponseEntity<List<AnteproyectoDTO>> listarAnteproyectosDocente(
+            @PathVariable String correo,
+            @RequestParam(required = false) String filtro
+    ) {
+        return ResponseEntity.ok(proyectoService.listarAnteproyectosDocente(correo, filtro));
     }
 
-    public ResponseEntity<Boolean> tieneObservacionesFA(UUID proyectoId) {
-        boolean tiene = proyectoService.tieneObservaciones(proyectoId);
-        return ResponseEntity.ok(tiene);
-    }
-
-    public ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(UUID proyectoId) {
-        try {
-            FormatoADTO formatoADTO = proyectoService.obtenerUltimoFormatoAConObservaciones(proyectoId);
-            return ResponseEntity.ok(formatoADTO);
-        } catch (EntityNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
-
-    //Se usaba para validar que no hubieran más de 7 proyectos activos para el docente en el front pero ya se paso la validacion al back,
-    //PERO además se usa para mostrar las estadisticas, entonces se deja, pero solo se usa en este caso
-
-    public ResponseEntity<Integer> countProyectosByEstadoYTipo(TipoProyecto tipoProyecto, EstadoProyecto estadoProyecto, String correoDocente) {
-        int count = proyectoService.countProyectosByEstadoYTipo(tipoProyecto, estadoProyecto, correoDocente);
-        return ResponseEntity.ok(count);
-    }
-
-    public ResponseEntity<List<AnteproyectoDTO>> listarAnteproyectosDocente(String correo, String filtro) {
-        List<AnteproyectoDTO> lista = proyectoService.listarAnteproyectosDocente(correo, filtro);
-        return ResponseEntity.ok(lista);
-    }
-
-    public ResponseEntity<AnteproyectoDTO> obtenerAnteproyecto(UUID proyectoId) {
-        try {
-            AnteproyectoDTO anteproyecto = proyectoService.obtenerAnteproyecto(proyectoId);
-            return ResponseEntity.ok(anteproyecto);
-        } catch (EntityNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    @GetMapping("/{proyectoId}/anteproyecto")
+    @Override
+    public ResponseEntity<AnteproyectoDTO> obtenerAnteproyecto(@PathVariable UUID proyectoId) {
+        return ResponseEntity.ok(proyectoService.obtenerAnteproyecto(proyectoId));
     }
 }
+

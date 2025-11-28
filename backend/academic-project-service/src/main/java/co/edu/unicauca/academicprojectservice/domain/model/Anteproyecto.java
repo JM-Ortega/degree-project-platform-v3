@@ -17,15 +17,20 @@ public class Anteproyecto {
 
     private static final int MAX_EVALUADORES = 2;
 
-    public Anteproyecto(UUID id, String nombreArchivo, String descripcion, String titulo, byte[] blob, LocalDate fechaCreacion, List<DocenteId> evaluadores) {
+    public Anteproyecto(UUID id, String nombreArchivo, String descripcion,
+                        String titulo, byte[] blob, LocalDate fechaCreacion,
+                        List<DocenteId> evaluadores) {
         this.id = id;
         this.nombreArchivo = nombreArchivo;
         this.descripcion = descripcion;
         this.titulo = titulo;
         this.blob = blob;
         this.fechaCreacion = fechaCreacion;
-        this.evaluadores = evaluadores;
+        this.evaluadores = (evaluadores == null)
+                ? new ArrayList<>()
+                : new ArrayList<>(evaluadores);
     }
+
 
     public static Anteproyecto crear(String nombreArchivo, String descripcion, String titulo, byte[] blob) {
         if (nombreArchivo == null || nombreArchivo.isBlank()) {

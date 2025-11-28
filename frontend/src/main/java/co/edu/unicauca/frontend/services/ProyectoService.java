@@ -16,13 +16,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.net.URI;
+import java.util.*;
 
 public class ProyectoService implements ObservableService {
     private final String baseUrlProyectos = "http://localhost:8080/api/academic/proyectos";
@@ -48,32 +45,31 @@ public class ProyectoService implements ObservableService {
 
     public List<ProyectoInfoDTO> listarProyectosDocente(String correoDocente, String filtro) {
         try {
-            // Codificar el correo para que caracteres como @ no den problemas
-            String correoEncodeado = URLEncoder.encode(correoDocente, StandardCharsets.UTF_8);
 
-            String url = baseUrlProyectos + "/docente/" + correoEncodeado;
+            String url = baseUrlProyectos + "/docente/{correoDocente}";
 
             if (filtro != null && !filtro.isEmpty()) {
-                url += "?filtro=" + URLEncoder.encode(filtro, StandardCharsets.UTF_8);
+                url += "?filtro={filtro}";
             }
+
+            Map<String, String> params = new HashMap<>();
+            params.put("correoDocente", correoDocente);
+            params.put("filtro", filtro);
 
             ResponseEntity<List<ProyectoInfoDTO>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<List<ProyectoInfoDTO>>() {
-                    }
+                    new ParameterizedTypeReference<List<ProyectoInfoDTO>>() {},
+                    params
             );
 
-            List<ProyectoInfoDTO> body = response.getBody();
-            return body != null ? body : Collections.emptyList();
+            return response.getBody() != null ? response.getBody() : Collections.emptyList();
 
         } catch (HttpStatusCodeException e) {
             System.err.println("[ProyectoService] Error HTTP al listar proyectos del docente " + correoDocente);
             System.err.println("Status: " + e.getStatusCode());
             System.err.println("Response body: " + e.getResponseBodyAsString());
-
-
             throw new RuntimeException("Error al consultar los proyectos del docente", e);
 
         } catch (RestClientException e) {
@@ -81,7 +77,7 @@ public class ProyectoService implements ObservableService {
             throw new RuntimeException("No se pudo conectar con el servidor", e);
         }
     }
-
+    
     public void crearProyecto(ProyectoDTO proyecto) {
         try {
             /*

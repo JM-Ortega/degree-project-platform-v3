@@ -1,19 +1,12 @@
 package co.edu.unicauca.coordinatorservice.controller;
 
 import co.edu.unicauca.coordinatorservice.entity.*;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.EstadoFormatoA;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.EstudianteDTO;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.FormatoADTO;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.ProyectoDTO;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.TipoProyecto;
-import co.edu.unicauca.coordinatorservice.repository.DocenteRepository;
-import co.edu.unicauca.coordinatorservice.repository.EstudianteRepository;
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
+import co.edu.unicauca.shared.contracts.events.academic.DTOs.FormatoADTO;
 import co.edu.unicauca.coordinatorservice.repository.FormatoARepository;
 import jakarta.transaction.Transactional;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Component

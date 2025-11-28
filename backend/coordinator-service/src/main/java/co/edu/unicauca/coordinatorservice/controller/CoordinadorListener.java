@@ -1,7 +1,7 @@
 package co.edu.unicauca.coordinatorservice.controller;
 
 import co.edu.unicauca.coordinatorservice.entity.Coordinador;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.Programa;
+import co.edu.unicauca.shared.contracts.model.Programa;
 import co.edu.unicauca.coordinatorservice.repository.CoordinadorRepository;
 import co.edu.unicauca.shared.contracts.events.auth.UserCreatedEvent;
 import jakarta.transaction.Transactional;

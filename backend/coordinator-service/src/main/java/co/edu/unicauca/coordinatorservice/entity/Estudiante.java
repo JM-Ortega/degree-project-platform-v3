@@ -1,6 +1,6 @@
 package co.edu.unicauca.coordinatorservice.entity;
 
-import co.edu.unicauca.coordinatorservice.infra.DTOS.Programa;
+import co.edu.unicauca.shared.contracts.model.Programa;
 import jakarta.persistence.*;
 
 @Entity

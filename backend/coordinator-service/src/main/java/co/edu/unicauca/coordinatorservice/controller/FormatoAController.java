@@ -2,7 +2,7 @@ package co.edu.unicauca.coordinatorservice.controller;
 
 import co.edu.unicauca.coordinatorservice.entity.Estudiante;
 import co.edu.unicauca.coordinatorservice.entity.FormatoA;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.Programa;
+import co.edu.unicauca.shared.contracts.model.Programa;
 import co.edu.unicauca.coordinatorservice.infra.DTOSInternos.FormatoAResumenDTO;
 import co.edu.unicauca.coordinatorservice.repository.FormatoARepository;
 import co.edu.unicauca.coordinatorservice.service.FormatoAService;

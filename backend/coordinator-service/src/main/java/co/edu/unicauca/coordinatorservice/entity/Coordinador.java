@@ -2,7 +2,7 @@ package co.edu.unicauca.coordinatorservice.entity;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.Programa;
+import co.edu.unicauca.shared.contracts.model.Programa;
 
 @Entity
 @Table(name = "coordinador")

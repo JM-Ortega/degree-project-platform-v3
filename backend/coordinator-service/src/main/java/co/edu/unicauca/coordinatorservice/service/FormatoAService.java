@@ -2,7 +2,7 @@ package co.edu.unicauca.coordinatorservice.service;
 
 import co.edu.unicauca.coordinatorservice.entity.Estudiante;
 import co.edu.unicauca.coordinatorservice.entity.FormatoA;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.EstadoFormatoA;
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import co.edu.unicauca.coordinatorservice.repository.FormatoARepository;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -111,8 +111,9 @@ public class FormatoAService {
                 destinatarios,
                 subject,
                 message,
-                celulares,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                true
         );
 
         rabbitTemplate.convertAndSend(mainExchange, "notification.send." + routingKeyFuncional, notificationEvent);

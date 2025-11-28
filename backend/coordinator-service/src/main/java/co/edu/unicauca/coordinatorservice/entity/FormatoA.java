@@ -4,18 +4,20 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.EstadoFormatoA;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.TipoProyecto;
+import java.util.UUID;
+
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
+import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 
 @Entity
 @Table(name = "formato_a")
 public class FormatoA implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     @Column(name = "proyecto_id", nullable = false)
-    private Long proyectoId;
+    private UUID proyectoId;
 
     @Column(name = "nro_version",  nullable = false)
     private int nroVersion;
@@ -56,19 +58,19 @@ public class FormatoA implements Serializable {
     @Enumerated(EnumType.STRING)
     private TipoProyecto tipoProyecto;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public Long getProyectoId() {
+    public UUID getProyectoId() {
         return proyectoId;
     }
 
-    public void setProyectoId(Long proyectoId) {
+    public void setProyectoId(UUID proyectoId) {
         this.proyectoId = proyectoId;
     }
 

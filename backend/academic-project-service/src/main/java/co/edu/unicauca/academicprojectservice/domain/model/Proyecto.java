@@ -24,12 +24,31 @@ public class Proyecto {
     private Anteproyecto anteproyecto;
     private EstadoProyecto estadoProyecto;
 
-    public Proyecto(UUID id, String titulo, List<EstudianteId> estudiantesId, DocenteId directorId, List<FormatoA> formatosA, TipoProyecto tipoProyecto, DocenteId codirectorId, byte[] cartaLaboral, Anteproyecto anteproyecto, EstadoProyecto estadoProyecto) {
+    public Proyecto(UUID id,
+                    String titulo,
+                    List<EstudianteId> estudiantesId,
+                    DocenteId directorId,
+                    List<FormatoA> formatosA,
+                    TipoProyecto tipoProyecto,
+                    DocenteId codirectorId,
+                    byte[] cartaLaboral,
+                    Anteproyecto anteproyecto,
+                    EstadoProyecto estadoProyecto) {
+
         this.id = id;
         this.titulo = titulo;
-        this.estudiantesId = List.copyOf(estudiantesId);
+
+        this.estudiantesId = (estudiantesId == null)
+                ? List.of()
+                : List.copyOf(estudiantesId);
+
         this.directorId = directorId;
-        this.formatosA = formatosA;
+
+        // formatosA nunca null
+        this.formatosA = (formatosA == null)
+                ? new ArrayList<>()
+                : new ArrayList<>(formatosA);
+
         this.tipoProyecto = tipoProyecto;
         this.codirectorId = codirectorId;
         this.cartaLaboral = cartaLaboral;

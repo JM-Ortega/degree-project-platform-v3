@@ -39,27 +39,68 @@ public class ProyectoService {
     // Este es el que se llama por el frontenda para crear un proyecto
     public void crearProyectoConArchivos(ProyectoDTO dto) {
 
+        // ==========================
+        //  VALIDACIÓN DE ESTUDIANTES
+        // ==========================
+        if (dto.getEstudiantes() == null || dto.getEstudiantes().isEmpty()) {
+            throw new IllegalArgumentException("Debe enviar al menos un estudiante");
+        }
+
+        // Limpia correos: quita null, vacíos, espacios
+        List<String> correosLimpios = dto.getEstudiantes().stream()
+                .map(c -> c == null ? "" : c.trim())
+                .filter(c -> !c.isBlank())
+                .toList();
+
+        if (correosLimpios.isEmpty()) {
+            throw new IllegalArgumentException("La lista de correos de estudiantes no contiene valores válidos");
+        }
+
+        // ========================================
+        //  VALIDACIÓN DEL DIRECTOR (ya existe)
+        // ========================================
         DocenteId directorId = dbPortDocente.findIdByCorreo(dto.getDirector())
                 .orElseThrow(() -> new IllegalArgumentException("Director no encontrado: " + dto.getDirector()));
 
-        List<EstudianteId> estudiantesId = dto.getEstudiantes().stream()
+
+        // ========================================
+        //  VALIDAR QUE CADA ESTUDIANTE EXISTA
+        // ========================================
+        List<EstudianteId> estudiantesId = correosLimpios.stream()
                 .map(correo ->
                         dbPortEstudiante.findIdByCorreo(correo)
-                                .orElseThrow(() -> new IllegalArgumentException("Este correo no pertenece a un estudiante: " + correo))
+                                .orElseThrow(() ->
+                                        new IllegalArgumentException("Este correo no pertenece a un estudiante: " + correo)
+                                )
                 )
                 .toList();
 
-        // Validación mapeada del front validar que el director no tenga mas de 7 proyectos activos
-        int numeroProyectos = countProyectosByEstadoYTipo(dto.getTipoProyecto(), dto.getEstadoProyecto(), dto.getDirector());
+
+        // ========================================
+        //  VALIDACIÓN DEL DIRECTOR (> 7 proyectos)
+        // ========================================
+        int numeroProyectos = countProyectosByEstadoYTipo(
+                dto.getTipoProyecto(),
+                dto.getEstadoProyecto(),
+                dto.getDirector()
+        );
+
         if (numeroProyectos > 7)
             throw new IllegalStateException("El docente alcanzó el límite de 7 proyectos en curso");
 
-        // Validacion mapeada del front: Que el estudiante no tenga otro proyecto en curso
-        for (String correo : dto.getEstudiantes()) {
+
+        // ========================================
+        //  VALIDACIÓN DEL ESTUDIANTE (no duplicado)
+        // ========================================
+        for (String correo : correosLimpios) {
             if (dbPortEstudiante.proyectoActivo(correo))
                 throw new IllegalStateException("El estudiante ya tiene un proyecto en curso");
         }
 
+
+        // ========================================
+        //  CREACIÓN DEL PROYECTO
+        // ========================================
         Proyecto proyecto = Proyecto.crear(
                 dto.getTitulo(),
                 estudiantesId,
@@ -67,31 +108,42 @@ public class ProyectoService {
                 dto.getTipoProyecto()
         );
 
-        if (dto.getTipoProyecto().equals(TipoProyecto.PRACTICA_PROFESIONAL) &&
-                dto.getCartaLaboral() != null) {
+        // Adjuntar carta laboral si aplica
+        if (dto.getTipoProyecto().equals(TipoProyecto.PRACTICA_PROFESIONAL)
+                && dto.getCartaLaboral() != null) {
             proyecto.adjuntarCartaLaboral(dto.getCartaLaboral());
         }
 
+        // Adjuntar formato A si viene en la creación
         if (dto.getFormatoA() != null) {
-            String nombreFormato = dto.getFormatoA().nombreFormato();
-            byte[] archivoFormato = dto.getFormatoA().blob();
-            proyecto.agregarFormatoAInicial(nombreFormato, archivoFormato);
+            proyecto.agregarFormatoAInicial(
+                    dto.getFormatoA().nombreFormato(),
+                    dto.getFormatoA().blob()
+            );
         }
 
+        // Guardar en BD
         dbPortProyecto.guardarProyecto(proyecto);
+
+        // Publicar eventos
         messagingPort.publicarProyectoCreado(proyecto);
         notificationPort.notificarProyectoCreado(proyecto);
     }
 
+
     // ======================  nuevo
     public List<ProyectoInfoDTO> listarInfoPorCorreoDocente(String correo, String filtro) {
-        DocenteId docenteId = dbPortDocente.findIdByCorreo(correo)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Docente no encontrado con correo: " + correo
-                ));
-
+        try {
+            log.info("Listando proyectos para docente {} con filtro '{}'", correo, filtro);
         return dbPortProyecto.listarInfoProyectosPorCorreoDocente(correo, filtro);
+        } catch (EntityNotFoundException e) {
+            throw e; // la atrapará el controller y devuelve 404
+        } catch (Exception ex) {
+            log.error("Error al listar proyectos del docente {}", correo, ex);
+            throw new IllegalStateException("Error al listar proyectos del docente " + correo, ex);
     }
+    }
+
 
     public List<ProyectoEstudianteDTO> listarPorEstudiante(String correo) {
         return dbPortProyecto.listarProyectosPorCorreoEstudiante(correo);

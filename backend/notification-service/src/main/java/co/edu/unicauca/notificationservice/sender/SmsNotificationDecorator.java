@@ -1,7 +1,10 @@
 package co.edu.unicauca.notificationservice.sender;
 
+import co.edu.unicauca.notificationservice.service.InformationService;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * Decorador de {@link NotificationSender} que agrega funcionalidad
@@ -12,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class SmsNotificationDecorator implements NotificationSender {
+    private InformationService informationService;
 
     /**
      * Componente base decorado (por ejemplo, {@link EmailNotificationSender}).
@@ -41,17 +45,16 @@ public class SmsNotificationDecorator implements NotificationSender {
         // Envío base (correo electrónico)
         wrapped.send(event);
 
+        List<String> telefonos = informationService.getTelefonos(event.getCorreos());
+
         // Envío complementario por SMS
-        if (event.getRecipientPhones() != null && !event.getRecipientPhones().isEmpty()) {
-            for (String phone : event.getRecipientPhones()) {
-                log.info("""
-                        📱 Enviando SMS
-                        ├── A: {}
-                        └── Mensaje: {}
-                        """, phone, event.getMessage());
-            }
-        } else {
-            log.warn("⚠️ No se encontraron números de teléfono para enviar SMS.");
+        for (String telefono : telefonos) {
+            log.info("""
+                    📱 Enviando SMS
+                    ├── A: {}
+                    └── Mensaje: {}
+                    """, telefono, event.getMensaje());
         }
+
     }
 }

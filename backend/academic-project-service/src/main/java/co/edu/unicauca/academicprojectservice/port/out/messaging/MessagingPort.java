@@ -7,4 +7,5 @@ public interface MessagingPort {
 
     void publicarAnteproyectoSinEvaluadores(Proyecto proyecto);
 
+    void publicarFormatoActualizado(Proyecto proyectoCreado);
 }

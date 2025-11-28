@@ -1,6 +1,7 @@
 package co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository;
 
-import co.edu.unicauca.academicprojectservice.domain.model.Anteproyecto;
+
+import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Anteproyecto;
 import co.edu.unicauca.academicprojectservice.application.dto.AnteproyectoDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

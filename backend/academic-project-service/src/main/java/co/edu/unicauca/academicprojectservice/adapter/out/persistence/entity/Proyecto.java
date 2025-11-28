@@ -33,7 +33,7 @@ public class Proyecto {
     @JoinColumn(name = "codirector_id")
     private Docente codirector;
 
-    @OneToMany(mappedBy = "proyecto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FormatoA> formatosA = new ArrayList<>();
 
     private byte[] cartaLaboral;

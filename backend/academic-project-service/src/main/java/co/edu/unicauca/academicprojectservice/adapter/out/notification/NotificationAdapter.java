@@ -73,7 +73,8 @@ public class NotificationAdapter implements NotificationPort {
                     subject,
                     message,
                     estudiante1.getPrograma(),
-                    OffsetDateTime.now()
+                    OffsetDateTime.now(),
+                    true
             );
 
             rabbitTemplate.convertAndSend(mainExchange, "notification.send", notificationEvent);
@@ -129,7 +130,8 @@ public class NotificationAdapter implements NotificationPort {
                     subject,
                     message,
                     estudiante1.getPrograma(),
-                    OffsetDateTime.now()
+                    OffsetDateTime.now(),
+                    false
             );
 
             rabbitTemplate.convertAndSend(mainExchange, "notification.send", notificationEvent);
@@ -185,7 +187,8 @@ public class NotificationAdapter implements NotificationPort {
                     subject,
                     message,
                     estudiante1.getPrograma(),
-                    OffsetDateTime.now()
+                    OffsetDateTime.now(),
+                    true
             );
 
             rabbitTemplate.convertAndSend(mainExchange, "notification.send.anteproyecto.created", notificationEvent);

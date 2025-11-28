@@ -11,7 +11,6 @@ import java.util.UUID;
 @Table(name = "formatoA")
 public class FormatoA {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private int nroVersion;

@@ -9,7 +9,6 @@ import java.util.UUID;
 @Table(name = "anteproyecto")
 public class Anteproyecto {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
 
     private String nombreArchivo;

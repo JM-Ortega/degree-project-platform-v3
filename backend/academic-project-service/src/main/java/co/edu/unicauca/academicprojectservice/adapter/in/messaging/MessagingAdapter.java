@@ -22,8 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static co.edu.unicauca.shared.contracts.messaging.RoutingKeys.ACADEMIC_ANTEPROYECTO_CREATED;
-import static co.edu.unicauca.shared.contracts.messaging.RoutingKeys.PROJECT_CREATED;
+import static co.edu.unicauca.shared.contracts.messaging.RoutingKeys.*;
 
 @Slf4j
 @Service
@@ -139,5 +138,21 @@ public class MessagingAdapter implements MessagingPort {
         rabbitTemplate.convertAndSend(mainExchange, ACADEMIC_ANTEPROYECTO_CREATED, event);
         log.info("[RabbitMQ] AnteproyectoSinEvaluadoresEvent publicado. rk={} proyectoId={} anteId={}",
                 ACADEMIC_ANTEPROYECTO_CREATED, proyecto.getId(), ante.getId());
+    }
+
+    @Override
+    public void publicarFormatoActualizado(Proyecto proyectoCreado){
+        co.edu.unicauca.shared.contracts.events.academic.DTOs.FormatoADTO f = new co.edu.unicauca.shared.contracts.events.academic.DTOs.FormatoADTO();
+        f.setId(proyectoCreado.getFormatosA().getLast().getId());
+        f.setProyectoId(proyectoCreado.getId());
+        f.setNroVersion(proyectoCreado.getFormatosA().getLast().getNroVersion());
+        f.setNombreFormatoA(proyectoCreado.getFormatosA().getLast().getNombreFormato());
+        f.setFechaSubida(proyectoCreado.getFormatosA().getLast().getFechaCreacion());
+        f.setBlob(proyectoCreado.getFormatosA().getLast().getBlob());
+        f.setEstado(proyectoCreado.getFormatosA().getLast().getEstado());
+
+        rabbitTemplate.convertAndSend(mainExchange, PROJECT_UPDATED, f);
+
+        log.info("[RabbitMQ] Nueva version de FormatoA enviada. rk={} id={}", PROJECT_UPDATED, f.getId());
     }
 }

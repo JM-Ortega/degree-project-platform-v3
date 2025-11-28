@@ -146,8 +146,7 @@ public class ProyectoService {
 
         dbPortProyecto.guardarProyecto(proyecto);
         notificationPort.notificarFormatoActualizado(proyecto);
-        //TODO Falta enviar mensaje al coordinador para que rechace o apruebe
-        // el formato cuando se actualice el formato aqui
+        messagingPort.publicarFormatoActualizado(proyecto);
     }
 
     public void asociarAnteproyectoAProyecto(String correo, AnteproyectoDTO dto) {

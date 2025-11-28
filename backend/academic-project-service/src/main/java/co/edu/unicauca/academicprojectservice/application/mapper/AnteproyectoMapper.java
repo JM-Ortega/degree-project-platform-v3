@@ -11,6 +11,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface AnteproyectoMapper {
 
+    @Mapping(target = "evaluadores", source = "evaluadores")
     Anteproyecto entityToDomain(
             co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Anteproyecto entity
     );

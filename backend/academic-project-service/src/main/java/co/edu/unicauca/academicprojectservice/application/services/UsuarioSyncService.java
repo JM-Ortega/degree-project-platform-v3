@@ -56,6 +56,8 @@ public class UsuarioSyncService implements UsuarioSyncUseCase {
     private void procesarDocente(String email, String nombres, String apellidos, UserCreatedEvent evt) {
         Optional<Docente> existente = docenteRepository.findByCorreo(email);
         Docente d = existente.orElse(new Docente());
+
+        d.setId(evt.id());
         d.setCorreo(email);
         d.setNombres(nombres);
         d.setApellidos(apellidos);
@@ -66,6 +68,7 @@ public class UsuarioSyncService implements UsuarioSyncUseCase {
     private void procesarEstudiante(String email, String nombres, String apellidos, UserCreatedEvent evt) {
         Optional<Estudiante> existente = estudianteRepository.findByCorreoIgnoreCase(email);
         Estudiante e = existente.orElse(new Estudiante());
+        e.setId(evt.id());
         e.setCorreo(email);
         e.setNombres(nombres);
         e.setApellidos(apellidos);

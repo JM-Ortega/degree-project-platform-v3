@@ -9,6 +9,7 @@ import java.util.List;
 public interface FormatoAMapper {
 
     // --- Dominio → Persistencia ---
+
     List<co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.FormatoA> toEntityList(List<FormatoA> formatos);
 
     // --- Persistencia → Dominio ---

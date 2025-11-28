@@ -1,16 +1,15 @@
 package co.edu.unicauca.frontend.infra.dto;
 
-import co.edu.unicauca.frontend.entities.EstadoArchivo;
+import co.edu.unicauca.frontend.entities.EstadoFormatoA;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class FormatoADTO {
     private String nombreFormato;
     private byte[] blob;
     private int nroVersion;
     private LocalDate fechaCreacion;
-    private EstadoArchivo estado;
+    private EstadoFormatoA estado;
 
     public byte[] getBlob() {
         return blob;
@@ -19,10 +18,10 @@ public class FormatoADTO {
         this.blob = blob;
     }
 
-    public EstadoArchivo getEstado() {
+    public EstadoFormatoA getEstado() {
         return estado;
     }
-    public void setEstado(EstadoArchivo estado) {
+    public void setEstado(EstadoFormatoA estado) {
         this.estado = estado;
     }
 

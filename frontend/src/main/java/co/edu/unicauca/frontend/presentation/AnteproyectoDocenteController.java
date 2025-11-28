@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
 public class AnteproyectoDocenteController implements Initializable {
     @FXML
@@ -279,7 +280,7 @@ public class AnteproyectoDocenteController implements Initializable {
 
         ObservableList<AnteproyectoDocenteController.RowVM> rows = FXCollections.observableArrayList();
         for (AnteproyectoDTO p : proyectos) {
-            long id = p.getId();
+            UUID id = p.getId();
             String titulo = p.getTitulo();
 
             String estNombre = p.getEstudianteNombre();
@@ -368,19 +369,19 @@ public class AnteproyectoDocenteController implements Initializable {
 
     // =================== ViewModel ===================
     public static class RowVM {
-        private final long proyectoId;
+        private final UUID proyectoId;
         private final StringProperty titulo = new SimpleStringProperty();
         private final StringProperty estudianteNombre = new SimpleStringProperty();
         private final StringProperty estudianteCorreo = new SimpleStringProperty();
 
-        public RowVM(long proyectoId, String titulo, String estudianteNombre, String estudianteCorreo) {
+        public RowVM(UUID proyectoId, String titulo, String estudianteNombre, String estudianteCorreo) {
             this.proyectoId = proyectoId;
             this.titulo.set(titulo);
             this.estudianteNombre.set(estudianteNombre);
             this.estudianteCorreo.set(estudianteCorreo);
         }
 
-        public long proyectoId() {
+        public UUID proyectoId() {
             return proyectoId;
         }
 

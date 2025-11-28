@@ -1,8 +1,7 @@
 package co.edu.unicauca.frontend.entities;
 
-public enum EstadoArchivo {
+public enum EstadoFormatoA {
     PENDIENTE,
     APROBADO,
-    RECHAZADO,
     OBSERVADO
 }

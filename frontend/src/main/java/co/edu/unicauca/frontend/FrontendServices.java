@@ -61,7 +61,7 @@ public final class FrontendServices {
         // ===== Dominio local =====
         docenteService = new DocenteService();
         estudianteService = new EstudianteService();
-        proyectoService = new ProyectoService(docenteService, estudianteService);
+        proyectoService = new ProyectoService();
 
         initialized = true;
 

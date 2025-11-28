@@ -1,6 +1,8 @@
 package co.edu.unicauca.frontend.presentation;
 
 import co.edu.unicauca.frontend.FrontendServices;
+import co.edu.unicauca.frontend.entities.EstadoProyecto;
+import co.edu.unicauca.frontend.entities.TipoProyecto;
 import co.edu.unicauca.frontend.infra.dto.ProyectoEstudianteDTO;
 import co.edu.unicauca.frontend.services.ProyectoEstudianteService;
 import co.edu.unicauca.frontend.services.ProyectoService;
@@ -9,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
@@ -40,45 +43,43 @@ public class FormatoAEstudianteController implements Initializable {
     }
 
     public void configurarColumnas() {
-        colTitulo.setCellValueFactory(cell -> cell.getValue().tituloProperty());
+        colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
+        colDirector.setCellValueFactory(new PropertyValueFactory<>("nombreDirector"));
 
         colTipo.setCellValueFactory(cellData -> {
-            String tipo = cellData.getValue().getTipoProyecto();
-            String tipoP;
-            switch (tipo) {
-                case "TRABAJO_DE_INVESTIGACION":
-                    tipoP = "Trabajo de investigación";
-                    break;
-                case "PRACTICA_PROFESIONAL":
-                    tipoP = "Práctica profesional";
-                    break;
-                default:
-                    tipoP = tipo;
-                    break;
+            TipoProyecto tipo = cellData.getValue().getTipoProyecto();
+            String readable;
+
+            if (tipo == null) readable = "";
+            else {
+                switch (tipo) {
+                    case TRABAJO_DE_INVESTIGACION -> readable = "Trabajo de investigación";
+                    case PRACTICA_PROFESIONAL -> readable = "Práctica profesional";
+                    default -> readable = tipo.name();
+                }
             }
-            return new ReadOnlyStringWrapper(tipoP);
+            return new ReadOnlyStringWrapper(readable);
         });
 
-        colDirector.setCellValueFactory(cell -> cell.getValue().nombreDirectorProperty());
-
         colEstado.setCellValueFactory(cellData -> {
-            String tipo = cellData.getValue().getEstadoProyecto(); // EN_TRAMITE | RECHAZADO | TERMINADO
-            String estP;
-            switch (tipo) {
-                case "EN_TRAMITE":
-                    estP = "En trámite";
-                    break;
-                case "RECHAZADO":
-                    estP = "Rechazado";
-                    break;
-                case "TERMINADO":
-                    estP = "Terminado";
-                    break;
-                default:
-                    estP = tipo;
-                    break;
+            EstadoProyecto estado = cellData.getValue().getEstadoProyecto();
+            String readable;
+
+            if (estado == null) readable = "";
+            else {
+                switch (estado) {
+                    case PRIMERA_REVISION_FORMATOA -> readable = "Primera revisión";
+                    case SEGUNDA_REVISION_FORMATOA -> readable = "Segunda revisión";
+                    case TERCERA_REVISION_FORMATOA -> readable = "Tercera revisión";
+                    case FORMATOA_ACEPTADO -> readable = "Formato A aceptado";
+                    case FORMATOA_RECHAZADO -> readable = "Formato A rechazado";
+                    case ANTEPROYECTO_ENVIADO -> readable = "Anteproyecto enviado";
+                    case EN_REVISION_ANTEPROYECTO -> readable = "En revisión de anteproyecto";
+                    default -> readable = estado.name();
+                }
             }
-            return new ReadOnlyStringWrapper(estP);
+
+            return new ReadOnlyStringWrapper(readable);
         });
     }
 
@@ -86,7 +87,7 @@ public class FormatoAEstudianteController implements Initializable {
      * Alineo los íconos con los estados del proyecto.
      */
     private void configurarColumnaEstado() {
-        colEstado.setCellFactory(col -> new TableCell<ProyectoEstudianteDTO, String>() {
+        colEstado.setCellFactory(col -> new TableCell<ProyectoEstudianteDTO, String>()  {
             private final ImageView imageView = new ImageView();
 
             @Override
@@ -99,15 +100,28 @@ public class FormatoAEstudianteController implements Initializable {
                 }
 
                 // Mapeo: EN_TRAMITE -> pendiente, RECHAZADO -> observado, TERMINADO -> aprobado
-                String raw = getTableView().getItems().get(getIndex()).getEstadoProyecto();
-                String key = raw == null ? "" : raw.trim().toUpperCase();
+                ProyectoEstudianteDTO dto = getTableView().getItems().get(getIndex());
+                EstadoProyecto estado = dto.getEstadoProyecto();
 
-                Image img = switch (key) {
-                    case "EN_TRAMITE" -> loadImage("/co/unicauca/workflow/degree_project/images/pendiente.png");
-                    case "RECHAZADO" -> loadImage("/co/unicauca/workflow/degree_project/images/observado.png");
-                    case "TERMINADO" -> loadImage("/co/unicauca/workflow/degree_project/images/aprobado.png");
-                    default -> null;
-                };
+                Image img = null;
+
+                // Si sobra tiempo ponerle colores y iconos difrerentes
+                if (estado != null) {
+                    img = switch (estado) {
+                        case PRIMERA_REVISION_FORMATOA,
+                             SEGUNDA_REVISION_FORMATOA,
+                             TERCERA_REVISION_FORMATOA,
+                             ANTEPROYECTO_ENVIADO,
+                             EN_REVISION_ANTEPROYECTO
+                                -> loadImage("/co/unicauca/workflow/degree_project/images/pendiente.png");
+
+                        case FORMATOA_RECHAZADO
+                                -> loadImage("/co/unicauca/workflow/degree_project/images/observado.png");
+
+                        case FORMATOA_ACEPTADO
+                                -> loadImage("/co/unicauca/workflow/degree_project/images/aprobado.png");
+                    };
+                }
 
                 if (img != null) {
                     imageView.setImage(img);
@@ -134,7 +148,8 @@ public class FormatoAEstudianteController implements Initializable {
             tabla.setItems(FXCollections.observableArrayList(proyectos));
         } catch (Exception e) {
             e.printStackTrace();
-            alerta(Alert.AlertType.ERROR, "Error", null, "Error al cargar los datos: " + e.getMessage());
+            alerta(Alert.AlertType.ERROR, "Error", null,
+                    "Error al cargar los datos: " + e.getMessage());
         }
     }
 

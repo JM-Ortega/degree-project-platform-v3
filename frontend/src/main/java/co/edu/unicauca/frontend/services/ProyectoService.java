@@ -1,6 +1,6 @@
 package co.edu.unicauca.frontend.services;
 
-import co.edu.unicauca.frontend.entities.EstadoArchivo;
+import co.edu.unicauca.frontend.entities.EstadoFormatoA;
 import co.edu.unicauca.frontend.entities.EstadoProyecto;
 import co.edu.unicauca.frontend.entities.TipoProyecto;
 import co.edu.unicauca.frontend.infra.config.PdfValidator;
@@ -13,19 +13,23 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
-public class ProyectoService implements ObservableService{
+public class ProyectoService implements ObservableService {
     private final String baseUrlProyectos = "http://localhost:8080/api/academic/proyectos";
     private final RestTemplate restTemplate;
     private final List<Observer> observers = new ArrayList<>();
-    private final DocenteService docenteService;
-    private final EstudianteService estudianteService;
 
-    public ProyectoService(DocenteService docenteService, EstudianteService estudianteService) {
+    public ProyectoService() {
         this.restTemplate = new RestTemplate();
 
         this.restTemplate.getInterceptors().add((request, body, execution) -> {
@@ -35,31 +39,47 @@ public class ProyectoService implements ObservableService{
             }
             return execution.execute(request, body);
         });
-
-        this.docenteService = docenteService;
-        this.estudianteService = estudianteService;
     }
 
-    public EstadoProyecto enforceAutoCancelIfNeeded(long proyectoId) {
+    public EstadoProyecto enforceAutoCancelIfNeeded(UUID proyectoId) {
         String url = baseUrlProyectos + "/" + proyectoId + "/enforceAutoCancel";
         return restTemplate.getForObject(url, EstadoProyecto.class);
     }
 
     public List<ProyectoInfoDTO> listarProyectosDocente(String correoDocente, String filtro) {
-        String url = baseUrlProyectos + "/docente/" + correoDocente;
+        try {
+            // Codificar el correo para que caracteres como @ no den problemas
+            String correoEncodeado = URLEncoder.encode(correoDocente, StandardCharsets.UTF_8);
 
-        if (filtro != null && !filtro.isEmpty()) {
-            url += "?filtro=" + filtro;
+            String url = baseUrlProyectos + "/docente/" + correoEncodeado;
+
+            if (filtro != null && !filtro.isEmpty()) {
+                url += "?filtro=" + URLEncoder.encode(filtro, StandardCharsets.UTF_8);
+            }
+
+            ResponseEntity<List<ProyectoInfoDTO>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<ProyectoInfoDTO>>() {
+                    }
+            );
+
+            List<ProyectoInfoDTO> body = response.getBody();
+            return body != null ? body : Collections.emptyList();
+
+        } catch (HttpStatusCodeException e) {
+            System.err.println("[ProyectoService] Error HTTP al listar proyectos del docente " + correoDocente);
+            System.err.println("Status: " + e.getStatusCode());
+            System.err.println("Response body: " + e.getResponseBodyAsString());
+
+
+            throw new RuntimeException("Error al consultar los proyectos del docente", e);
+
+        } catch (RestClientException e) {
+            System.err.println("[ProyectoService] Error de comunicación con el backend: " + e.getMessage());
+            throw new RuntimeException("No se pudo conectar con el servidor", e);
         }
-
-        ResponseEntity<List<ProyectoInfoDTO>> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<ProyectoInfoDTO>>() {}
-        );
-
-        return response.getBody();
     }
 
     public void crearProyecto(ProyectoDTO proyecto) {
@@ -87,16 +107,16 @@ public class ProyectoService implements ObservableService{
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Error inesperado al crear el proyecto "+ e.getMessage(), e);
+            throw new RuntimeException("Error inesperado al crear el proyecto " + e.getMessage(), e);
         }
     }
 
-    public boolean canResubmit(long proyectoId) {
+    public boolean canResubmit(UUID proyectoId) {
         String url = baseUrlProyectos + "/resubmit/" + proyectoId;
         return restTemplate.getForObject(url, Boolean.class);
     }
 
-    public boolean tieneObservacionesFormatoA(long proyectoId) {
+    public boolean tieneObservacionesFormatoA(UUID proyectoId) {
         String url = baseUrlProyectos + "/observacionesFA/" + proyectoId;
         return restTemplate.getForObject(url, Boolean.class);
     }
@@ -130,7 +150,7 @@ public class ProyectoService implements ObservableService{
         }
     }
 
-    public FormatoADTO subirNuevaVersionFormatoA(long proyectoId, FormatoADTO formatoADTO){
+    public FormatoADTO subirNuevaVersionFormatoA(UUID proyectoId, FormatoADTO formatoADTO) {
         /*Esta validacion ya se hace en el back al insertar un nuevo proyecto
         if (!existeProyecto(proyectoId))
             throw new IllegalArgumentException("Proyecto no existe");
@@ -151,20 +171,20 @@ public class ProyectoService implements ObservableService{
         int max = maxVersionFormatoA(proyectoId);
 
         formatoADTO.setNroVersion(max + 1);
-        formatoADTO.setEstado(EstadoArchivo.PENDIENTE);
+        formatoADTO.setEstado(EstadoFormatoA.PENDIENTE);
 
         insertarFormatoA(formatoADTO, proyectoId);
         notifyObservers();
         return formatoADTO;
     }
 
-    public int maxVersionFormatoA(long id) {
+    public int maxVersionFormatoA(UUID id) {
         String url = baseUrlProyectos + "/" + id + "/formatoA/max-version";
         ResponseEntity<Integer> response = restTemplate.getForEntity(url, Integer.class);
         return response.getBody() != null ? response.getBody() : 0;
     }
 
-    public void insertarFormatoA(FormatoADTO formatoADTO, long proyectoId){
+    public void insertarFormatoA(FormatoADTO formatoADTO, UUID proyectoId) {
         String url = baseUrlProyectos + "/insertarFormatoAProyecto/" + proyectoId;
         restTemplate.postForEntity(url, formatoADTO, String.class);
     }
@@ -180,7 +200,8 @@ public class ProyectoService implements ObservableService{
                 url,
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<AnteproyectoDTO>>() {}
+                new ParameterizedTypeReference<List<AnteproyectoDTO>>() {
+                }
         );
         return response.getBody();
     }
@@ -202,7 +223,7 @@ public class ProyectoService implements ObservableService{
         }
     }
 
-    public AnteproyectoDTO obtenerAnteproyecto(long proyectoId) {
+    public AnteproyectoDTO obtenerAnteproyecto(UUID proyectoId) {
         String url = baseUrlProyectos + "/" + proyectoId + "/anteproyecto";
 
         try {
@@ -215,7 +236,7 @@ public class ProyectoService implements ObservableService{
         }
     }
 
-    public FormatoADTO obtenerUltimoFormatoAConObservaciones(long proyectoId) {
+    public FormatoADTO obtenerUltimoFormatoAConObservaciones(UUID proyectoId) {
         String url = baseUrlProyectos + "/ultimoFormatoAConObservaciones" + "/" + proyectoId;
         try {
             ResponseEntity<FormatoADTO> response = restTemplate.getForEntity(url, FormatoADTO.class);

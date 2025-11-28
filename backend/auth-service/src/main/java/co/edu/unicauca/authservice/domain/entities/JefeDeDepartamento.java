@@ -5,6 +5,8 @@ import co.edu.unicauca.shared.contracts.model.Departamento;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 /**
  * Representa al jefe de un departamento académico dentro de la universidad.
  *
@@ -38,7 +40,7 @@ public class JefeDeDepartamento extends Persona {
         // Constructor requerido por JPA
     }
 
-    public JefeDeDepartamento(String id,
+    public JefeDeDepartamento(UUID id,
                               String codigo,
                               String nombres,
                               String apellidos,

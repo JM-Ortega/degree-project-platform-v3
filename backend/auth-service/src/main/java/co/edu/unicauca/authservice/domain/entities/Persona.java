@@ -4,6 +4,8 @@ import co.edu.unicauca.shared.contracts.model.Programa;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 /**
  * Entidad base abstracta que representa a una persona registrada en el sistema.
  *
@@ -29,7 +31,7 @@ public abstract class Persona {
             description = "Identificador único (UUID) de la persona.",
             example = "f0b8c19a-21ac-4b3a-8e1b-8a3c256ca8cd"
     )
-    private String id;
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 30)
     @Schema(
@@ -76,7 +78,7 @@ public abstract class Persona {
         // Requerido por JPA
     }
 
-    public Persona(String id,
+    public Persona(UUID id,
                    String codigo,
                    String nombres,
                    String apellidos,
@@ -93,7 +95,7 @@ public abstract class Persona {
     }
 
     // Getters y setters
-    public String getId() { return id; }
+    public UUID getId() { return id; }
     public String getCodigo() { return codigo; }
     public String getNombres() { return nombres; }
     public String getApellidos() { return apellidos; }

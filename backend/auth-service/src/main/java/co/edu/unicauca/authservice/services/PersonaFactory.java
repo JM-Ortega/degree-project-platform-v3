@@ -50,7 +50,7 @@ public class PersonaFactory {
      */
     public Persona crearDesdeDto(RegistroPersonaDto dto, Usuario usuario) {
         Rol rolPrincipal = elegirRolPrincipal(dto.roles());
-        String id = UUID.randomUUID().toString();
+        UUID id = UUID.randomUUID();
 
         return switch (rolPrincipal) {
             case ESTUDIANTE -> new Estudiante(

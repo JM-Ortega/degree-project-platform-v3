@@ -4,6 +4,8 @@ import co.edu.unicauca.shared.contracts.model.Programa;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 /**
  * Representa a un estudiante registrado en el sistema.
  *
@@ -28,7 +30,7 @@ public class Estudiante extends Persona {
         // Constructor protegido requerido por JPA
     }
 
-    public Estudiante(String id,
+    public Estudiante(UUID id,
                       String codigo,
                       String nombres,
                       String apellidos,

@@ -155,8 +155,10 @@ public class AuthService {
 
             UserCreatedEvent userEvent = new UserCreatedEvent(
                     persona.getId(),
-                    persona.getNombres() + " " + persona.getApellidos(),
+                    persona.getNombres(),
+                    persona.getApellidos(),
                     usuario.getEmail(),           // ya es el normalizado
+                    persona.getCelular(),         // puede ser null
                     persona.getPrograma(),
                     departamento,
                     usuario.getRoles()
@@ -168,16 +170,13 @@ public class AuthService {
             String message = "Tu cuenta ha sido creada correctamente.";
 
             var emails = List.of(usuario.getEmail());
-            var celulares = (persona.getCelular() != null && !persona.getCelular().isBlank())
-                    ? List.of(persona.getCelular())
-                    : List.<String>of();
 
             notificationPublisher.publishNotification(
                     type,
                     emails,
-                    celulares,
                     subject,
-                    message
+                    message,
+                    persona.getPrograma()
             );
 
             log.info("Eventos publicados correctamente para usuario {}", usuario.getEmail());

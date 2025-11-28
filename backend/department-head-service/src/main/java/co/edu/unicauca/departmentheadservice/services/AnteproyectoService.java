@@ -4,10 +4,7 @@ import co.edu.unicauca.departmentheadservice.access.AnteproyectoRepository;
 import co.edu.unicauca.departmentheadservice.entities.Anteproyecto;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class AnteproyectoService {
@@ -30,42 +27,39 @@ public class AnteproyectoService {
      * @return lista de Anteproyectos sin evaluadores que coinciden con el título o ID.
      */
     public List<Anteproyecto> buscarPorNombreOIdSinEvaluadores(String nombre, String id) {
+
         Set<Anteproyecto> resultado = new HashSet<>();
 
         boolean buscarPorNombre = nombre != null && !nombre.trim().isEmpty();
         boolean buscarPorId = id != null && !id.trim().isEmpty();
 
-        // Si no hay criterios de búsqueda, devolver todos
+        // Si no hay criterios, devolver todos
         if (!buscarPorNombre && !buscarPorId) {
             return anteproyectoRepository.findByEvaluadoresIsEmpty();
         }
 
-        // Buscar por nombre (si se proporciona)
+        // Buscar por nombre
         if (buscarPorNombre) {
-            String nombreBusqueda = nombre.trim();
-            List<Anteproyecto> porNombre = anteproyectoRepository
-                .findByEvaluadoresIsEmptyAndTituloContainingIgnoreCase(nombreBusqueda);
+            List<Anteproyecto> porNombre =
+                    anteproyectoRepository.findByEvaluadoresIsEmptyAndTituloContainingIgnoreCase(nombre.trim());
+
             resultado.addAll(porNombre);
         }
 
-        // Buscar por ID (si se proporciona)
+        // Buscar por ID (UUID)
         if (buscarPorId) {
             String idBusqueda = id.trim();
             try {
-                // Intentar buscar como ID numérico
-                Long idLong = Long.parseLong(idBusqueda);
-                List<Anteproyecto> porId = anteproyectoRepository
-                    .findByEvaluadoresIsEmptyAndId(idLong);
-                resultado.addAll(porId);
-            } catch (NumberFormatException e) {
-                // Si no es numérico, buscar en otros campos (como código)
-                // Por ejemplo, si tienes un campo código:
-                // List<Anteproyecto> porCodigo = anteproyectoRepository
-                //     .findByEvaluadoresIsEmptyAndCodigoContainingIgnoreCase(idBusqueda);
-                // resultado.addAll(porCodigo);
+                UUID uuid = UUID.fromString(idBusqueda);
 
-                // Por ahora, solo log el error
-                System.err.println("ID no numérico proporcionado: " + idBusqueda);
+                // Buscar por el campo de dominio anteproyectoId (no el internalId)
+                List<Anteproyecto> porId =
+                        anteproyectoRepository.findByEvaluadoresIsEmptyAndAnteproyectoId(uuid);
+
+                resultado.addAll(porId);
+
+            } catch (IllegalArgumentException e) {
+                System.err.println("ID proporcionado no es un UUID válido: " + idBusqueda);
             }
         }
 

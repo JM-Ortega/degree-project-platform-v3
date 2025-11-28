@@ -46,7 +46,7 @@ public class DepartmentHeadEventListener {
         }
 
         try {
-            Docente docente = new Docente(event.id().toString(), event.nombre(), event.email());
+            Docente docente = new Docente(event.id(), event.nombre(), event.email());
             docenteRepository.save(docente);
             log.info("[DeptHead] Docente almacenado: {} ({})", docente.getNombre(), docente.getEmail());
         } catch (Exception e) {

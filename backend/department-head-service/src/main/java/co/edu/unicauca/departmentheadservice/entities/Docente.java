@@ -4,12 +4,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "docentes")
 public class Docente {
 
     @Id
-    private String personaId; // ID único de persona para el Docente
+    private UUID personaId; // ID único de persona para el Docente
 
     private String nombre;
     private String email; // Correo electrónico del Docente
@@ -18,14 +20,14 @@ public class Docente {
     protected Docente() {}
 
     // Constructor con parámetros
-    public Docente(String personaId, String nombre, String email) {
+    public Docente(UUID personaId, String nombre, String email) {
         this.personaId = personaId;
         this.nombre = nombre;
         this.email = email;
     }
 
     // Getters y setters
-    public String getPersonaId() {
+    public UUID getPersonaId() {
         return personaId;
     }
 
@@ -37,7 +39,7 @@ public class Docente {
         return email;
     }
 
-    public void setPersonaId(String personaId) {
+    public void setPersonaId(UUID personaId) {
         this.personaId = personaId;
     }
 

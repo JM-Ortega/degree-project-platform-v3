@@ -110,7 +110,8 @@ public class DepartmentHeadDataLoader implements CommandLineRunner {
     private Docente getOrCreateDocente(String nombre, String email) {
         return docenteRepository.findByEmail(email)
                 .orElseGet(() -> {
-                    Docente nuevo = new Docente(email, nombre, email);
+                    UUID personaId = UUID.nameUUIDFromBytes(email.getBytes());
+                    Docente nuevo = new Docente(personaId, nombre, email);
                     return docenteRepository.save(nuevo);
                 });
     }

@@ -2,22 +2,22 @@ package co.edu.unicauca.academicprojectservice.adapter.out.persistence;
 
 import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.*;
 import co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository.*;
+import co.edu.unicauca.academicprojectservice.application.dto.AnteproyectoDTO;
+import co.edu.unicauca.academicprojectservice.application.dto.DocenteDTO;
+import co.edu.unicauca.academicprojectservice.application.dto.ProyectoEstudianteDTO;
+import co.edu.unicauca.academicprojectservice.application.dto.ProyectoInfoDTO;
 import co.edu.unicauca.academicprojectservice.application.mapper.AnteproyectoMapper;
 import co.edu.unicauca.academicprojectservice.application.mapper.FormatoAMapper;
-import co.edu.unicauca.academicprojectservice.application.dto.*;
 import co.edu.unicauca.academicprojectservice.application.mapper.ProyectoMapper;
 import co.edu.unicauca.academicprojectservice.domain.model.DocenteId;
 import co.edu.unicauca.academicprojectservice.domain.model.EstudianteId;
 import co.edu.unicauca.academicprojectservice.port.out.persistence.DbPortProyecto;
-
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
-import jakarta.persistence.EntityNotFoundException;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -91,8 +91,13 @@ public class DbAdapterProyecto implements DbPortProyecto {
     public List<ProyectoInfoDTO> listarInfoProyectosPorCorreoDocente(String correoDocente, String filtro) {
         Docente docente = docenteRepository.findByCorreo(correoDocente)
                 .orElseThrow(() -> new EntityNotFoundException("Docente no encontrado con correo: " + correoDocente));
-        return proyectoRepository.listarInfoPorDocente(docente.getId(), filtro);
+
+        String filtroNormalizado =
+                (filtro == null || filtro.isBlank()) ? null : filtro.trim();
+
+        return proyectoRepository.listarInfoPorDocente(docente.getId(), filtroNormalizado);
     }
+
 
     @Override
     public void guardarProyecto(co.edu.unicauca.academicprojectservice.domain.model.Proyecto proyecto) {
@@ -107,19 +112,37 @@ public class DbAdapterProyecto implements DbPortProyecto {
 
         List<FormatoA> formatosA = formatoAMapper.toEntityList(proyecto.getFormatosA());
 
-        // Se incluyo el guardado del anteproyecto
-        Anteproyecto anteproyecto = anteproyectoMapper.domainToEntity(proyecto.getAnteproyecto());
+        Anteproyecto anteproyecto = null;
 
-        List<Docente> evaluadores = proyecto.getAnteproyecto().getEvaluadores().stream()
-                .map(e -> docenteRepository.findById(e.value())
-                        .orElseThrow(() -> new IllegalArgumentException("Evaluador no encontrado")))
-                .toList();
+        if (proyecto.getAnteproyecto() != null) {
+            anteproyecto = anteproyectoMapper.domainToEntity(proyecto.getAnteproyecto());
 
-        anteproyecto.setEvaluadores(evaluadores);
+            if (proyecto.getAnteproyecto().getEvaluadores() != null) {
+                List<Docente> evaluadores = proyecto.getAnteproyecto().getEvaluadores().stream()
+                        .map(e -> docenteRepository.findById(e.value())
+                                .orElseThrow(() -> new IllegalArgumentException("Evaluador no encontrado")))
+                        .toList();
 
-        Proyecto p = new Proyecto(proyecto.getId(), proyecto.getTitulo(), listaEstudiantes, docente, null, formatosA, proyecto.getCartaLaboral(), anteproyecto, proyecto.getTipoProyecto(), proyecto.getEstadoProyecto());
+                anteproyecto.setEvaluadores(evaluadores);
+            }
+        }
+
+        Proyecto p = new Proyecto(
+                proyecto.getId(),
+                proyecto.getTitulo(),
+                listaEstudiantes,
+                docente,
+                null,
+                formatosA,
+                proyecto.getCartaLaboral(),
+                anteproyecto,
+                proyecto.getTipoProyecto(),
+                proyecto.getEstadoProyecto()
+        );
+
         proyectoRepository.save(p);
     }
+
 
     @Override
     public void actualizarEstadoProyecto(UUID proyectoId, EstadoProyecto estado) {

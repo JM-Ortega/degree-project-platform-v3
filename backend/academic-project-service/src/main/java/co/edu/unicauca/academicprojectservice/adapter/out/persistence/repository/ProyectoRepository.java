@@ -1,9 +1,9 @@
 package co.edu.unicauca.academicprojectservice.adapter.out.persistence.repository;
 
 import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Proyecto;
+import co.edu.unicauca.academicprojectservice.application.dto.ProyectoInfoDTO;
 import co.edu.unicauca.shared.contracts.model.EstadoProyecto;
 import co.edu.unicauca.shared.contracts.model.TipoProyecto;
-import co.edu.unicauca.academicprojectservice.application.dto.ProyectoInfoDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,28 +19,30 @@ import java.util.UUID;
 public interface ProyectoRepository extends JpaRepository<Proyecto, UUID> {
 
     @Query("""
-        SELECT new co.edu.unicauca.academicprojectservice.application.dto.ProyectoInfoDTO(
-            p.id,
-            p.titulo,
-            p.tipoProyecto,
-            p.estadoProyecto,
-            CONCAT(e.nombres, ' ', e.apellidos),
-            e.correo
-        )
-        FROM Proyecto p
-        JOIN p.estudiantes e
-        WHERE 
-            (p.director.id = :docenteId)
-            AND (
-                :filtro IS NULL OR :filtro = '' OR
-                LOWER(p.titulo) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-                LOWER(e.nombres) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-                LOWER(e.apellidos) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-                LOWER(e.correo) LIKE LOWER(CONCAT('%', :filtro, '%'))
-            )
-        ORDER BY p.id DESC
-    """)
-    List<ProyectoInfoDTO> listarInfoPorDocente(@Param("docenteId") UUID docenteId, @Param("filtro") String filtro);
+                SELECT new co.edu.unicauca.academicprojectservice.application.dto.ProyectoInfoDTO(
+                    p.id,
+                    p.titulo,
+                    p.tipoProyecto,
+                    p.estadoProyecto,
+                    CONCAT(e.nombres, ' ', e.apellidos),
+                    e.correo
+                )
+                FROM Proyecto p
+                JOIN p.estudiantes e
+                WHERE 
+                    (p.director.id = :docenteId)
+                    AND (
+                        :filtro IS NULL OR :filtro = '' OR
+                        LOWER(p.titulo) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                        LOWER(e.nombres) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                        LOWER(e.apellidos) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                        LOWER(e.correo) LIKE LOWER(CONCAT('%', :filtro, '%'))
+                    )
+                ORDER BY p.id DESC
+            """)
+    List<ProyectoInfoDTO> listarInfoPorDocente(@Param("docenteId") UUID docenteId,
+                                               @Param("filtro") String filtro);
+
 
     @Modifying
     @Transactional

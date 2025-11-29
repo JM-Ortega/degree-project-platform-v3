@@ -110,7 +110,8 @@ public class MessagingAdapter implements MessagingPort {
     public void publicarAnteproyectoSinEvaluadores(Proyecto proyecto) {
         Anteproyecto ante = proyecto.getAnteproyecto();
         if (ante == null) {
-            log.warn("[RabbitMQ] No se pudo publicar AnteproyectoSinEvaluadoresEvent: proyecto {} sin anteproyecto", proyecto.getId());
+            log.warn("[RabbitMQ] No se pudo publicar AnteproyectoSinEvaluadoresEvent: proyecto {} sin anteproyecto",
+                    proyecto.getId());
             return;
         }
 
@@ -141,18 +142,21 @@ public class MessagingAdapter implements MessagingPort {
     }
 
     @Override
-    public void publicarFormatoActualizado(Proyecto proyectoCreado){
-        co.edu.unicauca.shared.contracts.events.academic.DTOs.FormatoADTO f = new co.edu.unicauca.shared.contracts.events.academic.DTOs.FormatoADTO();
-        f.setId(proyectoCreado.getFormatosA().getLast().getId());
+    public void publicarFormatoActualizado(Proyecto proyectoCreado) {
+        FormatoA ultimo = proyectoCreado.getFormatosA().getLast();
+
+        FormatoADTO f = new FormatoADTO();
+        f.setId(ultimo.getId());
         f.setProyectoId(proyectoCreado.getId());
-        f.setNroVersion(proyectoCreado.getFormatosA().getLast().getNroVersion());
-        f.setNombreFormatoA(proyectoCreado.getFormatosA().getLast().getNombreFormato());
-        f.setFechaSubida(proyectoCreado.getFormatosA().getLast().getFechaCreacion());
-        f.setBlob(proyectoCreado.getFormatosA().getLast().getBlob());
-        f.setEstado(proyectoCreado.getFormatosA().getLast().getEstado());
+        f.setNroVersion(ultimo.getNroVersion());
+        f.setNombreFormatoA(ultimo.getNombreFormato());
+        f.setFechaSubida(ultimo.getFechaCreacion());
+        f.setBlob(ultimo.getBlob());
+        f.setEstado(ultimo.getEstado());
 
-        rabbitTemplate.convertAndSend(mainExchange, PROJECT_UPDATED, f);
+        rabbitTemplate.convertAndSend(mainExchange, ACADEMIC_FORMATO_A_CHANGED, f);
 
-        log.info("[RabbitMQ] Nueva version de FormatoA enviada. rk={} id={}", PROJECT_UPDATED, f.getId());
+        log.info("[RabbitMQ] Nueva version de FormatoA enviada. rk={} proyectoId={} formatoId={}",
+                ACADEMIC_FORMATO_A_CHANGED, proyectoCreado.getId(), f.getId());
     }
 }

@@ -76,7 +76,7 @@ public class RabbitMQConfig {
                 .build();
     }
 
-    // --- NUEVA COLA dedicada a los eventos de creación de usuarios ---
+    // Cola dedicada a los eventos de creación de usuarios
     @Bean
     public Queue projectAuthQueue() {
         return QueueBuilder.durable(projectAuthQueueName)
@@ -102,17 +102,32 @@ public class RabbitMQConfig {
                 .with(PROJECT_UPDATED);
     }
 
+    // Formato A aprobado por el coordinador
     @Bean
-    public Binding bindingFormatoAApproved(Queue projectFormatoAQueue, TopicExchange mainExchange) {
+    public Binding bindingFormatoAApproved(
+            @Qualifier("projectFormatoAQueue") Queue projectFormatoAQueue,
+            TopicExchange mainExchange) {
+
         return BindingBuilder.bind(projectFormatoAQueue)
                 .to(mainExchange)
                 .with(COORDINATOR_FORMAT_A_APPROVED);
     }
 
     @Bean
+    public Binding bindingFormatoARejected(
+            @Qualifier("projectFormatoAQueue") Queue projectFormatoAQueue,
+            TopicExchange mainExchange) {
+
+        return BindingBuilder.bind(projectFormatoAQueue)
+                .to(mainExchange)
+                .with(COORDINATOR_FORMAT_A_REJECTED);
+    }
+
+    @Bean
     public Binding bindAuthUserCreated(
             @Qualifier("projectAuthQueue") Queue projectAuthQueue,
             TopicExchange mainExchange) {
+
         return BindingBuilder.bind(projectAuthQueue)
                 .to(mainExchange)
                 .with(AUTH_USER_CREATED);

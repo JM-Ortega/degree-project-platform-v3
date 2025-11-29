@@ -17,20 +17,19 @@ public class FormatoAListener {
         this.proyectoService = proyectoService;
     }
 
-    /**
-     * Escucha mensajes relacionados con FormatoA o Proyectos provenientes del exchange principal.
-     * Los eventos llegan desde otros microservicios (p. ej., coordinator-service o project-service)
-     * a través de la cola del servicio académico.
-     */
     @RabbitListener(queues = "${messaging.queues.projectFormatoA}")
     @Transactional
     public void handleFormatoAEvent(FormatoADTO dto) {
         try {
             if (dto == null) {
-                System.err.println("[RabbitMQ] FormatoA DTO nulo — se ignora");
+                System.err.println("❌ [RabbitMQ] FormatoA DTO nulo — ignorado");
                 return;
             }
-            System.out.println("📩 [RabbitMQ] Mensaje recibido (FormatoA): " + dto);
+
+            System.out.printf(
+                    "📩 [RabbitMQ] Evento FormatoA recibido: proyectoId=%s, estado=%s, version=%d%n",
+                    dto.getProyectoId(), dto.getEstado(), dto.getNroVersion()
+            );
 
             if (dto.getProyectoId() == null) {
                 throw new IllegalArgumentException("proyectoId es requerido");
@@ -39,19 +38,21 @@ public class FormatoAListener {
                 throw new IllegalArgumentException("estado es requerido");
             }
 
-            final String estadoName = (dto.getEstado() instanceof Enum<?>)
-                    ? ((Enum<?>) dto.getEstado()).name()
-                    : dto.getEstado().toString();
-            final EstadoFormatoA estado = EstadoFormatoA.valueOf(estadoName);
+            EstadoFormatoA estado = dto.getEstado();
 
-            proyectoService.registrarResultadoRevisionFormatoADesdeEvento(dto.getProyectoId(), estado);
+            proyectoService.registrarResultadoRevisionFormatoADesdeEvento(
+                    dto.getProyectoId(),
+                    estado
+            );
 
-            System.out.println("[AcademicProjectService] Resultado de revisión de FormatoA aplicado al proyecto");
+            System.out.println("✔️ [AcademicProjectService] Revisión de FormatoA aplicada al proyecto");
+
         } catch (IllegalArgumentException ex) {
-            System.err.println("[RabbitMQ] Evento FormatoA inválido: " + ex.getMessage());
-            throw new AmqpRejectAndDontRequeueException("Evento FormatoA inválido", ex);
+            System.err.println("⚠️ [RabbitMQ] Evento FormatoA inválido: " + ex.getMessage());
+            throw new AmqpRejectAndDontRequeueException("Evento inválido FormatoA", ex);
+
         } catch (Exception ex) {
-            System.err.println("[RabbitMQ] Error procesando FormatoA: " + ex.getMessage());
+            System.err.println("❌ [RabbitMQ] Error procesando FormatoA: " + ex.getMessage());
             throw new AmqpRejectAndDontRequeueException("Error procesando FormatoA", ex);
         }
     }

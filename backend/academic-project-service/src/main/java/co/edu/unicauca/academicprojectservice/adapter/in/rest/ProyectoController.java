@@ -33,10 +33,10 @@ public class ProyectoController implements ProyectoPort {
     @PostMapping("/insertarFormatoAProyecto/{proyectoId}")
     @Override
     public ResponseEntity<String> insertarFormatoAProyecto(
-            @PathVariable Long proyectoId,
+            @PathVariable UUID proyectoId,
             @RequestBody FormatoADTO formatoA
     ) {
-        proyectoService.insertarFormatoAEnProyecto(UUID.fromString(proyectoId.toString()), formatoA);
+        proyectoService.insertarFormatoAEnProyecto(proyectoId, formatoA);
         return ResponseEntity.ok("Formato A insertado correctamente");
     }
 

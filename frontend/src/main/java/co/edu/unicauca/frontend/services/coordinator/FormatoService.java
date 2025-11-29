@@ -46,7 +46,9 @@ public class FormatoService {
         if (b == null || b.isBlank()) b = "http://localhost:8080/api";
         this.baseUrl = trimRightSlash(b);
 
-        this.epListar = ensureLeadingSlash(orDefault("api.endpoint.formatoa.listar", "/coordinator/formatoA/listar/{programa}"));
+        this.epListar = ensureLeadingSlash(
+                orDefault("api.endpoint.formatoa.listar", "/coordinator/formatoA/listar/{programa}")
+        );
         this.epGet = ensureLeadingSlash(orDefault("api.endpoint.formatoa.get", "/coordinator/formatoA/{id}"));
         this.epDownload = ensureLeadingSlash(orDefault("api.endpoint.formatoa.descargar", "/coordinator/formatoA/{id}/descargar"));
         this.epUpdate = ensureLeadingSlash(orDefault("api.endpoint.formatoa.actualizar", "/coordinator/formatoA/actualizar/{id}"));
@@ -69,9 +71,18 @@ public class FormatoService {
      * Lista de Formato A (resumen) por programa vía Gateway
      */
     public List<FormatoAResumen> obtenerFormatosAResumen() {
-        String programa = "INGENIERIA_DE_SISTEMAS";
-        String programaEnc = URLEncoder.encode(programa.toUpperCase().trim(), StandardCharsets.UTF_8);
-        String url = baseUrl + epListar.replace("{programa}", programaEnc);
+        // 1. Sacar el email del usuario logueado
+        String email = SessionManager.getInstance().getUserEmail();
+        if (email == null || email.isBlank()) {
+            System.err.println("No hay email en sesión");
+            return List.of();
+        }
+
+        // 2. Armar la URL con el email como query param
+        String emailEnc = URLEncoder.encode(email.toLowerCase().trim(), StandardCharsets.UTF_8);
+        String url = baseUrl + epListar + "?email=" + emailEnc;
+        // ej: baseUrl = http://gateway/api/coordinador
+        // epListar = /formatos-a
 
         try {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -85,7 +96,6 @@ public class FormatoService {
             }
 
             HttpRequest request = builder.GET().build();
-
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             handleErrors(url, response);
 
@@ -97,12 +107,12 @@ public class FormatoService {
 
             return dtoList.stream()
                     .map(dto -> new FormatoAResumen(
-                            dto.getId(),
+                            dto.getId(), // String (UUID)
                             dto.getNombreProyecto(),
                             dto.getNombreDirector(),
-                            dto.getTipoProyecto() != null ? dto.getTipoProyecto().toString() : "",
+                            dto.getTipoProyecto(),
                             dto.getFechaSubida(),
-                            dto.getEstadoFormatoA() != null ? dto.getEstadoFormatoA().toString() : "",
+                            dto.getEstadoFormatoA(),
                             dto.getNroVersion(),
                             dto.getNombreFormatoA()
                     ))
@@ -120,7 +130,7 @@ public class FormatoService {
     /**
      * Descargar PDF vía Gateway (devuelve bytes)
      */
-    public byte[] descargarFormatoA(Long id) throws IOException, InterruptedException {
+    public byte[] descargarFormatoA(String id) throws IOException, InterruptedException {
         String url = baseUrl + epDownload.replace("{id}", String.valueOf(id));
 
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -145,7 +155,7 @@ public class FormatoService {
      * PUT multipart/form-data vía Gateway
      */
     public HttpResponse<String> actualizarFormato(
-            Long formatoId, String nuevoEstado, File archivo, String nombreArchivo, String horaActual
+            String formatoId, String nuevoEstado, File archivo, String nombreArchivo, String horaActual
     ) throws IOException, InterruptedException {
 
         HttpRequest.BodyPublisher body = buildMultipartBody(archivo, nuevoEstado, nombreArchivo, horaActual);

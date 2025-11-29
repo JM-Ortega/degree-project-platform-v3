@@ -1,3 +1,4 @@
+/*
 package co.edu.unicauca.gateway.config;
 
 import org.springframework.context.annotation.Bean;
@@ -27,7 +28,7 @@ public class SecurityConfig {
 }
 
 
-/*
+*/
 package co.edu.unicauca.gateway.config;
 
 import org.springframework.context.annotation.Bean;
@@ -121,4 +122,4 @@ public class SecurityConfig {
         };
     }
 }
-*/
+/**/

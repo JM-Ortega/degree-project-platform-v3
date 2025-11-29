@@ -1,25 +1,26 @@
 package co.edu.unicauca.coordinatorservice.entity;
 
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
+import co.edu.unicauca.shared.contracts.model.TipoProyecto;
 import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
-import co.edu.unicauca.shared.contracts.model.TipoProyecto;
-
 @Entity
 @Table(name = "formato_a")
 public class FormatoA implements Serializable {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;  // mismo UUID que en academic-project-service
 
     @Column(name = "proyecto_id", nullable = false)
     private UUID proyectoId;
 
-    @Column(name = "nro_version",  nullable = false)
+    @Column(name = "nro_version", nullable = false)
     private int nroVersion;
 
     @Column(name = "nombre_formato_a")
@@ -58,6 +59,11 @@ public class FormatoA implements Serializable {
     @Enumerated(EnumType.STRING)
     private TipoProyecto tipoProyecto;
 
+    public FormatoA() {
+        // requerido por JPA
+    }
+
+    // ===== Getters & Setters =====
     public UUID getId() {
         return id;
     }

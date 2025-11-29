@@ -63,6 +63,7 @@ messaging:
     auth: auth-service.q
     project: academic-project-service.q
     coordinator: coordinator-service.q
+    coordinatorFormatoA: coordinator-service.formata.q
     department: department-head-service.q
     notification: notification-service.q
 
@@ -85,6 +86,7 @@ messaging:
     formatAApprovedByCoordinator: coordinator.formata.approved
     proposalApprovedByDeptHead: department.proposal.approved
     notificationAny: notification.send.*
+
 
 # ======================================================
 # Configuracion del servidor embebido (Tomcat)

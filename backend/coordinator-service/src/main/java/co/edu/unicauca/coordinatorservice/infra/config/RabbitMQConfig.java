@@ -9,96 +9,129 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static co.edu.unicauca.shared.contracts.messaging.RoutingKeys.*;
+
 @Configuration
 public class RabbitMQConfig {
 
+    // ========= Nombres de exchanges =========
+
     @Value("${messaging.exchange.main}")
-    private String mainExchange;
+    private String mainExchangeName;
 
     @Value("${messaging.exchange.dlx}")
-    private String dlxExchange;
+    private String dlxExchangeName;
 
+    // ========= Nombres de colas del coordinator =========
+
+    // Eventos de proyecto (ProyectoDTO)
     @Value("${messaging.queues.coordinator}")
-    private String coordinatorQueue;
+    private String coordinatorProjectQueueName;
 
-    @Value("${messaging.queues.coordinatorDlq}")
-    private String coordinatorDlq;
+    // Eventos de Formato A (FormatoADTO)
+    @Value("${messaging.queues.coordinatorFormatoA}")
+    private String coordinatorFormatoAQueueName;
 
+    // Eventos de usuario creado (auth.user.created)
     @Value("${messaging.queues.coordinatorAuth}")
-    private String coordinatorAuthQueue; // ✅ nueva cola para eventos de usuario
+    private String coordinatorAuthQueueName;
 
-    @Value("${messaging.routing.formatAApprovedByCoordinator}")
-    private String routingKeyFormatAApproved;
+    // Dead Letter Queue del coordinator
+    @Value("${messaging.queues.coordinatorDlq}")
+    private String coordinatorDlqQueueName;
 
-    // 1) Exchange principal
+    // ========= Exchanges =========
+
     @Bean
     public TopicExchange mainExchange() {
-        return new TopicExchange(mainExchange, true, false);
+        return new TopicExchange(mainExchangeName, true, false);
     }
 
-    // 2) Dead Letter Exchange (DLX)
     @Bean
     public TopicExchange deadLetterExchange() {
-        return new TopicExchange(dlxExchange, true, false);
+        return new TopicExchange(dlxExchangeName, true, false);
     }
 
-    // 3) Cola principal
+    // ========= Colas =========
+
+    // Cola para eventos de proyecto
     @Bean
-    public Queue coordinatorQueueBean() {
-        return QueueBuilder.durable(coordinatorQueue)
-                .withArgument("x-dead-letter-exchange", dlxExchange)
-                .withArgument("x-dead-letter-routing-key", coordinatorDlq)
+    public Queue coordinatorProjectQueue() {
+        return QueueBuilder.durable(coordinatorProjectQueueName)
+                .withArgument("x-dead-letter-exchange", dlxExchangeName)
+                .withArgument("x-dead-letter-routing-key", coordinatorDlqQueueName)
                 .build();
     }
 
-    // 4) Cola de mensajes muertos (DLQ)
+    // Cola para eventos de Formato A
     @Bean
-    public Queue coordinatorDlqBean() {
-        return QueueBuilder.durable(coordinatorDlq).build();
+    public Queue coordinatorFormatoAQueue() {
+        return QueueBuilder.durable(coordinatorFormatoAQueueName)
+                .withArgument("x-dead-letter-exchange", dlxExchangeName)
+                .withArgument("x-dead-letter-routing-key", coordinatorDlqQueueName)
+                .build();
     }
 
-    // 5) Binding: mainExchange -> coordinatorQueue
+    // Cola para eventos de usuario creado (auth.user.created)
     @Bean
-    public Binding bindingCoordinator() {
+    public Queue coordinatorAuthQueue() {
+        return QueueBuilder.durable(coordinatorAuthQueueName)
+                .withArgument("x-dead-letter-exchange", dlxExchangeName)
+                .withArgument("x-dead-letter-routing-key", coordinatorDlqQueueName)
+                .build();
+    }
+
+    // Dead Letter Queue del coordinator-service
+    @Bean
+    public Queue coordinatorDlqQueue() {
+        return QueueBuilder.durable(coordinatorDlqQueueName).build();
+    }
+
+    // ========= Bindings =========
+
+    // project.created -> cola de proyectos del coordinator
+    @Bean
+    public Binding bindCoordinatorProject() {
         return BindingBuilder
-                .bind(coordinatorQueueBean())
+                .bind(coordinatorProjectQueue())
                 .to(mainExchange())
-                .with(routingKeyFormatAApproved);
+                .with(PROJECT_CREATED);
     }
 
-    // ✅ NUEVA COLA para eventos de creación de usuario (auth.user.created)
+    // academic.formata.changed -> cola de Formato A del coordinator
     @Bean
-    public Queue coordinatorAuthQueueBean() {
-        return QueueBuilder.durable(coordinatorAuthQueue)
-                .withArgument("x-dead-letter-exchange", dlxExchange)
-                .withArgument("x-dead-letter-routing-key", coordinatorDlq)
-                .build();
+    public Binding bindCoordinatorFormatoA() {
+        return BindingBuilder
+                .bind(coordinatorFormatoAQueue())
+                .to(mainExchange())
+                .with(ACADEMIC_FORMATO_A_CHANGED);
     }
 
-    // ✅ Binding para la cola de usuarios
+    // auth.user.created -> cola de auth del coordinator
     @Bean
     public Binding bindCoordinatorAuthUserCreated() {
-        return BindingBuilder.bind(coordinatorAuthQueueBean())
-                .to(mainExchange())
-                .with("auth.user.created");
-    }
-
-    // 6) Binding: DLX -> DLQ
-    @Bean
-    public Binding bindingCoordinatorDlq() {
         return BindingBuilder
-                .bind(coordinatorDlqBean())
-                .to(deadLetterExchange())
-                .with(coordinatorDlq);
+                .bind(coordinatorAuthQueue())
+                .to(mainExchange())
+                .with(AUTH_USER_CREATED);
     }
 
-    // 7) Convertidor JSON
+    // DLX -> DLQ del coordinator
+    @Bean
+    public Binding bindCoordinatorDlq() {
+        return BindingBuilder
+                .bind(coordinatorDlqQueue())
+                .to(deadLetterExchange())
+                .with(coordinatorDlqQueueName);
+    }
+
+    // ========= Infraestructura JSON / listeners =========
+
     @Bean
     public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
-    // 8) RabbitTemplate
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
                                          Jackson2JsonMessageConverter converter) {
@@ -107,11 +140,11 @@ public class RabbitMQConfig {
         return template;
     }
 
-    // 9) Listener Factory
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
             Jackson2JsonMessageConverter converter) {
+
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(converter);

@@ -1,16 +1,22 @@
 package co.edu.unicauca.coordinatorservice.controller;
 
-import co.edu.unicauca.coordinatorservice.entity.*;
-import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
-import co.edu.unicauca.shared.contracts.events.academic.DTOs.FormatoADTO;
+import co.edu.unicauca.coordinatorservice.entity.FormatoA;
 import co.edu.unicauca.coordinatorservice.repository.FormatoARepository;
+import co.edu.unicauca.shared.contracts.events.academic.DTOs.FormatoADTO;
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+
 import java.util.Optional;
 
 @Component
 public class FormatoAListener {
+
+    private static final Logger log = LoggerFactory.getLogger(FormatoAListener.class);
+
     private final FormatoARepository formatoARepository;
 
     public FormatoAListener(FormatoARepository formatoARepository) {
@@ -18,46 +24,43 @@ public class FormatoAListener {
     }
 
     /**
-     * Escucha mensajes provenientes de la cola del coordinador.
-     * Estos mensajes llegan desde el microservicio de la fuente de la verdad
-     * cuando se crea o actualiza un FormatoA o un Proyecto.
+     * Maneja eventos de Formato A publicados por academic-project-service.
+     * El coordinator mantiene una réplica local para sus consultas.
      */
-    @RabbitListener(queues = "${messaging.queues.project}")
+    @RabbitListener(queues = "${messaging.queues.coordinatorFormatoA}")
     @Transactional
     public void handleFormatoAEvent(FormatoADTO dto) {
         if (dto == null) {
-            System.err.println("⚠️ [RabbitMQ] Se recibió un mensaje nulo en CoordinatorService.");
+            log.warn("[CoordinatorService] Mensaje FormatoADTO nulo recibido. Se ignora.");
             return;
         }
 
-        System.out.println("📩 [RabbitMQ] Mensaje recibido en CoordinatorService: " + dto.getNombreFormatoA());
+        log.info("[CoordinatorService] Evento FormatoA recibido: nombreFormatoA='{}', proyectoId={}, version={}",
+                dto.getNombreFormatoA(), dto.getProyectoId(), dto.getNroVersion());
 
-        // Buscar si ya existe el FormatoA
+        // Buscar FormatoA existente por proyectoId, o crear uno nuevo
         Optional<FormatoA> existingFormato = formatoARepository.findByProyectoId(dto.getProyectoId());
-        FormatoA formato = existingFormato.orElse(new FormatoA());
+        FormatoA formato = existingFormato.orElseGet(FormatoA::new);
 
-        // Actualizar campos con la información nueva
+        // Actualizar campos básicos
         formato.setProyectoId(dto.getProyectoId());
         formato.setNroVersion(dto.getNroVersion());
         formato.setNombreFormatoA(dto.getNombreFormatoA());
         formato.setFechaSubida(dto.getFechaSubida());
         formato.setBlob(dto.getBlob());
 
+        // Estado del Formato A (enum compartido)
         if (dto.getEstado() != null) {
-            try {
-                formato.setEstadoFormatoA(EstadoFormatoA.valueOf(dto.getEstado().toString()));
-            } catch (IllegalArgumentException e) {
-                System.err.println("⚠️ Estado inválido recibido: " + dto.getEstado());
-            }
+            formato.setEstadoFormatoA(dto.getEstado());
         } else {
-            System.err.println("⚠️ FormatoA recibido sin estado (proyectoId=" + dto.getProyectoId() + ")");
-            // Opcional: asignar un valor por defecto
+            log.warn("[CoordinatorService] FormatoA recibido sin estado (proyectoId={}). Se marca como PENDIENTE.",
+                    dto.getProyectoId());
             formato.setEstadoFormatoA(EstadoFormatoA.PENDIENTE);
         }
 
         formatoARepository.save(formato);
 
-        System.out.println("[CoordinatorService] FormatoA guardado/actualizado correctamente: "
-                + formato.getNombreProyecto() + " | Versión: " + formato.getNroVersion());
+        log.info("[CoordinatorService] FormatoA persistido: nombreFormatoA='{}', proyectoId={}, version={}",
+                formato.getNombreFormatoA(), formato.getProyectoId(), formato.getNroVersion());
     }
 }

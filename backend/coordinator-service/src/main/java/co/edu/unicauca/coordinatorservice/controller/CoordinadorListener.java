@@ -1,7 +1,6 @@
 package co.edu.unicauca.coordinatorservice.controller;
 
 import co.edu.unicauca.coordinatorservice.entity.Coordinador;
-import co.edu.unicauca.shared.contracts.model.Programa;
 import co.edu.unicauca.coordinatorservice.repository.CoordinadorRepository;
 import co.edu.unicauca.shared.contracts.events.auth.UserCreatedEvent;
 import jakarta.transaction.Transactional;
@@ -23,30 +22,35 @@ public class CoordinadorListener {
      * Escucha eventos de creación de usuario desde auth-service.
      * Filtra solo los usuarios con rol COORDINADOR y los sincroniza localmente.
      */
-    @RabbitListener(queues = "${messaging.queues.coordinatorAuth}") // ✅ cola dedicada
+    @RabbitListener(queues = "${messaging.queues.coordinatorAuth}")
     @Transactional
     public void recibirCoordinador(UserCreatedEvent dto) {
         if (dto == null || dto.roles() == null) return;
 
-        // ✅ Verifica si el usuario tiene el rol COORDINADOR
         boolean esCoordinador = dto.roles().stream()
                 .anyMatch(r -> r.name().equalsIgnoreCase("COORDINADOR"));
 
-        if (!esCoordinador) return; // Ignora si no aplica
+        if (!esCoordinador) {
+            return; // ignorar usuarios que no sean coordinadores
+        }
 
         System.out.println("📩 [RabbitMQ] Mensaje recibido en CoordinatorService: " + dto.nombre());
 
-        // Buscar si ya existe
         Optional<Coordinador> existente = coordinadorRepository.findByCorreo(dto.email());
-        Coordinador coordinador = existente.orElse(new Coordinador());
+        Coordinador coordinador = existente.orElseGet(Coordinador::new);
 
-        // Actualizar campos
+        // Si es nuevo, copia el UUID que viene del auth-service
+        if (coordinador.getId() == null) {
+            coordinador.setId(dto.id());
+        }
+
         coordinador.setNombres(dto.nombre());
         coordinador.setCorreo(dto.email());
-        coordinador.setPrograma(Programa.valueOf(dto.programa().toString()));
+        coordinador.setPrograma(dto.programa()); // ya es enum Programa compartido
 
         coordinadorRepository.save(coordinador);
 
-        System.out.println("[CoordinatorService] ✅ Coordinador guardado/actualizado correctamente: " + coordinador.getNombres());
+        System.out.println("[CoordinatorService] ✅ Coordinador guardado/actualizado correctamente: "
+                + coordinador.getNombres());
     }
 }

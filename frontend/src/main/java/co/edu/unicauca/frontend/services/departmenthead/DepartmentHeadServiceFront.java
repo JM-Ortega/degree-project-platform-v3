@@ -1,6 +1,7 @@
 package co.edu.unicauca.frontend.services.departmenthead;
 
 import co.edu.unicauca.frontend.dto.AnteproyectoDto;
+import co.edu.unicauca.frontend.infra.dto.UsuarioDTO;
 import co.edu.unicauca.frontend.infra.http.HttpClientException;
 
 import java.util.List;
@@ -52,4 +53,8 @@ public class DepartmentHeadServiceFront {
             throw new Exception("Error al buscar Anteproyectos: " + ex.getResponseBody(), ex);
         }
     }
+
+//    public  List<UsuarioDTO> buscarDocentes(){
+//
+//    }
 }

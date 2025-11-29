@@ -80,24 +80,42 @@ public class DepartmentHeadController {
         }
     }
 
-    private void cargarVistaEnBorderPane(String rutaFxml) {
-        if (bp == null) {
-            return;
-        }
-
+    public void cargarVistaEnBorderPane(String rutaFxml, Object data) {
         try {
-            if (getClass().getResource(rutaFxml) == null) {
-                return;
-            }
-
             FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFxml));
             Pane vista = loader.load();
+
+            Object controller = loader.getController();
+
+            // Si el controlador tiene el metodo setParentController, lo llamas
+            try {
+                controller.getClass()
+                        .getMethod("setParentController", DepartmentHeadController.class)
+                        .invoke(controller, this);
+            } catch (NoSuchMethodException ignored) {
+                // El controlador no lo implementa, no pasa nada
+            }
+
+            // Si el controlador tiene el metodo receiveData(Object data), lo llamas
+            if (data != null) {
+                try {
+                    controller.getClass()
+                            .getMethod("receiveData", Object.class)
+                            .invoke(controller, data);
+                } catch (NoSuchMethodException ignored) {
+                    // No lo implementa, no pasa nada
+                }
+            }
+
             bp.setCenter(vista);
-        } catch (IOException e) {
-            e.printStackTrace();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void cargarVistaEnBorderPane(String rutaFxml) {
+        cargarVistaEnBorderPane(rutaFxml, null);
     }
 
     private void activarBoton(Button botonActivo, Button... otros) {

@@ -1,19 +1,18 @@
-package co.edu.unicauca.frontend.infra.dto;
+package co.edu.unicauca.academicprojectservice.application.dto;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class CartaLaboralDTO {
     private String nombreCartaLaboral;
     private LocalDate fechaCreacion;
     private byte[] blob;
 
-    public byte[] getBlob() {
-        return blob;
+    public String getNombreCartaLaboral() {
+        return nombreCartaLaboral;
     }
 
-    public void setBlob(byte[] blob) {
-        this.blob = blob;
+    public void setNombreCartaLaboral(String nombreCartaLaboral) {
+        this.nombreCartaLaboral = nombreCartaLaboral;
     }
 
     public LocalDate getFechaCreacion() {
@@ -24,12 +23,11 @@ public class CartaLaboralDTO {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public String getNombreCartaLaboral() {
-        return nombreCartaLaboral;
+    public byte[] getBlob() {
+        return blob;
     }
 
-    public void setNombreCartaLaboral(String nombreCartaLaboral) {
-        this.nombreCartaLaboral = nombreCartaLaboral;
+    public void setBlob(byte[] blob) {
+        this.blob = blob;
     }
-
 }

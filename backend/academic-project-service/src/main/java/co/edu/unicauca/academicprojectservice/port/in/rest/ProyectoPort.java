@@ -24,7 +24,7 @@ public interface ProyectoPort {
 
     ResponseEntity<Boolean> tieneObservacionesFA(UUID proyectoId);
 
-    ResponseEntity<String> insertarFormatoAProyecto(Long proyectoId, FormatoADTO formatoA);
+    ResponseEntity<String> insertarFormatoAProyecto(UUID proyectoId, FormatoADTO formatoA);
 
     ResponseEntity<FormatoADTO> obtenerUltimoFormatoAConObservaciones(UUID proyectoId);
 

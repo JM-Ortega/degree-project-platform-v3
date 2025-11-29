@@ -36,7 +36,7 @@ public class ProyectoService {
     private final MessagingPort messagingPort;
     private final NotificationPort notificationPort;
 
-    // Este es el que se llama por el frontenda para crear un proyecto
+    // Este es el que se llama por el frontend para crear un proyecto
     public void crearProyectoConArchivos(ProyectoDTO dto) {
 
         // ==========================
@@ -62,7 +62,6 @@ public class ProyectoService {
         DocenteId directorId = dbPortDocente.findIdByCorreo(dto.getDirector())
                 .orElseThrow(() -> new IllegalArgumentException("Director no encontrado: " + dto.getDirector()));
 
-
         // ========================================
         //  VALIDAR QUE CADA ESTUDIANTE EXISTA
         // ========================================
@@ -75,7 +74,6 @@ public class ProyectoService {
                 )
                 .toList();
 
-
         // ========================================
         //  VALIDACIÓN DEL DIRECTOR (> 7 proyectos)
         // ========================================
@@ -85,21 +83,33 @@ public class ProyectoService {
                 dto.getDirector()
         );
 
-        if (numeroProyectos > 7)
+        if (numeroProyectos > 7) {
             throw new IllegalStateException("El docente alcanzó el límite de 7 proyectos en curso");
-
+        }
 
         // ========================================
         //  VALIDACIÓN DEL ESTUDIANTE (no duplicado)
         // ========================================
         for (String correo : correosLimpios) {
-            if (dbPortEstudiante.proyectoActivo(correo))
+            if (dbPortEstudiante.proyectoActivo(correo)) {
                 throw new IllegalStateException("El estudiante ya tiene un proyecto en curso");
         }
-
+        }
 
         // ========================================
-        //  CREACIÓN DEL PROYECTO
+        //  VALIDACIÓN DEL FORMATO A (OBLIGATORIO)
+        // ========================================
+        if (dto.getFormatoA() == null
+                || dto.getFormatoA().blob() == null
+                || dto.getFormatoA().blob().length == 0
+                || dto.getFormatoA().nombreFormato() == null
+                || dto.getFormatoA().nombreFormato().isBlank()) {
+
+            throw new IllegalArgumentException("Debe adjuntar el Formato A inicial del proyecto.");
+        }
+
+        // ========================================
+        //  CREACIÓN DEL PROYECTO (DOMINIO)
         // ========================================
         Proyecto proyecto = Proyecto.crear(
                 dto.getTitulo(),
@@ -110,17 +120,17 @@ public class ProyectoService {
 
         // Adjuntar carta laboral si aplica
         if (dto.getTipoProyecto().equals(TipoProyecto.PRACTICA_PROFESIONAL)
-                && dto.getCartaLaboral() != null) {
-            proyecto.adjuntarCartaLaboral(dto.getCartaLaboral());
+                && dto.getCartaLaboral() != null
+                && dto.getCartaLaboral().getBlob() != null) {
+
+            proyecto.adjuntarCartaLaboral(dto.getCartaLaboral().getBlob());
         }
 
-        // Adjuntar formato A si viene en la creación
-        if (dto.getFormatoA() != null) {
-            proyecto.agregarFormatoAInicial(
-                    dto.getFormatoA().nombreFormato(),
-                    dto.getFormatoA().blob()
-            );
-        }
+        // Adjuntar Formato A inicial (ya validado como obligatorio)
+        proyecto.agregarFormatoAInicial(
+                dto.getFormatoA().nombreFormato(),
+                dto.getFormatoA().blob()
+        );
 
         // Guardar en BD
         dbPortProyecto.guardarProyecto(proyecto);
@@ -236,19 +246,39 @@ public class ProyectoService {
 
     public boolean canResubmit(UUID proyectoId) {
         EstadoProyecto estado = dbPortProyecto.obtenerEstadoProyecto(proyectoId);
-        if (estado == null ||
-                (estado != EstadoProyecto.FORMATOA_RECHAZADO
-                        && estado != EstadoProyecto.ANTEPROYECTO_ENVIADO)) {
+        if (estado == null) {
             return false;
         }
 
+        // 1. Nunca permitir nueva versión si ya está en estados finales o de anteproyecto
+        if (estado == EstadoProyecto.FORMATOA_RECHAZADO
+                || estado == EstadoProyecto.FORMATOA_ACEPTADO
+                || estado == EstadoProyecto.ANTEPROYECTO_ENVIADO
+                || estado == EstadoProyecto.EN_REVISION_ANTEPROYECTO) {
+            return false;
+        }
+
+        // 2. Solo permitir mientras el proyecto esté en segunda o tercera revisión de Formato A
+        if (estado != EstadoProyecto.SEGUNDA_REVISION_FORMATOA
+                && estado != EstadoProyecto.TERCERA_REVISION_FORMATOA) {
+            return false;
+        }
+
+        // 3. Validar versiones
         int maxVersion = getMaxVersionFormatoA(proyectoId);
-        if (maxVersion == 0) return true;
-        if (maxVersion >= 3) return false;
 
+        // Si por alguna razón no hay Formato A, no tiene sentido permitir resubir
+        if (maxVersion == 0) {
+            return false;
+        }
 
+        // Máximo 3 versiones
+        if (maxVersion >= 3) {
+            return false;
+        }
+
+        // 4. El último Formato A debe estar en estado OBSERVADO
         FormatoA ultimo = getUltimoFormatoA(proyectoId);
-
         return ultimo != null && ultimo.getEstado() == EstadoFormatoA.OBSERVADO;
     }
 
@@ -275,6 +305,7 @@ public class ProyectoService {
     public AnteproyectoDTO obtenerAnteproyecto (UUID proyectoId) {
         return dbPortProyecto.obtenerAnteproyecto (proyectoId);
     }
+
 
     public void registrarResultadoRevisionFormatoADesdeEvento(UUID proyectoId, EstadoFormatoA nuevoEstado) {
         Proyecto proyecto = dbPortProyecto.findById(proyectoId);

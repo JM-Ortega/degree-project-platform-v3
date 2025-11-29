@@ -11,71 +11,31 @@ public class ProyectoDTO {
     private String director;
     private AnteproyectoDTO anteproyecto;
     private FormatoADTO formatoA;
-    private byte[] cartaLaboral;
+    private CartaLaboralDTO cartaLaboral;
     private TipoProyecto tipoProyecto;
     private EstadoProyecto estadoProyecto;
 
-    public AnteproyectoDTO getAnteproyecto() {
-        return anteproyecto;
-    }
+    public AnteproyectoDTO getAnteproyecto() { return anteproyecto; }
+    public void setAnteproyecto(AnteproyectoDTO anteproyecto) { this.anteproyecto = anteproyecto; }
 
-    public void setAnteproyecto(AnteproyectoDTO anteproyecto) {
-        this.anteproyecto = anteproyecto;
-    }
+    public String getDirector() { return director; }
+    public void setDirector(String director) { this.director = director; }
 
-    public String getDirector() {
-        return director;
-    }
+    public CartaLaboralDTO getCartaLaboral() { return cartaLaboral; }
+    public void setCartaLaboral(CartaLaboralDTO cartaLaboral) { this.cartaLaboral = cartaLaboral; }
 
-    public void setDirector(String director) {
-        this.director = director;
-    }
+    public EstadoProyecto getEstadoProyecto() { return estadoProyecto; }
+    public void setEstadoProyecto(EstadoProyecto estadoProyecto) { this.estadoProyecto = estadoProyecto; }
 
-    public byte[] getCartaLaboral() {
-        return cartaLaboral;
-    }
+    public List<String> getEstudiantes() { return estudiantes; }
+    public void setEstudiantes(List<String> estudiantes) { this.estudiantes = estudiantes; }
 
-    public void setCartaLaboral(byte[] cartaLaboral) {
-        this.cartaLaboral = cartaLaboral;
-    }
+    public FormatoADTO getFormatoA() { return formatoA; }
+    public void setFormatoA(FormatoADTO formatoA) { this.formatoA = formatoA; }
 
-    public EstadoProyecto getEstadoProyecto() {
-        return estadoProyecto;
-    }
+    public TipoProyecto getTipoProyecto() { return tipoProyecto; }
+    public void setTipoProyecto(TipoProyecto tipoProyecto) { this.tipoProyecto = tipoProyecto; }
 
-    public void setEstadoProyecto(EstadoProyecto estadoProyecto) {
-        this.estadoProyecto = estadoProyecto;
-    }
-
-    public List<String> getEstudiantes() {
-        return estudiantes;
-    }
-
-    public void setEstudiantes(List<String> estudiantes) {
-        this.estudiantes = estudiantes;
-    }
-
-    public FormatoADTO getFormatoA() {
-        return formatoA;
-    }
-
-    public void setFormatoA(FormatoADTO formatoA) {
-        this.formatoA = formatoA;
-    }
-
-    public TipoProyecto getTipoProyecto() {
-        return tipoProyecto;
-    }
-
-    public void setTipoProyecto(TipoProyecto tipoProyecto) {
-        this.tipoProyecto = tipoProyecto;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
 }

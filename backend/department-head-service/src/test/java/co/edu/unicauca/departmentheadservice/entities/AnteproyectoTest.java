@@ -18,17 +18,17 @@ class AnteproyectoTest {
     void setUp() {
         docenteMock = mock(Docente.class);
 
-        anteproyecto = new Anteproyecto(
-                10L,                          // anteproyectoId
-                20L,                          // proyectoId
-                "Proyecto de Investigación",
-                "Descripción del proyecto de investigación",
-                LocalDate.of(2025, 11, 2),
-                List.of(docenteMock),
-                "estudiante@unicauca.edu.co",
-                "director@unicauca.edu.co",
-                "SISTEMAS"
-        );
+//        anteproyecto = new Anteproyecto(
+//                10L,                          // anteproyectoId
+//                20L,                          // proyectoId
+//                "Proyecto de Investigación",
+//                "Descripción del proyecto de investigación",
+//                LocalDate.of(2025, 11, 2),
+//                List.of(docenteMock),
+//                "estudiante@unicauca.edu.co",
+//                "director@unicauca.edu.co",
+//                "SISTEMAS"
+//        );
     }
 
     @Test

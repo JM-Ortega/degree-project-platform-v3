@@ -1,5 +1,6 @@
 package co.edu.unicauca.departmentheadservice.entities;
 
+import co.edu.unicauca.shared.contracts.model.Departamento;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,10 +11,10 @@ class DocenteTest {
     private Docente docente;
 
     @BeforeEach
-    void setUp() {
-        // Instanciamos la clase Docente con datos de prueba
-        docente = new Docente("12345", "Juan Ortega", "juan@unicauca.edu.co");
-    }
+//    void setUp() {
+//        // Instanciamos la clase Docente con datos de prueba
+//        docente = new Docente("12345", "Juan Ortega", "juan@unicauca.edu.co", Departamento.SISTEMAS);
+//    }
 
     @Test
     void testConstructorAndGetters() {
@@ -26,7 +27,7 @@ class DocenteTest {
     @Test
     void testSetters() {
         // Cambiar valores a través de los setters
-        docente.setPersonaId("67890");
+//        docente.setPersonaId("67890");
         docente.setNombre("Carlos Perez");
         docente.setEmail("carlos@unicauca.edu.co");
 

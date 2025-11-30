@@ -33,7 +33,7 @@ public class DepartmentHeadEventListener {
     @RabbitHandler
     public void onUserCreated(UserCreatedEvent event,
                               @Header("amqp_receivedRoutingKey") String rk) {
-        if (event == null || event.personaId() == null) {
+        if (event == null || event.id() == null) {
             log.warn("[DeptHead] Ignorado UserCreatedEvent inválido. rk={}", rk);
             return;
         }
@@ -46,7 +46,7 @@ public class DepartmentHeadEventListener {
         }
 
         try {
-            Docente docente = new Docente(event.personaId(), event.nombre(), event.email());
+            Docente docente = new Docente(event.id(), event.nombre(), event.email());
             docenteRepository.save(docente);
             log.info("[DeptHead] Docente almacenado: {} ({})", docente.getNombre(), docente.getEmail());
         } catch (Exception e) {

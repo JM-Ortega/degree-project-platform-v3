@@ -3,15 +3,17 @@ package co.edu.unicauca.frontend.infra.dto;
 import co.edu.unicauca.frontend.entities.EstadoProyecto;
 import co.edu.unicauca.frontend.entities.TipoProyecto;
 
+import java.util.UUID;
+
 public class ProyectoInfoDTO {
-    private Long id;
+    private UUID id;
     private String titulo;
     private TipoProyecto tipo;
     private EstadoProyecto estado;
     private String estudianteNombre;
     private String estudianteCorreo;
 
-    public ProyectoInfoDTO(Long id, String titulo, TipoProyecto tipo, EstadoProyecto estado,
+    public ProyectoInfoDTO(UUID id, String titulo, TipoProyecto tipo, EstadoProyecto estado,
                            String estudianteNombre, String estudianteCorreo) {
         this.id = id;
         this.titulo = titulo;
@@ -30,8 +32,8 @@ public class ProyectoInfoDTO {
     public String getEstudianteNombre() {return estudianteNombre;}
     public void setEstudianteNombre(String estudianteNombre) {this.estudianteNombre = estudianteNombre;}
 
-    public Long getId() {return id;}
-    public void setId(Long id) {this.id = id;}
+    public UUID getId() {return id;}
+    public void setId(UUID id) {this.id = id;}
 
     public String getTitulo() {return titulo;}
     public void setTitulo(String titulo) {this.titulo = titulo;}

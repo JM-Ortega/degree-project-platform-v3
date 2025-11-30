@@ -5,20 +5,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface AnteproyectoRepository extends JpaRepository<Anteproyecto, Long> {
+public interface AnteproyectoRepository extends JpaRepository<Anteproyecto, UUID> {
 
-    // Método existente
+    // Anteproyectos sin evaluadores
     List<Anteproyecto> findByEvaluadoresIsEmpty();
 
-    // Método para buscar por título
+    // Anteproyectos sin evaluadores filtrando por título
     List<Anteproyecto> findByEvaluadoresIsEmptyAndTituloContainingIgnoreCase(String titulo);
 
-    // Método para buscar por ID
-    List<Anteproyecto> findByEvaluadoresIsEmptyAndId(Long id);
+    // Anteproyectos sin evaluadores filtrando por anteproyectoId (UUID de dominio)
+    List<Anteproyecto> findByEvaluadoresIsEmptyAndAnteproyectoId(UUID anteproyectoId);
 
-    boolean existsByAnteproyectoId(Long anteproyectoId);
-
-
+    // Usado en el seeder para saber si ya existe
+    boolean existsByAnteproyectoId(UUID anteproyectoId);
 }

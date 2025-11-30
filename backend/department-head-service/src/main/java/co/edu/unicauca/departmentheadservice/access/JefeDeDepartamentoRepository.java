@@ -5,10 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface JefeDeDepartamentoRepository extends JpaRepository<JefeDeDepartamento, String> {
+public interface JefeDeDepartamentoRepository extends JpaRepository<JefeDeDepartamento, UUID> {
 
-    Optional<JefeDeDepartamento> findByPersonaId(String personaId);
-
+    Optional<JefeDeDepartamento> findByPersonaId(UUID personaId);
 }

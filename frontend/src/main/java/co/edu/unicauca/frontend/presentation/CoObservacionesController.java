@@ -126,7 +126,7 @@ public class CoObservacionesController implements Initializable {
         Task<Void> envioTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                Long id = formatoSeleccionado.getId();
+                String id = formatoSeleccionado.getId();
                 String estado = cbxValoracion.getValue();
                 String nombreArchivo = archivoSeleccionado.getName();
                 String horaActual = java.time.LocalDateTime.now()

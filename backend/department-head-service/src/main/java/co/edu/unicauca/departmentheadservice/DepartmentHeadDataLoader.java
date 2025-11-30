@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class DepartmentHeadDataLoader implements CommandLineRunner {
@@ -19,7 +20,7 @@ public class DepartmentHeadDataLoader implements CommandLineRunner {
     private final AnteproyectoRepository anteproyectoRepository;
     private final DocenteRepository docenteRepository;
 
-    @Value("${seed.enabled:true}")        // puedes apagar semillas con seed.enabled=false
+    @Value("${seed.enabled:true}")
     private boolean seedEnabled;
 
     public DepartmentHeadDataLoader(AnteproyectoRepository anteproyectoRepository,
@@ -36,21 +37,20 @@ public class DepartmentHeadDataLoader implements CommandLineRunner {
     }
 
     private void loadData() {
-        // --- Crear/obtener docentes de prueba (idempotente por email) ---
         Docente docente1 = getOrCreateDocente("Juan Pérez", "juan.perez@unicauca.edu.co");
         Docente docente2 = getOrCreateDocente("Ana Gómez", "ana.gomez@unicauca.edu.co");
         Docente docente3 = getOrCreateDocente("Carlos Ruiz", "carlos.ruiz@unicauca.edu.co");
 
-        // --- Crear lista de anteproyectos (solo los que falten) ---
         List<Anteproyecto> nuevos = new ArrayList<>();
 
-        // 15 sin evaluadores
         for (int i = 1; i <= 15; i++) {
-            long apId = 100L + i;
+            UUID apId = UUID.nameUUIDFromBytes(("ap-" + i).getBytes());
+            UUID proyectoId = UUID.nameUUIDFromBytes(("proj-" + i).getBytes());
+
             if (!anteproyectoRepository.existsByAnteproyectoId(apId)) {
                 nuevos.add(new Anteproyecto(
                         apId,
-                        200L + i,
+                        proyectoId,
                         "Anteproyecto sin evaluadores " + i,
                         "Descripción del anteproyecto sin evaluadores " + i,
                         LocalDate.now(),
@@ -62,13 +62,14 @@ public class DepartmentHeadDataLoader implements CommandLineRunner {
             }
         }
 
-        // 3 con dos evaluadores
         for (int i = 16; i <= 18; i++) {
-            long apId = 100L + i;
+            UUID apId = UUID.nameUUIDFromBytes(("ap-" + i).getBytes());
+            UUID proyectoId = UUID.nameUUIDFromBytes(("proj-" + i).getBytes());
+
             if (!anteproyectoRepository.existsByAnteproyectoId(apId)) {
                 nuevos.add(new Anteproyecto(
                         apId,
-                        200L + i,
+                        proyectoId,
                         "Anteproyecto con 2 evaluadores " + i,
                         "Descripción del anteproyecto con 2 evaluadores " + i,
                         LocalDate.now(),
@@ -80,13 +81,14 @@ public class DepartmentHeadDataLoader implements CommandLineRunner {
             }
         }
 
-        // 2 con un evaluador
         for (int i = 19; i <= 20; i++) {
-            long apId = 100L + i;
+            UUID apId = UUID.nameUUIDFromBytes(("ap-" + i).getBytes());
+            UUID proyectoId = UUID.nameUUIDFromBytes(("proj-" + i).getBytes());
+
             if (!anteproyectoRepository.existsByAnteproyectoId(apId)) {
                 nuevos.add(new Anteproyecto(
                         apId,
-                        200L + i,
+                        proyectoId,
                         "Anteproyecto con 1 evaluador " + i,
                         "Descripción del anteproyecto con 1 evaluador " + i,
                         LocalDate.now(),
@@ -108,9 +110,9 @@ public class DepartmentHeadDataLoader implements CommandLineRunner {
     private Docente getOrCreateDocente(String nombre, String email) {
         return docenteRepository.findByEmail(email)
                 .orElseGet(() -> {
-                    Docente nuevo = new Docente(email, nombre, email);
+                    UUID personaId = UUID.nameUUIDFromBytes(email.getBytes());
+                    Docente nuevo = new Docente(personaId, nombre, email);
                     return docenteRepository.save(nuevo);
                 });
     }
-
 }

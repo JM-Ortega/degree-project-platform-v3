@@ -84,6 +84,7 @@ public class CoProyectoController implements Initializable {
         }
     }
 
+
     // ----------------------------------------
     // Configuración columna Estado
     // ----------------------------------------

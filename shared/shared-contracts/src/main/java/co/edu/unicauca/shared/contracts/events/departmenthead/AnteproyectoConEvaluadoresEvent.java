@@ -1,11 +1,13 @@
 package co.edu.unicauca.shared.contracts.events.departmenthead;
 
 import java.util.List;
+import java.util.UUID;
 
 public record AnteproyectoConEvaluadoresEvent(
-        String anteproyectoId,    // Identificador único del Anteproyecto
-        String titulo,            // Título del Anteproyecto
-        String departamento,      // Departamento que aprueba el anteproyecto
-        List<String> evaluadores  // Lista de correos o IDs de evaluadores asignados
-) {
-}
+    UUID proyectoId,
+    UUID anteproyectoId,
+    String titulo,
+    String departamento,
+    List<String> evaluadores // correos de docentes
+) { }
+

@@ -1,6 +1,7 @@
 package co.edu.unicauca.authservice.infra.messaging;
 
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
+import co.edu.unicauca.shared.contracts.model.Programa;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -29,24 +30,27 @@ public class NotificationPublisher {
 
     /**
      * Publica una notificación genérica hacia notification-service.
-     * @param type    Ej: "auth.user.created" (se enviará a la ruta "notification.send.auth.user.created")
+     *
+     * @param type     Ej: "auth.user.created" (se enviará a la ruta "notification.send.auth.user.created")
      * @param toEmails lista de destinatarios por email
-     * @param toPhones lista de celulares (puede ir vacía)
-     * @param subject asunto del correo
-     * @param message cuerpo del mensaje
+     * @param subject  asunto del correo
+     * @param message  cuerpo del mensaje
+     * @param programa programa de los estudiantes relacionados con la notificación
      */
     public void publishNotification(String type,
                                     List<String> toEmails,
-                                    List<String> toPhones,
                                     String subject,
-                                    String message) {
+                                    String message,
+                                    Programa programa) {
+
         NotificationEvent event = new NotificationEvent(
-                type,
-                toEmails,
-                subject,
-                message,
-                toPhones,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                type,                         // tipo
+                toEmails,                     // correos
+                subject,                      // asunto
+                message,                      // mensaje
+                programa,                     // programa
+                OffsetDateTime.now(ZoneOffset.UTC), // timestamp
+                false
         );
 
         String routingKey = "notification.send." + type; // p.ej. notification.send.auth.user.created

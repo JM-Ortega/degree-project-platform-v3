@@ -2,9 +2,10 @@ package co.edu.unicauca.frontend.infra.dto;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.UUID;
 
 public class AnteproyectoDTO {
-    private long id;
+    private UUID id;
     private String nombreArchivo;
     private String descripcion;
     private String titulo;
@@ -31,8 +32,8 @@ public class AnteproyectoDTO {
     public LocalDate getFechaCreacion() {return fechaCreacion;}
     public void setFechaCreacion(LocalDate fechaCreacion) {this.fechaCreacion = fechaCreacion;}
 
-    public long getId() {return id;}
-    public void setId(long id) {this.id = id;}
+    public UUID getId() {return id;}
+    public void setId(UUID id) {this.id = id;}
 
     public String getEstudianteCorreo() {return estudianteCorreo;}
     public void setEstudianteCorreo(String estudianteCorreo) {this.estudianteCorreo = estudianteCorreo;}

@@ -3,7 +3,7 @@ package co.edu.unicauca.coordinatorservice;
 import co.edu.unicauca.coordinatorservice.entity.Docente;
 import co.edu.unicauca.coordinatorservice.entity.Estudiante;
 import co.edu.unicauca.coordinatorservice.entity.FormatoA;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.EstadoFormatoA;
+import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
 import co.edu.unicauca.coordinatorservice.repository.FormatoARepository;
 import co.edu.unicauca.coordinatorservice.service.FormatoAService;
 import lombok.extern.slf4j.Slf4j;

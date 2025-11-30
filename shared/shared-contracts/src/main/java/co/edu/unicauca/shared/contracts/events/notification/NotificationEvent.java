@@ -1,13 +1,14 @@
 package co.edu.unicauca.shared.contracts.events.notification;
 
-
 import co.edu.unicauca.shared.contracts.model.Programa;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class NotificationEvent {
     @NotBlank
     private String tipo;
 
-    /** Lista de direcciones de correo electrónico de los estudiantes y docentes realcionados. */
+    /** Lista de direcciones de correo electrónico de los estudiantes y docentes relacionados. */
     @NotEmpty
     private List<String> correos;
 
@@ -36,11 +37,16 @@ public class NotificationEvent {
     @NotBlank
     private String mensaje;
 
-    /** Programa al que pertenece el estudainte. */
-    @NotBlank
+    /** Programa de los estudiantes relacionados con la notificación. */
+    // Debe poder ser vacio ya que por ejemplo el coordinador no necesita enviar el programa de el estudiante
+    // Creo que el unico que necesittenviar el programa es el micro de academic
     private Programa programa;
 
     /** Marca de tiempo del evento (formato ISO-8601). */
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private OffsetDateTime timestamp;
+
+    // Indica si se quiere enviar SMS o no
+    @NotBlank
+    private boolean SMS;
 }

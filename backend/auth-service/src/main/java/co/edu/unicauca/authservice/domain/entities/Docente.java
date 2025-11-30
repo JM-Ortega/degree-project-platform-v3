@@ -5,6 +5,8 @@ import co.edu.unicauca.shared.contracts.model.Programa;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 /**
  * Representa a un docente registrado en el sistema.
  *
@@ -37,7 +39,7 @@ public class Docente extends Persona {
         // Constructor protegido requerido por JPA
     }
 
-    public Docente(String id,
+    public Docente(UUID id,
                    String codigo,
                    String nombres,
                    String apellidos,

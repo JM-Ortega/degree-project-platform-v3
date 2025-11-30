@@ -1,6 +1,6 @@
 package co.edu.unicauca.departmentheadservice.infra.messaging;
 
-import co.edu.unicauca.shared.contracts.events.departmenthead.AnteproyectoConEvaluadoresEvent;  // Asegúrate de tener este evento
+import co.edu.unicauca.shared.contracts.events.departmenthead.AnteproyectoConEvaluadoresEvent;
 import co.edu.unicauca.shared.contracts.messaging.RoutingKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -138,7 +138,6 @@ public class AuthDataLoader implements CommandLineRunner {
         }
 
         try {
-            // 1) DTO como si viniera del frontend
             RegistroPersonaDto dto = new RegistroPersonaDto(
                     nombres,
                     apellidos,
@@ -150,7 +149,6 @@ public class AuthDataLoader implements CommandLineRunner {
                     departamento
             );
 
-            // 2) Crear usuario en Keycloak (cuenta + password + roles)
             List<String> roleNames = roles.stream()
                     .map(Rol::name)
                     .toList();
@@ -163,18 +161,14 @@ public class AuthDataLoader implements CommandLineRunner {
                     roleNames
             );
 
-            // 3) Crear Usuario interno con keycloakId
             Usuario usuario = new Usuario(emailNorm, roles);
             usuario.setKeycloakId(keycloakId);
 
-            // 4) Crear Persona concreta (Estudiante/Docente/etc.)
             Persona persona = personaFactory.crearDesdeDto(dto, usuario);
             persona.setCodigo(codigoPersonaGenerator.generar());
 
-            // 5) Guardar en BD (Persona cascada → Usuario)
             personaRepo.save(persona);
 
-            // 6) Publicar eventos como en el flujo real
             publicarEventos(persona, usuario);
 
             log.info("Usuario DEMO creado en BD + Keycloak: {}", emailNorm);
@@ -194,8 +188,10 @@ public class AuthDataLoader implements CommandLineRunner {
 
             UserCreatedEvent event = new UserCreatedEvent(
                     persona.getId(),
-                    persona.getNombres() + " " + persona.getApellidos(),
+                    persona.getNombres(),
+                    persona.getApellidos(),
                     usuario.getEmail(),
+                    null,
                     persona.getPrograma(),
                     departamento,
                     usuario.getRoles()
@@ -206,9 +202,9 @@ public class AuthDataLoader implements CommandLineRunner {
             notificationPublisher.publishNotification(
                     "auth.user.created",
                     List.of(usuario.getEmail()),
-                    List.of(),
                     "Bienvenido a la plataforma",
-                    "Tu usuario demo ha sido creado correctamente."
+                    "Tu usuario demo ha sido creado correctamente.",
+                    persona.getPrograma()
             );
 
         } catch (Exception e) {

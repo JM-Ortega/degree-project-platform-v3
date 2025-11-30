@@ -1,54 +1,46 @@
 package co.edu.unicauca.coordinatorservice.entity;
 
+import co.edu.unicauca.shared.contracts.model.Programa;
 import jakarta.persistence.*;
+
 import java.io.Serializable;
-import co.edu.unicauca.coordinatorservice.infra.DTOS.Programa;
+import java.util.UUID;
 
 @Entity
 @Table(name = "coordinador")
 public class Coordinador implements Serializable {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(columnDefinition = "uuid", nullable = false)
+    private UUID id;  // Mismo UUID que viene del auth-service
 
     private String nombres;
+
+    @Column(nullable = false, unique = true)
     private String correo;
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Programa programa;
 
     public Coordinador() {
-        this.id= null;
+        // Constructor requerido por JPA
     }
 
-    public Long getId() {
-        return id;
-    }
+    // === Getters & Setters ===
+    public UUID getId() { return id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(UUID id) { this.id = id; }
 
-    public String getNombres() {
-        return nombres;
-    }
+    public String getNombres() { return nombres; }
 
-    public void setNombres(String nombres) {
-        this.nombres = nombres;
-    }
+    public void setNombres(String nombres) { this.nombres = nombres; }
 
-    public String getCorreo() {
-        return correo;
-    }
+    public String getCorreo() { return correo; }
 
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
+    public void setCorreo(String correo) { this.correo = correo; }
 
-    public Programa getPrograma() {
-        return programa;
-    }
+    public Programa getPrograma() { return programa; }
 
-    public void setPrograma(Programa programa) {
-        this.programa = programa;
-    }
+    public void setPrograma(Programa programa) { this.programa = programa; }
 }

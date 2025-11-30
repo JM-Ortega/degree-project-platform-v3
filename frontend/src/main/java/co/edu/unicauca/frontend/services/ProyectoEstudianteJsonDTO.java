@@ -1,17 +1,22 @@
 package co.edu.unicauca.frontend.services;
 
+import co.edu.unicauca.frontend.entities.EstadoProyecto;
+import co.edu.unicauca.frontend.entities.TipoProyecto;
+
+import java.util.UUID;
+
 public class ProyectoEstudianteJsonDTO {
-    private Long id;
+    private UUID id;
     private String titulo;
     private String nombreDirector;
-    private String tipoProyecto;
-    private String estadoProyecto;
+    private TipoProyecto tipoProyecto;
+    private EstadoProyecto estadoProyecto;
 
     public ProyectoEstudianteJsonDTO() {} // necesario para Jackson
 
     // getters y setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
@@ -19,10 +24,10 @@ public class ProyectoEstudianteJsonDTO {
     public String getNombreDirector() { return nombreDirector; }
     public void setNombreDirector(String nombreDirector) { this.nombreDirector = nombreDirector; }
 
-    public String getTipoProyecto() { return tipoProyecto; }
-    public void setTipoProyecto(String tipoProyecto) { this.tipoProyecto = tipoProyecto; }
+    public TipoProyecto getTipoProyecto() { return tipoProyecto; }
+    public void setTipoProyecto(TipoProyecto tipoProyecto) { this.tipoProyecto = tipoProyecto; }
 
-    public String getEstadoProyecto() { return estadoProyecto; }
-    public void setEstadoProyecto(String estadoProyecto) { this.estadoProyecto = estadoProyecto; }
+    public EstadoProyecto getEstadoProyecto() { return estadoProyecto; }
+    public void setEstadoProyecto(EstadoProyecto estadoProyecto) { this.estadoProyecto = estadoProyecto; }
 }
 

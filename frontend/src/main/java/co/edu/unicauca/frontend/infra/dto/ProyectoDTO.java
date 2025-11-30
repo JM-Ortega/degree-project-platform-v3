@@ -3,10 +3,13 @@ package co.edu.unicauca.frontend.infra.dto;
 import co.edu.unicauca.frontend.entities.EstadoProyecto;
 import co.edu.unicauca.frontend.entities.TipoProyecto;
 
+import java.util.List;
+import java.util.UUID;
+
 public class ProyectoDTO {
-    private long id;
+    private UUID id;
     private String titulo;
-    private String estudiante;
+    private List<String> estudiantes;
     private String director;
     private AnteproyectoDTO anteproyectoDTO;
     private FormatoADTO formatoADTO;
@@ -14,8 +17,8 @@ public class ProyectoDTO {
     private TipoProyecto tipoProyecto;
     private EstadoProyecto estadoProyecto;
 
-    public long getId() {return id;}
-    public void setId(long id) {this.id = id;}
+    public UUID getId() {return id;}
+    public void setId(UUID id) {this.id = id;}
 
     public AnteproyectoDTO getAnteproyecto() {
         return anteproyectoDTO;
@@ -45,11 +48,11 @@ public class ProyectoDTO {
         this.estadoProyecto = estadoProyecto;
     }
 
-    public String getEstudiante() {
-        return estudiante;
+    public List<String> getEstudiantes() {
+        return estudiantes;
     }
-    public void setEstudiante(String estudiante) {
-        this.estudiante = estudiante;
+    public void setEstudiantes(List<String> estudiante) {
+        this.estudiantes = estudiante;
     }
 
     public FormatoADTO getFormatoA() {

@@ -57,7 +57,6 @@ public class DocenteService {
         }
     }
 
-
     public int countProyectosEnTramiteDocente(String correo) {
         try {
             String url = baseUrlDocente + "/countProyectos/" + enc(correo);
@@ -80,7 +79,6 @@ public class DocenteService {
             throw new RuntimeException("Error consultando conteo de proyectos: " + ex.getMessage(), ex);
         }
     }
-
 
     public boolean docenteTieneCupo(String correo) {
         return countProyectosEnTramiteDocente(correo) < 7;

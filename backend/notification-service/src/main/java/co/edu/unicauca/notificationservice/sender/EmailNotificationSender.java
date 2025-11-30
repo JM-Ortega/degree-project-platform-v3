@@ -4,6 +4,9 @@ import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import co.edu.unicauca.notificationservice.service.InformationService;
+
 /**
  * Implementación de {@link NotificationSender} responsable del envío de notificaciones por correo electrónico.
  * Registra la información relevante del mensaje en el log para efectos de simulación o auditoría.
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class EmailNotificationSender implements NotificationSender {
+    private InformationService informationService;
 
     /**
      * Envía una notificación por correo electrónico.
@@ -20,14 +24,21 @@ public class EmailNotificationSender implements NotificationSender {
      */
     @Override
     public void send(NotificationEvent event) {
+        if (event.getTipo().equals("coordinador")){
+            List<String> emails = event.getCorreos();
+            String emailCoordinador = informationService.getEmailCoordinador(event.getPrograma().toString());
+            emails.add(emailCoordinador);
+            event.setCorreos(emails);
+        }
+
         log.info("""
                         ✉️  Enviando correo electrónico
                         ├── Para: {}
                         ├── Asunto: {}
                         └── Mensaje: {}
                         """,
-                String.join(", ", event.getRecipientEmails()),
-                event.getSubject(),
-                event.getMessage());
+                String.join(", ", event.getCorreos()),
+                event.getAsunto(),
+                event.getMensaje());
     }
 }

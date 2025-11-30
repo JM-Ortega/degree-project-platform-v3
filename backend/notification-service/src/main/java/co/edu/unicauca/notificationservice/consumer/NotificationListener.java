@@ -51,13 +51,12 @@ public class NotificationListener {
                         ├─ Tipo: {}
                         ├─ Destinatarios: {}
                         └─ Mensaje: {}
-                        """, event.getType(),
-                String.join(", ", event.getRecipientEmails()),
-                event.getMessage());
+                        """, event.getTipo(),
+                String.join(", ", event.getCorreos()),
+                event.getMensaje());
 
         try {
-            boolean hasPhones = event.getRecipientPhones() != null && !event.getRecipientPhones().isEmpty();
-            NotificationSender sender = hasPhones ? smsNotificationSender : emailNotificationSender;
+            NotificationSender sender = event.isSMS() ? smsNotificationSender : emailNotificationSender;
             sender.send(event);
         } catch (Exception e) {
             log.error("❌ Error al procesar notificación: {}", e.getMessage(), e);

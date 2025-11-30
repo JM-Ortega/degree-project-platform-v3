@@ -2,7 +2,7 @@ package co.edu.unicauca.frontend.presentation;
 
 import co.edu.unicauca.frontend.FrontendServices;
 import co.edu.unicauca.frontend.dto.SessionInfo;
-import co.edu.unicauca.frontend.entities.EstadoArchivo;
+import co.edu.unicauca.frontend.entities.EstadoFormatoA;
 import co.edu.unicauca.frontend.entities.EstadoProyecto;
 import co.edu.unicauca.frontend.entities.TipoProyecto;
 import co.edu.unicauca.frontend.infra.dto.CartaLaboralDTO;
@@ -33,8 +33,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
 public class FormatoADocenteController implements Initializable {
 
@@ -56,11 +58,17 @@ public class FormatoADocenteController implements Initializable {
     @FXML
     private TitledPane pnNuevoProyecto;
     @FXML
-    private TextField txtEstudianteCorreo;
+    private TextField txtEstudiante1Correo;
     @FXML
-    private Button btnBuscarEstudiante;
+    private TextField txtEstudiante2Correo;
     @FXML
-    private Label lblEstudianteNombre;
+    private Button btnBuscarEstudiante1;
+    @FXML
+    private Button btnBuscarEstudiante2;
+    @FXML
+    private Label lblEstudiante1Nombre;
+    @FXML
+    private Label lblEstudiante2Nombre;
     @FXML
     private TextField txtTitulo;
 
@@ -168,22 +176,43 @@ public class FormatoADocenteController implements Initializable {
     }
 
     // =================== Carga inicial ===================
-    public void cargarDatos() {
-        SessionData data = SessionManager.getInstance().getCurrentSession();
-        SessionInfo docente = (data != null) ? data.getSessionInfo() : null;
+public void cargarDatos() {
+    SessionData data = SessionManager.getInstance().getCurrentSession();
+    SessionInfo docente = (data != null) ? data.getSessionInfo() : null;
 
-        if (docente == null) {
-            System.err.println("No hay sesión activa");
-            return;
-        }
+    if (docente == null) {
+        System.err.println("No hay sesión activa");
+        mostrarAlertaError(
+                "Sesión no encontrada",
+                "No se encontró información de sesión para el docente.\n" +
+                "Por favor, inicie sesión nuevamente."
+        );
+        return;
+    }
 
-        nombreDocente.setText(docente.nombres());
-        ocultarPanelNuevo();
-        if (lblPdfNombre != null) lblPdfNombre.setText("Ningún archivo seleccionado");
-        if (lblCartaNombre != null) lblCartaNombre.setText("Ningún archivo seleccionado");
+    nombreDocente.setText(docente.nombres());
+    ocultarPanelNuevo();
+    if (lblPdfNombre != null) lblPdfNombre.setText("Ningún archivo seleccionado");
+    if (lblCartaNombre != null) lblCartaNombre.setText("Ningún archivo seleccionado");
+
+    try {
+
         actualizarCupo();
         cargarTabla();
+    } catch (RuntimeException ex) {
+
+        System.err.println("[FormatoADocenteController] Error al cargar datos del docente");
+        ex.printStackTrace();
+
+        mostrarAlertaError(
+                "Error al cargar datos",
+                "Ocurrió un error al cargar la información del docente y sus proyectos.\n" +
+                "Detalle: " + ex.getMessage()
+        );
+
     }
+}
+
 
     // =================== Eventos ===================
     @FXML
@@ -223,23 +252,44 @@ public class FormatoADocenteController implements Initializable {
     }
 
     @FXML
-    private void onBuscarEstudiante() {
-        lblEstudianteNombre.setStyle("");
+    private void onBuscarEstudiante1() {
+        lblEstudiante1Nombre.setStyle("");
         lblNuevoProyectoMsg.setText("");
 
-        String correo = safeText(txtEstudianteCorreo);
+        String correo = safeText(txtEstudiante1Correo);
         if (!isEmailLike(correo)) {
-            setError(lblEstudianteNombre, "Ingrese el correo institucional del estudiante");
+            setError(lblEstudiante1Nombre, "Ingrese el correo institucional del estudiante");
             return;
         }
         try {
             boolean libre = estudianteService.estudianteLibrePorCorreo(correo);
-            if (libre) setOk(lblEstudianteNombre, "Estudiante disponible");
-            else setError(lblEstudianteNombre, "Estudiante con proyecto en curso");
+            if (libre) setOk(lblEstudiante1Nombre, "Estudiante disponible");
+            else setError(lblEstudiante1Nombre, "Estudiante con proyecto en curso");
         } catch (IllegalArgumentException ex) {
-            setError(lblEstudianteNombre, ex.getMessage());
+            setError(lblEstudiante1Nombre, ex.getMessage());
         } catch (Exception ex) {
-            setError(lblEstudianteNombre, "Error al validar estudiante");
+            setError(lblEstudiante1Nombre, "Error al validar estudiante");
+        }
+    }
+
+    @FXML
+    private void onBuscarEstudiante2() {
+        lblEstudiante2Nombre.setStyle("");
+        lblNuevoProyectoMsg.setText("");
+
+        String correo = safeText(txtEstudiante2Correo);
+        if (!isEmailLike(correo)) {
+            setError(lblEstudiante2Nombre, "Ingrese el correo institucional del estudiante");
+            return;
+        }
+        try {
+            boolean libre = estudianteService.estudianteLibrePorCorreo(correo);
+            if (libre) setOk(lblEstudiante2Nombre, "Estudiante disponible");
+            else setError(lblEstudiante2Nombre, "Estudiante con proyecto en curso");
+        } catch (IllegalArgumentException ex) {
+            setError(lblEstudiante2Nombre, ex.getMessage());
+        } catch (Exception ex) {
+            setError(lblEstudiante2Nombre, "Error al validar estudiante");
         }
     }
 
@@ -292,8 +342,8 @@ public class FormatoADocenteController implements Initializable {
             return;
         }
 
-
-        String correo = safeText(txtEstudianteCorreo);
+        String correo1 = safeText(txtEstudiante1Correo);
+        String correo2 = safeText(txtEstudiante2Correo);
         String titulo = safeText(txtTitulo);
         TipoProyecto tipoTrabajo = cbTipoTrabajo != null ? cbTipoTrabajo.getValue() : TipoProyecto.PRACTICA_PROFESIONAL;
 
@@ -301,7 +351,11 @@ public class FormatoADocenteController implements Initializable {
             setError(lblNuevoProyectoMsg, "Seleccione el tipo de trabajo.");
             return;
         }
-        if (!isEmailLike(correo)) {
+        if (!isEmailLike(correo1)) {
+            setError(lblNuevoProyectoMsg, "Ingrese el correo institucional válido del estudiante.");
+            return;
+        }
+        if (!correo2.equals("") && !isEmailLike(correo2)) {
             setError(lblNuevoProyectoMsg, "Ingrese el correo institucional válido del estudiante.");
             return;
         }
@@ -317,22 +371,29 @@ public class FormatoADocenteController implements Initializable {
             setError(lblNuevoProyectoMsg, "Adjunte la Carta de aceptación (PDF).");
             return;
         }
+        if (tipoTrabajo == TipoProyecto.PRACTICA_PROFESIONAL && !correo2.equals("")) {
+            setError(lblNuevoProyectoMsg, "No se admiten 2 estudiantes para un proyecto de tipo PRACTICA PROFESIONAL.");
+            return;
+        }
 
         try {
             ProyectoDTO p = new ProyectoDTO();
             p.setTipoProyecto(tipoTrabajo);
             p.setTitulo(titulo);
             p.setDirector(docente.email());
-            p.setEstudiante(correo);
+            List<String> correosEst = new ArrayList<>();
+            correosEst.add(correo1);
+            correosEst.add(correo2);
+            p.setEstudiantes(correosEst);
 
             FormatoADTO formatoADTO = new FormatoADTO();
             formatoADTO.setNombreFormato(formatoANombre);
             formatoADTO.setBlob(formatoABytes);
-            formatoADTO.setEstado(EstadoArchivo.PENDIENTE);
+            formatoADTO.setEstado(EstadoFormatoA.PENDIENTE);
             formatoADTO.setFechaCreacion(LocalDate.now());
             formatoADTO.setNroVersion(1);
 
-            if (isBlank(p.getTitulo()) || isBlank(p.getEstudiante()) || isBlank(p.getDirector()))
+            if (isBlank(p.getTitulo()) || isBlank(p.getEstudiantes().getFirst()) || isBlank(p.getDirector()))
                 throw new IllegalArgumentException("Título, estudiante y docente son obligatorios");
 
             if (tipoTrabajo == TipoProyecto.PRACTICA_PROFESIONAL) {
@@ -344,7 +405,7 @@ public class FormatoADocenteController implements Initializable {
                 p.setFormatoA(formatoADTO);
                 p.setCartaLaboral(carta);
 
-                if (p.getCartaLaboral()==null || p.getFormatoA()==null) {
+                if (p.getCartaLaboral() == null || p.getFormatoA() == null) {
                     throw new IllegalArgumentException("Datos incompletos");
                 }
 
@@ -352,7 +413,7 @@ public class FormatoADocenteController implements Initializable {
             } else {
                 p.setFormatoA(formatoADTO);
 
-                if (p.getFormatoA()==null) {
+                if (p.getFormatoA() == null) {
                     throw new IllegalArgumentException("Datos incompletos");
                 }
 
@@ -439,7 +500,7 @@ public class FormatoADocenteController implements Initializable {
 
         ObservableList<RowVM> rows = FXCollections.observableArrayList();
         for (ProyectoInfoDTO p : proyectos) {
-            long id = p.getId();
+            UUID id = p.getId();
             String titulo = p.getTitulo();
 
             EstadoProyecto estadoFinal = proyectoService.enforceAutoCancelIfNeeded(id);
@@ -543,8 +604,10 @@ public class FormatoADocenteController implements Initializable {
     }
 
     private void limpiarNuevoProyecto() {
-        txtEstudianteCorreo.clear();
-        lblEstudianteNombre.setText("");
+        txtEstudiante1Correo.clear();
+        txtEstudiante2Correo.clear();
+        lblEstudiante1Nombre.setText("");
+        lblEstudiante2Nombre.setText("No es obligatorio");
         txtTitulo.clear();
         if (cbTipoTrabajo != null) cbTipoTrabajo.getSelectionModel().clearSelection();
         lblPdfNombre.setText("Ningún archivo seleccionado");
@@ -568,14 +631,14 @@ public class FormatoADocenteController implements Initializable {
 
     // =================== ViewModel ===================
     public static class RowVM {
-        private final long proyectoId;
+        private final UUID proyectoId;
         private final StringProperty titulo = new SimpleStringProperty();
         private final StringProperty estudianteNombre = new SimpleStringProperty();
         private final StringProperty estudianteCorreo = new SimpleStringProperty();
         private final IntegerProperty version = new SimpleIntegerProperty();
         private final StringProperty estado = new SimpleStringProperty();
 
-        public RowVM(long proyectoId, String titulo, String estudianteNombre, String estudianteCorreo, int version, String estado) {
+        public RowVM(UUID proyectoId, String titulo, String estudianteNombre, String estudianteCorreo, int version, String estado) {
             this.proyectoId = proyectoId;
             this.titulo.set(titulo);
             this.estudianteNombre.set(estudianteNombre);
@@ -584,7 +647,7 @@ public class FormatoADocenteController implements Initializable {
             this.estado.set(estado);
         }
 
-        public long proyectoId() {
+        public UUID proyectoId() {
             return proyectoId;
         }
 
@@ -608,4 +671,13 @@ public class FormatoADocenteController implements Initializable {
             return estado;
         }
     }
+
+    private void mostrarAlertaError(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
 }

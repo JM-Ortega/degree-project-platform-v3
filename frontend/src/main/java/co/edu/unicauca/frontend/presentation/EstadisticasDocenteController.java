@@ -14,6 +14,8 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class EstadisticasDocenteController implements Initializable, Observer {
@@ -52,13 +54,14 @@ public class EstadisticasDocenteController implements Initializable, Observer {
         seriesTesis.getData().clear();
         seriesPractica.getData().clear();
 
-        seriesTesis.getData().add(new XYChart.Data<>("TERMINADOS", obtenerCantidad("TRABAJO_DE_INVESTIGACION", "TERMINADO")));
-        seriesTesis.getData().add(new XYChart.Data<>("RECHAZADOS", obtenerCantidad("TRABAJO_DE_INVESTIGACION", "RECHAZADO")));
-        seriesTesis.getData().add(new XYChart.Data<>("EN TRAMITE", obtenerCantidad("TRABAJO_DE_INVESTIGACION", "EN_TRAMITE")));
+        seriesTesis.getData().add(new XYChart.Data<>("Anteproyecto en revision", obtenerCantidad("TRABAJO_DE_INVESTIGACION", "EN_REVISION_ANTEPROYECTO")));
+        seriesTesis.getData().add(new XYChart.Data<>("RECHAZADOS", obtenerCantidad("TRABAJO_DE_INVESTIGACION", "FORMATOA_RECHAZADO")));
+        List<String> estadosEnTramite = new ArrayList<>();
+        seriesTesis.getData().add(new XYChart.Data<>("EN TRAMITE", obtenerCantidadVariosEstados("TRABAJO_DE_INVESTIGACION", estadosEnTramite)));
 
-        seriesPractica.getData().add(new XYChart.Data<>("TERMINADOS", obtenerCantidad("PRACTICA_PROFESIONAL", "TERMINADO")));
-        seriesPractica.getData().add(new XYChart.Data<>("RECHAZADOS", obtenerCantidad("PRACTICA_PROFESIONAL", "RECHAZADO")));
-        seriesPractica.getData().add(new XYChart.Data<>("EN TRAMITE", obtenerCantidad("PRACTICA_PROFESIONAL", "EN_TRAMITE")));
+        seriesPractica.getData().add(new XYChart.Data<>("TERMINADOS", obtenerCantidad("PRACTICA_PROFESIONAL", "EN_REVISION_ANTEPROYECTO")));
+        seriesPractica.getData().add(new XYChart.Data<>("RECHAZADOS", obtenerCantidad("PRACTICA_PROFESIONAL", "FORMATOA_RECHAZADO")));
+        seriesPractica.getData().add(new XYChart.Data<>("EN TRAMITE", obtenerCantidadVariosEstados("PRACTICA_PROFESIONAL", estadosEnTramite)));
     }
 
     private int obtenerCantidad(String tipo, String estado) {
@@ -72,6 +75,23 @@ public class EstadisticasDocenteController implements Initializable, Observer {
         }
 
         return proyectoService.countProyectosByEstadoYTipo(tipo, estado, docente.email());
+    }
+
+    private int obtenerCantidadVariosEstados(String tipo, List<String> estados) {
+        SessionData data = SessionManager.getInstance().getCurrentSession();
+        SessionInfo docente = (data != null) ? data.getSessionInfo() : null;
+
+        if (docente == null) {
+            System.err.println("No hay sesión activa");
+            return 0;
+        }
+
+        int total = 0;
+        for (String estado : estados) {
+            int cantidad = proyectoService.countProyectosByEstadoYTipo(tipo, estado, docente.email());
+            total += cantidad;
+        }
+        return total;
     }
 
     public void setServices(DocenteService docenteService, ProyectoService proyectoService, EstudianteService estudianteService) {

@@ -4,6 +4,8 @@ import co.edu.unicauca.shared.contracts.model.Programa;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 /**
  * Representa a un coordinador académico dentro de la universidad.
  *
@@ -31,7 +33,7 @@ public class Coordinador extends Persona {
         // Requerido por JPA
     }
 
-    public Coordinador(String id,
+    public Coordinador(UUID id,
                        String codigo,
                        String nombres,
                        String apellidos,

@@ -1,5 +1,6 @@
 package co.edu.unicauca.departmentheadservice.entities;
 
+import co.edu.unicauca.shared.contracts.model.Departamento;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
@@ -19,13 +20,13 @@ public class JefeDeDepartamento {
     private String nombre;
 
     @Column(nullable = false)
-    private String departamento;
+    private Departamento departamento;
 
     // Constructor sin argumentos (requerido por JPA)
     protected JefeDeDepartamento() {}
 
     // Constructor con parámetros
-    public JefeDeDepartamento(UUID personaId, String nombre, String departamento) {
+    public JefeDeDepartamento(UUID personaId, String nombre, Departamento departamento) {
         this.personaId = personaId;
         this.nombre = nombre;
         this.departamento = departamento;
@@ -40,7 +41,7 @@ public class JefeDeDepartamento {
         return nombre;
     }
 
-    public String getDepartamento() {
+    public Departamento getDepartamento() {
         return departamento;
     }
 
@@ -52,7 +53,7 @@ public class JefeDeDepartamento {
         this.nombre = nombre;
     }
 
-    public void setDepartamento(String departamento) {
+    public void setDepartamento(Departamento departamento) {
         this.departamento = departamento;
     }
 }

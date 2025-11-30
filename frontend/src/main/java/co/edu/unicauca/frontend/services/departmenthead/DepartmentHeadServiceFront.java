@@ -1,10 +1,12 @@
 package co.edu.unicauca.frontend.services.departmenthead;
 
 import co.edu.unicauca.frontend.dto.AnteproyectoDto;
+import co.edu.unicauca.frontend.infra.dto.DocenteDTO;
 import co.edu.unicauca.frontend.infra.dto.UsuarioDTO;
 import co.edu.unicauca.frontend.infra.http.HttpClientException;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Servicio de aplicación del frontend para interactuar con el microservicio de "Department Head".
@@ -54,7 +56,19 @@ public class DepartmentHeadServiceFront {
         }
     }
 
-//    public  List<UsuarioDTO> buscarDocentes(){
-//
-//    }
+    public  List<DocenteDTO> obtenerDocentes(String correoJefe) throws Exception{
+        try {
+            return departmentHeadApi.obtenerDocentesPorCorreoJefe(correoJefe);
+        } catch (HttpClientException ex) {
+            throw new Exception("Error al obtener docentes: " + ex.getResponseBody(), ex);
+        }
+    }
+
+    public void asignarEvaluadores(String correoDocente1, String correoDocente2, UUID idAnteproyecto) throws Exception {
+        try {
+            departmentHeadApi.asignarEvaluadores(correoDocente1, correoDocente2, idAnteproyecto);
+        } catch (HttpClientException ex) {
+            throw new Exception("Error al obtener docentes: " + ex.getResponseBody(), ex);
+        }
+    }
 }

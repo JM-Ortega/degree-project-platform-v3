@@ -51,8 +51,18 @@ public final class FrontendServices {
         // ===== Department Head =====
         String sinEvaluadores = AppConfig.get("api.endpoint.sin-evaluadores");
         String buscar = AppConfig.get("api.endpoint.buscar");
-        var departmentHeadApi = new HttpDepartmentHeadApi(baseUrl, sinEvaluadores, buscar);
+        String docentesPorCorreo = AppConfig.get("api.endpoint.docentes-por-correo");
+        String asignarEvaluadores = AppConfig.get("api.endpoint.asignar-evaluadores");
+        var departmentHeadApi = new HttpDepartmentHeadApi(
+                baseUrl,
+                sinEvaluadores,
+                buscar,
+                docentesPorCorreo,
+                asignarEvaluadores
+        );
+
         departmentHeadService = new DepartmentHeadServiceFront(departmentHeadApi);
+
 
         // ===== Coordinator (inyecta baseUrl si tus clientes lo requieren) =====
         coordinadorClient = new CoordinadorClient(); // o new CoordinadorClient(baseUrl)

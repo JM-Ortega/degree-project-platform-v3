@@ -225,7 +225,6 @@ public class AnteproyectoController {
      */
     @FXML
     private void onAsignar(ActionEvent event) {
-
         AnteproyectoDto seleccionado = tblProyectos.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {

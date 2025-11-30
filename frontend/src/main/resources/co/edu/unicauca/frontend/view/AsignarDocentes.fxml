@@ -55,8 +55,9 @@
                 </HBox>
 
                 <HBox alignment="CENTER_LEFT" spacing="12.0">
-                    <Button fx:id="btnAsignar" text="Asignar" />
+                    <Button fx:id="btnAsignar" onAction="#onAsignar" text="Asignar" />
                     <Button fx:id="btnCancelar" onAction="#onCancelar" text="Cancelar" />
+               <Label fx:id="lblAsignar" textFill="RED" />
                 </HBox>
             </VBox>
 
@@ -64,7 +65,7 @@
             <HBox spacing="10.0" styleClass="section">
                 <Pane HBox.hgrow="ALWAYS" />
                 <TextField fx:id="txtBuscar" prefWidth="280.0" promptText="Buscar por nombre o correo..." />
-                <Button fx:id="btnRefrescar" text="Refrescar" />
+                <Button fx:id="btnRefrescar" onAction="#onRefrescar" text="Refrescar" />
             </HBox>
 
             <!-- Tabla de docentes -->
@@ -74,8 +75,8 @@
                 </Label>
                 <TableView fx:id="tblDocentes" prefHeight="371.0" prefWidth="930.0" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="colNombre" prefWidth="300.0" text="Nombre" />
-                        <TableColumn fx:id="colEmail" prefWidth="600.0" text="Email" />
+                        <TableColumn fx:id="colNombre" prefWidth="463.0" text="Nombre" />
+                        <TableColumn fx:id="colEmail" prefWidth="466.0" text="Email" />
                     </columns>
                 </TableView>
             </VBox>

@@ -46,7 +46,7 @@
                 <Pane HBox.hgrow="ALWAYS">
                <children>
                   <Button fx:id="btnAsignarEvaluadores" mnemonicParsing="false" onAction="#onAsignar" text="Asignar Evaluadores" />
-                  <Label fx:id="lblAsignarMsg" layoutX="146.0" layoutY="4.0" />
+                  <Label fx:id="lblAsignarMsg" layoutX="146.0" layoutY="4.0" textFill="RED" />
                </children></Pane>
                 <TextField fx:id="txtBuscar" prefWidth="280.0" promptText="Buscar por título, nombre o correo..." />
                 <Button fx:id="btnRefrescar" onAction="#onRefrescar" text="Refrescar" />

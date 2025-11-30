@@ -111,6 +111,8 @@ public class FormatoADocenteController implements Initializable {
     @FXML
     private Label lblTablaMsg;
 
+    public static boolean estadisticasAbiertas = false;
+    public static Stage estadisticasStage = null;
 
     // Estado de archivos para nuevo proyecto
     private byte[] formatoABytes;
@@ -224,8 +226,11 @@ public void cargarDatos() {
 
     @FXML
     private void onVerEstadisticas() {
+        if (estadisticasAbiertas && estadisticasStage != null) {
+            estadisticasStage.requestFocus();
+            return;
+        }
         try {
-
             FXMLLoader loader = new FXMLLoader(getClass().getResource(
                     "/co/edu/unicauca/frontend/view/EstadisticasDocente.fxml"
             ));
@@ -234,11 +239,18 @@ public void cargarDatos() {
             EstadisticasDocenteController controller = loader.getController();
             controller.setServices(docenteService, proyectoService, estudianteService);
 
-            Stage stage = new Stage();
-            stage.setTitle("Estadísticas - Docente");
-            stage.setScene(new Scene(vista));
+            estadisticasStage = new Stage();
+            estadisticasStage.setTitle("Estadísticas - Docente");
+            estadisticasStage.setScene(new Scene(vista));
 
-            stage.show();
+            estadisticasAbiertas = true;
+
+            estadisticasStage.setOnCloseRequest(e -> {
+                estadisticasAbiertas = false;
+                estadisticasStage = null;
+            });
+
+            estadisticasStage.show();
 
         } catch (IOException e) {
             e.printStackTrace();

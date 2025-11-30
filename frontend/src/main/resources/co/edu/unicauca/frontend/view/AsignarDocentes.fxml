@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -63,16 +62,19 @@
 
             <!-- Barra de acciones -->
             <HBox spacing="10.0" styleClass="section">
-                <Pane HBox.hgrow="ALWAYS" />
-                <TextField fx:id="txtBuscar" prefWidth="280.0" promptText="Buscar por nombre o correo..." />
+                <Pane HBox.hgrow="ALWAYS">
+               <children>
+                      <Label layoutX="7.0" layoutY="3.0" styleClass="subtitle" text="Seleccione 2 de los docentes disponibles">
+                          <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                      </Label>
+               </children></Pane>
                 <Button fx:id="btnRefrescar" onAction="#onRefrescar" text="Refrescar" />
             </HBox>
 
             <!-- Tabla de docentes -->
-            <VBox prefHeight="421.0" prefWidth="930.0" spacing="8.0" VBox.vgrow="ALWAYS">
-                <Label styleClass="subtitle" text="Seleccione 2 de los docentes disponibles">
-                    <font><Font name="System Bold" size="12.0" /></font>
-                </Label>
+            <VBox prefHeight="382.0" prefWidth="930.0" spacing="8.0" VBox.vgrow="ALWAYS">
                 <TableView fx:id="tblDocentes" prefHeight="371.0" prefWidth="930.0" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colNombre" prefWidth="463.0" text="Nombre" />

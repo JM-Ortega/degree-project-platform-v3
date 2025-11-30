@@ -29,7 +29,6 @@ public class AsignarDocentesController{
     @FXML private Label lblEvaluador2;
     @FXML private Label lblTitulo;
     @FXML private Label nombreDocente;
-    @FXML private TextField txtBuscar;
     @FXML private Label lblTablaMsg;
     @FXML private Label lblAsignar;
 
@@ -248,10 +247,6 @@ public class AsignarDocentesController{
      */
     @FXML
     private void onRefrescar(ActionEvent event) {
-        if (txtBuscar != null) {
-            txtBuscar.clear();
-        }
-
         // --- Limpieza total de selecciones ---
         seleccion1 = null;
         seleccion2 = null;

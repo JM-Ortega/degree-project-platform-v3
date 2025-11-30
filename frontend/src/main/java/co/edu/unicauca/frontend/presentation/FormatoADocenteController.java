@@ -11,9 +11,9 @@ import co.edu.unicauca.frontend.infra.dto.ProyectoDTO;
 import co.edu.unicauca.frontend.infra.dto.ProyectoInfoDTO;
 import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
-import co.edu.unicauca.frontend.services.DocenteService;
-import co.edu.unicauca.frontend.services.EstudianteService;
-import co.edu.unicauca.frontend.services.ProyectoService;
+import co.edu.unicauca.frontend.services.academic.DocenteService;
+import co.edu.unicauca.frontend.services.academic.EstudianteService;
+import co.edu.unicauca.frontend.services.academic.ProyectoService;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -225,22 +225,23 @@ public void cargarDatos() {
     @FXML
     private void onVerEstadisticas() {
         try {
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource(
                     "/co/edu/unicauca/frontend/view/EstadisticasDocente.fxml"
             ));
 
             Parent vista = loader.load();
-            EstadisticasDocenteController estadisticasController = loader.getController();
-            estadisticasController.setServices(this.docenteService, this.proyectoService, this.estudianteService);
+            EstadisticasDocenteController controller = loader.getController();
+            controller.setServices(docenteService, proyectoService, estudianteService);
 
             Stage stage = new Stage();
             stage.setTitle("Estadísticas - Docente");
             stage.setScene(new Scene(vista));
+
             stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error al cargar EstadisticasDocente.fxml: " + e.getMessage());
         }
     }
 
@@ -373,6 +374,10 @@ public void cargarDatos() {
         }
         if (tipoTrabajo == TipoProyecto.PRACTICA_PROFESIONAL && !correo2.equals("")) {
             setError(lblNuevoProyectoMsg, "No se admiten 2 estudiantes para un proyecto de tipo PRACTICA PROFESIONAL.");
+            return;
+        }
+        if (correo1.equalsIgnoreCase(correo2)) {
+            setError(lblNuevoProyectoMsg, "No se puede registrar el mismo estudiante para un proyecto.");
             return;
         }
 

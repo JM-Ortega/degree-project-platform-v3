@@ -1,4 +1,4 @@
-package co.edu.unicauca.frontend.services;
+package co.edu.unicauca.frontend.services.academic;
 
 import co.edu.unicauca.frontend.infra.dto.UsuarioDTO;
 import co.edu.unicauca.frontend.infra.session.SessionManager;

@@ -1,4 +1,4 @@
-package co.edu.unicauca.frontend.services;
+package co.edu.unicauca.frontend.services.academic;
 
 import co.edu.unicauca.frontend.entities.EstadoProyecto;
 import co.edu.unicauca.frontend.entities.TipoProyecto;

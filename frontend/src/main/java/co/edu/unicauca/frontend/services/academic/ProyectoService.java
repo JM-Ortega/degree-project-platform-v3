@@ -1,4 +1,4 @@
-package co.edu.unicauca.frontend.services;
+package co.edu.unicauca.frontend.services.academic;
 
 import co.edu.unicauca.frontend.entities.EstadoFormatoA;
 import co.edu.unicauca.frontend.entities.EstadoProyecto;
@@ -16,15 +16,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.*;
 
 public class ProyectoService implements ObservableService {
     private final String baseUrlProyectos = "http://localhost:8080/api/academic/proyectos";
     private final RestTemplate restTemplate;
-    private final List<Observer> observers = new ArrayList<>();
+    private final List<co.edu.unicauca.frontend.services.academic.Observer> observers = new ArrayList<>();
 
     public ProyectoService() {
         this.restTemplate = new RestTemplate();
@@ -203,12 +201,12 @@ public class ProyectoService implements ObservableService {
     }
 
     @Override
-    public void addObserver(Observer o) {
+    public void addObserver(co.edu.unicauca.frontend.services.academic.Observer o) {
         observers.add(o);
     }
 
     @Override
-    public void removeObserver(Observer o) {
+    public void removeObserver(co.edu.unicauca.frontend.services.academic.Observer o) {
         observers.remove(o);
     }
 

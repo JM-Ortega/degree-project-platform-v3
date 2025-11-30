@@ -5,9 +5,9 @@ import co.edu.unicauca.frontend.dto.SessionInfo;
 import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.presentation.navigation.ViewNavigator;
-import co.edu.unicauca.frontend.services.DocenteService;
-import co.edu.unicauca.frontend.services.EstudianteService;
-import co.edu.unicauca.frontend.services.ProyectoService;
+import co.edu.unicauca.frontend.services.academic.DocenteService;
+import co.edu.unicauca.frontend.services.academic.EstudianteService;
+import co.edu.unicauca.frontend.services.academic.ProyectoService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -105,7 +105,6 @@ public class DocenteController implements Initializable {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error al cargar FormatoADocente.fxml: " + e.getMessage());
         }
     }
 
@@ -123,7 +122,6 @@ public class DocenteController implements Initializable {
             bp.setCenter(vista);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error al cargar AnteproyectoDocente.fxml: " + e.getMessage());
         }
     }
 

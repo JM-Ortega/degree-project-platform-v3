@@ -14,27 +14,14 @@ import co.edu.unicauca.notificationservice.service.InformationService;
 @Slf4j
 @Component
 public class EmailNotificationSender implements NotificationSender {
-    private InformationService informationService;
-
-    public EmailNotificationSender(InformationService informationService) {
-        this.informationService = informationService;
-    }
-
     /**
      * Envía una notificación por correo electrónico.
-     * Este método simula el envío registrando los datos del mensaje en el log.
+     * Este metodo simula el envío registrando los datos del mensaje en el log.
      *
      * @param event evento de notificación con los datos del mensaje y destinatarios.
      */
     @Override
     public void send(NotificationEvent event) {
-        if (event.getTipo().equals("coordinador")){
-            List<String> emails = event.getCorreos();
-            String emailCoordinador = informationService.getEmailCoordinador(event.getPrograma().toString());
-            emails.add(emailCoordinador);
-            event.setCorreos(emails);
-        }
-
         log.info("""
                         
                         ✉️  Enviando correo electrónico

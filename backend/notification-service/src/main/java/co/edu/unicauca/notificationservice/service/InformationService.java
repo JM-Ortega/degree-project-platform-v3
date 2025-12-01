@@ -24,6 +24,11 @@ public class InformationService {
         return restTemplate.getForObject(url, String.class);
     }
 
+    public String getEmailJefeDepartamento (String departamento){
+        String url = baseUrlAuth + "/" + departamento;
+        return restTemplate.getForObject(url, String.class);
+    }
+
     public String getTelefono(String correo) {
         String url = baseUrlAuth + "/telefono?correo=" + correo;
         return restTemplate.getForObject(url, String.class);

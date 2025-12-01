@@ -1,7 +1,6 @@
 package co.edu.unicauca.notificationservice.consumer;
 
-
-import co.edu.unicauca.notificationservice.sender.NotificationSender;
+import co.edu.unicauca.notificationservice.service.NotificationService;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -17,20 +16,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class NotificationListener {
 
-    private final NotificationSender emailNotificationSender; // solo correo
-    private final NotificationSender smsNotificationSender;   // correo + SMS
+    NotificationService  notificationService;
 
     /**
      * Inyección explícita de beans calificados.
      *
-     * @param emailNotificationSender bean base (solo correo)
-     * @param smsNotificationSender   bean decorado (correo + SMS)
+     * @param notificationService bean del servicio
      */
-    public NotificationListener(
-            @Qualifier("emailNotificationSender") NotificationSender emailNotificationSender,
-            @Qualifier("smsNotificationSender") NotificationSender smsNotificationSender) {
-        this.emailNotificationSender = emailNotificationSender;
-        this.smsNotificationSender = smsNotificationSender;
+    public NotificationListener(@Qualifier("notificationService") NotificationService  notificationService) {
+        this.notificationService = notificationService;
     }
 
     /**
@@ -48,7 +42,7 @@ public class NotificationListener {
 
         log.info("""
                         
-                        📬 Nueva notificación:
+                        📬 Nueva notificación a enviar:
                         ├─ Tipo: {}
                         ├─ Destinatarios: {}
                         └─ Mensaje: {}
@@ -57,8 +51,7 @@ public class NotificationListener {
                 event.getMensaje());
 
         try {
-            NotificationSender sender = event.isSMS() ? smsNotificationSender : emailNotificationSender;
-            sender.send(event);
+            notificationService.notificar(event);
         } catch (Exception e) {
             log.error("❌ Error al procesar notificación: {}", e.getMessage(), e);
             throw new AmqpRejectAndDontRequeueException(e);

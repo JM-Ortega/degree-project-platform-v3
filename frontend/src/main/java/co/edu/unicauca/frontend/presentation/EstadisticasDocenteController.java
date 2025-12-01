@@ -2,12 +2,13 @@ package co.edu.unicauca.frontend.presentation;
 
 import co.edu.unicauca.frontend.FrontendServices;
 import co.edu.unicauca.frontend.dto.SessionInfo;
+import co.edu.unicauca.frontend.entities.EstadoProyecto;
 import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
-import co.edu.unicauca.frontend.services.DocenteService;
-import co.edu.unicauca.frontend.services.EstudianteService;
-import co.edu.unicauca.frontend.services.Observer;
-import co.edu.unicauca.frontend.services.ProyectoService;
+import co.edu.unicauca.frontend.services.academic.DocenteService;
+import co.edu.unicauca.frontend.services.academic.EstudianteService;
+import co.edu.unicauca.frontend.services.academic.Observer;
+import co.edu.unicauca.frontend.services.academic.ProyectoService;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
@@ -49,14 +50,15 @@ public class EstadisticasDocenteController implements Initializable, Observer {
     }
 
     private void cargarEstadisticas() {
-
-        // limpiar datos anteriores para que no se dupliquen
-        seriesTesis.getData().clear();
-        seriesPractica.getData().clear();
-
-        seriesTesis.getData().add(new XYChart.Data<>("Anteproyecto en revision", obtenerCantidad("TRABAJO_DE_INVESTIGACION", "EN_REVISION_ANTEPROYECTO")));
-        seriesTesis.getData().add(new XYChart.Data<>("RECHAZADOS", obtenerCantidad("TRABAJO_DE_INVESTIGACION", "FORMATOA_RECHAZADO")));
         List<String> estadosEnTramite = new ArrayList<>();
+        estadosEnTramite.add(EstadoProyecto.PRIMERA_REVISION_FORMATOA.toString());
+        estadosEnTramite.add(EstadoProyecto.SEGUNDA_REVISION_FORMATOA.toString());
+        estadosEnTramite.add(EstadoProyecto.TERCERA_REVISION_FORMATOA.toString());
+        estadosEnTramite.add(EstadoProyecto.FORMATOA_ACEPTADO.toString());
+        estadosEnTramite.add(EstadoProyecto.ANTEPROYECTO_ENVIADO.toString());
+
+        seriesTesis.getData().add(new XYChart.Data<>("TERMINADOS", obtenerCantidad("TRABAJO_DE_INVESTIGACION", "EN_REVISION_ANTEPROYECTO")));
+        seriesTesis.getData().add(new XYChart.Data<>("RECHAZADOS", obtenerCantidad("TRABAJO_DE_INVESTIGACION", "FORMATOA_RECHAZADO")));
         seriesTesis.getData().add(new XYChart.Data<>("EN TRAMITE", obtenerCantidadVariosEstados("TRABAJO_DE_INVESTIGACION", estadosEnTramite)));
 
         seriesPractica.getData().add(new XYChart.Data<>("TERMINADOS", obtenerCantidad("PRACTICA_PROFESIONAL", "EN_REVISION_ANTEPROYECTO")));
@@ -98,7 +100,6 @@ public class EstadisticasDocenteController implements Initializable, Observer {
         this.proyectoService = proyectoService;
         this.docenteService = docenteService;
         this.estudianteService = estudianteService;
-
         this.proyectoService.addObserver(this);
         cargarEstadisticas();
     }

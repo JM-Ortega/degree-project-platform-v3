@@ -5,9 +5,9 @@ import co.edu.unicauca.frontend.dto.SessionInfo;
 import co.edu.unicauca.frontend.infra.session.SessionData;
 import co.edu.unicauca.frontend.infra.session.SessionManager;
 import co.edu.unicauca.frontend.presentation.navigation.ViewNavigator;
-import co.edu.unicauca.frontend.services.DocenteService;
-import co.edu.unicauca.frontend.services.EstudianteService;
-import co.edu.unicauca.frontend.services.ProyectoService;
+import co.edu.unicauca.frontend.services.academic.DocenteService;
+import co.edu.unicauca.frontend.services.academic.EstudianteService;
+import co.edu.unicauca.frontend.services.academic.ProyectoService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -41,6 +41,9 @@ public class DocenteController implements Initializable {
     @FXML
     private AnchorPane ap;
 
+    public static boolean estadisticasAbiertas = false;
+    public static Stage estadisticasStage = null;
+
     private DocenteService docenteService;
     private ProyectoService proyectoService;
     private EstudianteService estudianteService;
@@ -73,6 +76,11 @@ public class DocenteController implements Initializable {
     @FXML
     private void showInfoPrincipal(ActionEvent event) {
         activarBoton(btnPrincipal, btnFormatoA, btnSalir, btnAnteproyecto);
+        if (FormatoADocenteController.estadisticasAbiertas && FormatoADocenteController.estadisticasStage != null) {
+            FormatoADocenteController.estadisticasStage.close();
+            FormatoADocenteController.estadisticasStage = null;
+            FormatoADocenteController.estadisticasAbiertas = false;
+        }
         bp.setCenter(ap);
     }
 
@@ -91,27 +99,44 @@ public class DocenteController implements Initializable {
             formatoAController.cargarDatos();
             bp.setCenter(vista);
 
-            FXMLLoader loaderEstadisticas = new FXMLLoader(getClass().getResource(
-                    "/co/edu/unicauca/frontend/view/EstadisticasDocente.fxml"
-            ));
-            Parent estadisticasView = loaderEstadisticas.load();
-            EstadisticasDocenteController eController = loaderEstadisticas.getController();
-            eController.setServices(docenteService, proyectoService, estudianteService);
+            if (!FormatoADocenteController.estadisticasAbiertas) {
 
-            Stage estadisticasStage = new Stage();
-            estadisticasStage.setTitle("Estadísticas - Docente");
-            estadisticasStage.setScene(new Scene(estadisticasView));
-            estadisticasStage.show();
+                FXMLLoader loaderEst = new FXMLLoader(getClass().getResource(
+                        "/co/edu/unicauca/frontend/view/EstadisticasDocente.fxml"
+                ));
+
+                Parent vistaEst = loaderEst.load();
+                EstadisticasDocenteController eController = loaderEst.getController();
+                eController.setServices(docenteService, proyectoService, estudianteService);
+
+                Stage stage = new Stage();
+                stage.setTitle("Estadísticas - Docente");
+                stage.setScene(new Scene(vistaEst));
+
+                FormatoADocenteController.estadisticasAbiertas = true;
+                FormatoADocenteController.estadisticasStage = stage;
+
+                stage.setOnCloseRequest(ev -> {
+                    FormatoADocenteController.estadisticasAbiertas = false;
+                    FormatoADocenteController.estadisticasStage = null;
+                });
+
+                stage.show();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error al cargar FormatoADocente.fxml: " + e.getMessage());
         }
     }
 
     @FXML
     private void funcAnteproyecto(ActionEvent event) {
         activarBoton(btnAnteproyecto, btnPrincipal, btnFormatoA, btnSalir);
+        if (FormatoADocenteController.estadisticasAbiertas && FormatoADocenteController.estadisticasStage != null) {
+            FormatoADocenteController.estadisticasStage.close();
+            FormatoADocenteController.estadisticasStage = null;
+            FormatoADocenteController.estadisticasAbiertas = false;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(
                     "/co/edu/unicauca/frontend/view/AnteproyectoDocente.fxml"
@@ -123,7 +148,6 @@ public class DocenteController implements Initializable {
             bp.setCenter(vista);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error al cargar AnteproyectoDocente.fxml: " + e.getMessage());
         }
     }
 

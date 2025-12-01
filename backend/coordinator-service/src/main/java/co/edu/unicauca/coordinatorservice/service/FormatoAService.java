@@ -9,6 +9,7 @@ import co.edu.unicauca.coordinatorservice.repository.FormatoARepository;
 import co.edu.unicauca.shared.contracts.events.academic.DTOs.FormatoADTO;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import co.edu.unicauca.shared.contracts.model.EstadoFormatoA;
+import co.edu.unicauca.shared.contracts.model.Programa;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,19 +107,21 @@ public class FormatoAService {
             destinatarios.add(formato.getCoodirector().getEmail());
         }
         if (formato.getEstudiantes() != null) {
-        for (Estudiante e : formato.getEstudiantes()) {
-            if (e.getEmail() != null) {
-                destinatarios.add(e.getEmail());
+            for (Estudiante e : formato.getEstudiantes()) {
+                if (e.getEmail() != null) {
+                    destinatarios.add(e.getEmail());
+                }
             }
         }
-        }
+
+        Programa programa = formato.getEstudiantes().getFirst().getPrograma();
 
         NotificationEvent notificationEvent = new NotificationEvent(
                 routingKeyFuncional,
                 destinatarios,
                 subject,
                 message,
-                null,
+                programa,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 true
         );

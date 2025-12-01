@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -172,18 +173,15 @@ public class ProyectoService {
             throw new ProyectoNoEncontradoException(proyectoId);
         }
 
-        // Buscar el último Formato A que esté en OBSERVADO o APROBADO
-        List<FormatoA> candidatos = proyecto.getFormatosA().stream()
+        FormatoA ultimo = proyecto.getFormatosA().stream()
                 .filter(f -> f.getEstado() == EstadoFormatoA.OBSERVADO
                         || f.getEstado() == EstadoFormatoA.APROBADO)
-                .sorted((f1, f2) -> f2.getFechaCreacion().compareTo(f1.getFechaCreacion()))
-                .toList();
+                .max(Comparator.comparingInt(FormatoA::getNroVersion))
+                .orElse(null);
 
-        if (candidatos.isEmpty()) {
+        if (ultimo == null) {
             return null;
         }
-
-        FormatoA ultimo = candidatos.getFirst();
 
         return new FormatoADTO(
                 ultimo.getNombreFormato(),
@@ -316,13 +314,13 @@ public class ProyectoService {
     }
 
 
-    public void registrarResultadoRevisionFormatoADesdeEvento(UUID proyectoId, EstadoFormatoA nuevoEstado) {
+    public void registrarResultadoRevisionFormatoADesdeEvento(UUID proyectoId, EstadoFormatoA nuevoEstado, byte[] archivoRevisado, String nombreArchivoRevisado) {
         Proyecto proyecto = dbPortProyecto.findById(proyectoId);
         if (proyecto == null) {
             throw new ProyectoNoEncontradoException(proyectoId);
         }
 
-        proyecto.registrarResultadoRevisionFormatoA(nuevoEstado);
+        proyecto.registrarResultadoRevisionFormatoA(nuevoEstado, archivoRevisado, nombreArchivoRevisado);
 
         dbPortProyecto.guardarProyecto(proyecto);
     }

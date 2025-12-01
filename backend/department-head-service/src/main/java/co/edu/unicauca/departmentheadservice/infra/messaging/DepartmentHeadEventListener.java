@@ -57,10 +57,16 @@ public class DepartmentHeadEventListener {
         try {
             // Pienso que con que guarde el docente basta ya que docente y jefe tienen los mismos campos, ademas jefe de
             // Departamento ni se usa, no es necesario
-            Docente docente = new Docente(event.id(), event.nombre(), event.email(), event.departamento(), event.roles());
-            docenteRepository.save(docente);
-
-            log.info("[DeptHead] Docente almacenado: {} ({})", docente.getNombre(), docente.getEmail());
+            if(esDocente) {
+                Docente docente = new Docente(event.id(), event.nombre(), event.email(), event.departamento(), event.roles());
+                docenteRepository.save(docente);
+                log.info("[DeptHead] Docente almacenado: {} ({})", docente.getNombre(), docente.getEmail());
+            }
+            if(esJefe) {
+                JefeDeDepartamento jefe = new JefeDeDepartamento(event.id(),event.nombre(), event.email(), event.departamento());
+                jefeDeDepartamentoRepository.save(jefe);
+                log.info("[DeptHead] Jefe almacenado: {} ({})", jefe.getNombre(), jefe.getEmail());
+            }
         } catch (Exception e) {
             log.error("[DeptHead] Error almacenando docente {}: {}", event.email(), e.getMessage(), e);
             throw e; // permite reintento/DLQ

@@ -21,4 +21,6 @@ public interface AnteproyectoRepository extends JpaRepository<Anteproyecto, UUID
 
     // Usado en el seeder para saber si ya existe
     boolean existsByAnteproyectoId(UUID anteproyectoId);
+
+    Anteproyecto findAnteproyectoByAnteproyectoId(UUID anteproyectoId);
 }

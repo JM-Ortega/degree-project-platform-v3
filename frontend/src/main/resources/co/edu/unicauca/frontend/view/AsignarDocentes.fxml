@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="700.0" prefWidth="950.0" styleClass="root-white" stylesheets="@../styles/AnteproyectoJefeDepartamento.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.unicauca.frontend.presentation.AsignarDocentesController">
+    <children>
+        <VBox spacing="16.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+
+            <!-- Header -->
+            <HBox spacing="12.0" styleClass="header">
+                <Text styleClass="title" text="Asignar Evaluadores / Jefe de Departamento">
+                    <font><Font size="24.0" /></font>
+                </Text>
+                <Pane HBox.hgrow="ALWAYS" />
+                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                    <ImageView fitHeight="40.0" fitWidth="77.0" pickOnBounds="true" preserveRatio="true">
+                        <image><Image url="@../images/iconUsuario.png" /></image>
+                    </ImageView>
+                    <VBox spacing="2.0">
+                        <Label fx:id="nombreDocente" styleClass="label-strong" text="..." />
+                        <Label text="Jefe de Departamento" />
+                    </VBox>
+                </HBox>
+            </HBox>
+
+            <!-- Sección de detalles del anteproyecto -->
+            <VBox spacing="8.0" styleClass="section">
+                <HBox spacing="10.0">
+                    <Label text="Título:" />
+                    <Label fx:id="lblTitulo" styleClass="label-strong" text="" />
+                </HBox>
+                <HBox spacing="10.0">
+                    <Label text="Descripción:" />
+                    <Label fx:id="lblDescripcion" styleClass="label-strong" text="" />
+                </HBox>
+                <HBox spacing="10.0">
+                    <Label text="Evaluador 1:" />
+                    <Label fx:id="lblEvaluador1" styleClass="label-strong" text="" />
+                </HBox>
+                <HBox spacing="10.0">
+                    <Label text="Evaluador 2:" />
+                    <Label fx:id="lblEvaluador2" styleClass="label-strong" text="" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <Button fx:id="btnAsignar" onAction="#onAsignar" text="Asignar" />
+                    <Button fx:id="btnCancelar" onAction="#onCancelar" text="Cancelar" />
+               <Label fx:id="lblAsignar" textFill="RED" />
+                </HBox>
+            </VBox>
+
+            <!-- Barra de acciones -->
+            <HBox spacing="10.0" styleClass="section">
+                <Pane HBox.hgrow="ALWAYS">
+               <children>
+                      <Label layoutX="7.0" layoutY="3.0" styleClass="subtitle" text="Seleccione 2 de los docentes disponibles">
+                          <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                      </Label>
+               </children></Pane>
+                <Button fx:id="btnRefrescar" onAction="#onRefrescar" text="Refrescar" />
+            </HBox>
+
+            <!-- Tabla de docentes -->
+            <VBox prefHeight="382.0" prefWidth="930.0" spacing="8.0" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tblDocentes" prefHeight="371.0" prefWidth="930.0" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colNombre" prefWidth="463.0" text="Nombre" />
+                        <TableColumn fx:id="colEmail" prefWidth="466.0" text="Email" />
+                    </columns>
+                </TableView>
+            </VBox>
+         <Label fx:id="lblTablaMsg" styleClass="label-error" text="" />
+        </VBox>
+    </children>
+</AnchorPane>

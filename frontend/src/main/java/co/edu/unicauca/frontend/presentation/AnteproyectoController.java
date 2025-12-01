@@ -28,12 +28,18 @@ public class AnteproyectoController {
     @FXML private TextField txtBuscar;
     @FXML private Label lblTablaMsg;
     @FXML private Label nombreDocente;
+    @FXML private Label lblAsignarMsg;
 
     private DepartmentHeadServiceFront service;
     private ObservableList<AnteproyectoDto> listaAnteproyectos;
+    private DepartmentHeadController parent;
 
-    public AnteproyectoController() {
+    // Si se usa para el llamado del padre
+    public void setParentController(DepartmentHeadController parent) {
+        this.parent = parent;
     }
+
+    public AnteproyectoController() {}
 
     @FXML
     public void initialize() {
@@ -211,5 +217,26 @@ public class AnteproyectoController {
             txtBuscar.clear();
         }
         cargarAnteproyectos();
+    }
+
+    /**
+     * Maneja el evento para cambiar la vista a la asignacion de evaluadores
+     * @param event
+     */
+    @FXML
+    private void onAsignar(ActionEvent event) {
+        AnteproyectoDto seleccionado = tblProyectos.getSelectionModel().getSelectedItem();
+
+        if (seleccionado == null) {
+            lblAsignarMsg.setText("Debe seleccionar un anteproyecto para asignar evaluadores.");
+            return;
+        }
+
+        lblAsignarMsg.setText("");
+
+        parent.cargarVistaEnBorderPane(
+                "/co/edu/unicauca/frontend/view/AsignarDocentes.fxml",
+                seleccionado
+        );
     }
 }

@@ -1,7 +1,10 @@
 package co.edu.unicauca.departmentheadservice.services;
 
 import co.edu.unicauca.departmentheadservice.access.AnteproyectoRepository;
+import co.edu.unicauca.departmentheadservice.access.DocenteRepository;
 import co.edu.unicauca.departmentheadservice.entities.Anteproyecto;
+import co.edu.unicauca.departmentheadservice.entities.Docente;
+import co.edu.unicauca.departmentheadservice.infra.messaging.DepartmentHeadEventsPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -10,9 +13,16 @@ import java.util.*;
 public class AnteproyectoService {
 
     private final AnteproyectoRepository anteproyectoRepository;
+    private final DocenteRepository docenteRepository;
+    private final MesaggingService mesaggingService;
+    private final NotificationService notificationService;
 
-    public AnteproyectoService(AnteproyectoRepository anteproyectoRepository) {
+    public AnteproyectoService(AnteproyectoRepository anteproyectoRepository, DocenteRepository docenteRepository,
+                               MesaggingService mesaggingService, NotificationService notificationService) {
         this.anteproyectoRepository = anteproyectoRepository;
+        this.docenteRepository = docenteRepository;
+        this.mesaggingService = mesaggingService;
+        this.notificationService = notificationService;
     }
 
     public List<Anteproyecto> obtenerAnteproyectosSinEvaluadores() {
@@ -64,5 +74,19 @@ public class AnteproyectoService {
         }
 
         return new ArrayList<>(resultado);
+    }
+
+    public void asignarEvaluadores (String correoE1, String correoE2, UUID idAnteproyecto){
+        Anteproyecto anteproyecto = anteproyectoRepository.findAnteproyectoByAnteproyectoId(idAnteproyecto);
+        List<Docente> evaluadores = new ArrayList<>();
+        evaluadores.add(docenteRepository.findByEmail(correoE1)
+                .orElseThrow(() -> new IllegalArgumentException("Este correo no pertenece a un docente: " + correoE1)));
+        evaluadores.add(docenteRepository.findByEmail(correoE2)
+                .orElseThrow(() -> new IllegalArgumentException("Este correo no pertenece a un docente: " + correoE2)));
+        anteproyecto.setEvaluadores(evaluadores);
+
+        anteproyectoRepository.save(anteproyecto);
+        notificationService.notificarEvaluadores(anteproyecto);
+        mesaggingService.publicarMensaje(anteproyecto);
     }
 }

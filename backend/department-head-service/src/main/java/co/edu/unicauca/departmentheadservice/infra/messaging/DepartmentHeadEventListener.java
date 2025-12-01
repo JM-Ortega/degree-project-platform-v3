@@ -2,8 +2,10 @@ package co.edu.unicauca.departmentheadservice.infra.messaging;
 
 import co.edu.unicauca.departmentheadservice.access.AnteproyectoRepository;
 import co.edu.unicauca.departmentheadservice.access.DocenteRepository;
+import co.edu.unicauca.departmentheadservice.access.JefeDeDepartamentoRepository;
 import co.edu.unicauca.departmentheadservice.entities.Anteproyecto;
 import co.edu.unicauca.departmentheadservice.entities.Docente;
+import co.edu.unicauca.departmentheadservice.entities.JefeDeDepartamento;
 import co.edu.unicauca.shared.contracts.events.academic.AnteproyectoSinEvaluadoresEvent;
 import co.edu.unicauca.shared.contracts.events.auth.UserCreatedEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +24,13 @@ public class DepartmentHeadEventListener {
 
     private final AnteproyectoRepository anteproyectoRepository;
     private final DocenteRepository docenteRepository;
+    private final JefeDeDepartamentoRepository jefeDeDepartamentoRepository;
 
     public DepartmentHeadEventListener(AnteproyectoRepository anteproyectoRepository,
-                                       DocenteRepository docenteRepository) {
+                                       DocenteRepository docenteRepository, JefeDeDepartamentoRepository jefeDeDepartamentoRepository) {
         this.anteproyectoRepository = anteproyectoRepository;
         this.docenteRepository = docenteRepository;
+        this.jefeDeDepartamentoRepository = jefeDeDepartamentoRepository;
     }
 
     /** Llega auth.user.created */
@@ -40,15 +44,29 @@ public class DepartmentHeadEventListener {
 
         boolean esDocente = event.roles() != null &&
                 event.roles().stream().anyMatch(rol -> "DOCENTE".equalsIgnoreCase(rol.name()));
-        if (!esDocente) {
-            log.debug("[DeptHead] Usuario descartado (no docente): {} rk={}", event.email(), rk);
+
+        // Debe escuchar tambien jefes de departamaneto
+        boolean esJefe = event.roles() != null &&
+                event.roles().stream().anyMatch(rol -> "JEFE_DE_DEPARTAMENTO".equalsIgnoreCase(rol.name()));
+
+        if (!esDocente && !esJefe) {
+            log.debug("[DeptHead] Usuario descartado (no jefe ni docente): {} rk={}", event.email(), rk);
             return;
         }
 
         try {
-            Docente docente = new Docente(event.id(), event.nombre(), event.email());
-            docenteRepository.save(docente);
-            log.info("[DeptHead] Docente almacenado: {} ({})", docente.getNombre(), docente.getEmail());
+            // Pienso que con que guarde el docente basta ya que docente y jefe tienen los mismos campos, ademas jefe de
+            // Departamento ni se usa, no es necesario
+            if(esDocente) {
+                Docente docente = new Docente(event.id(), event.nombre(), event.email(), event.departamento(), event.roles());
+                docenteRepository.save(docente);
+                log.info("[DeptHead] Docente almacenado: {} ({})", docente.getNombre(), docente.getEmail());
+            }
+            if(esJefe) {
+                JefeDeDepartamento jefe = new JefeDeDepartamento(event.id(),event.nombre(), event.email(), event.departamento());
+                jefeDeDepartamentoRepository.save(jefe);
+                log.info("[DeptHead] Jefe almacenado: {} ({})", jefe.getNombre(), jefe.getEmail());
+            }
         } catch (Exception e) {
             log.error("[DeptHead] Error almacenando docente {}: {}", event.email(), e.getMessage(), e);
             throw e; // permite reintento/DLQ

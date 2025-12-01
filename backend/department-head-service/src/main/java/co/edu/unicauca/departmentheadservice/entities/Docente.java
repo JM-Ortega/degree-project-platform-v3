@@ -1,9 +1,11 @@
 package co.edu.unicauca.departmentheadservice.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
+import co.edu.unicauca.shared.contracts.model.Departamento;
+import co.edu.unicauca.shared.contracts.model.Rol;
+import jakarta.persistence.*;
+
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -16,14 +18,22 @@ public class Docente {
     private String nombre;
     private String email; // Correo electrónico del Docente
 
+    private Departamento departamento;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private List<Rol> roles;
+
     // Constructor sin argumentos (requerido por JPA)
     protected Docente() {}
 
     // Constructor con parámetros
-    public Docente(UUID personaId, String nombre, String email) {
+    public Docente(UUID personaId, String nombre, String email, Departamento departamento, List<Rol> roles) {
         this.personaId = personaId;
         this.nombre = nombre;
         this.email = email;
+        this.departamento = departamento;
+        this.roles = roles;
     }
 
     // Getters y setters
@@ -49,5 +59,21 @@ public class Docente {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Departamento getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(Departamento departamento) {
+        this.departamento = departamento;
+    }
+
+    public List<Rol> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Rol> rol) {
+        this.roles = rol;
     }
 }

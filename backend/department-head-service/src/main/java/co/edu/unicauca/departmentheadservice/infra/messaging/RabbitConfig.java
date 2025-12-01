@@ -90,6 +90,16 @@ public class RabbitConfig {
                 .with(departmentDlqName);
     }
 
+    /** Binding para subir anteproyectos con evaluadores*/
+    @Bean
+    public Binding proposalApprovedBinding() {
+        return BindingBuilder
+                .bind(departmentQueue())
+                .to(mainExchange())
+                .with("department.proposal.approved");
+    }
+
+
     // ===== Conversión JSON (el mismo converter sirve para template y listeners vía auto-config) =====
     @Bean
     public Jackson2JsonMessageConverter jackson2JsonMessageConverter(com.fasterxml.jackson.databind.ObjectMapper mapper) {

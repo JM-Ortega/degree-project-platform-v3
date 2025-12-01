@@ -30,7 +30,6 @@ public class NotificationService {
                 correos,
                 "👨‍🏫 Ha sido asignado como evaluador",
                 "Por favor revisar la plataforma, ha sido asignado como evaluador para un nuevo anteproyecto",
-                null,
                 OffsetDateTime.now(),
                 false
         );

@@ -1,7 +1,6 @@
 package co.edu.unicauca.notificationservice.consumer;
 
-
-import co.edu.unicauca.notificationservice.sender.NotificationSender;
+import co.edu.unicauca.notificationservice.service.NotificationService;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -10,34 +9,31 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- * Consumer de eventos de notificación.
- * Decide el canal de envío (solo correo o correo+SMS) según la presencia de teléfonos.
+ * Listener encargado de recibir eventos de notificación desde la cola de mensajería.
+ * Valida el evento recibido y delega el envío al {@link NotificationService}.
  */
 @Slf4j
 @Component
 public class NotificationListener {
 
-    private final NotificationSender emailNotificationSender; // solo correo
-    private final NotificationSender smsNotificationSender;   // correo + SMS
+    /** Servicio encargado de procesar y enviar la notificación. */
+    NotificationService  notificationService;
 
     /**
-     * Inyección explícita de beans calificados.
+     * Construye el listener con el servicio de notificaciones.
      *
-     * @param emailNotificationSender bean base (solo correo)
-     * @param smsNotificationSender   bean decorado (correo + SMS)
+     * @param notificationService servicio que maneja el envío de notificaciones
      */
-    public NotificationListener(
-            @Qualifier("emailNotificationSender") NotificationSender emailNotificationSender,
-            @Qualifier("smsNotificationSender") NotificationSender smsNotificationSender) {
-        this.emailNotificationSender = emailNotificationSender;
-        this.smsNotificationSender = smsNotificationSender;
+    public NotificationListener(@Qualifier("notificationService") NotificationService  notificationService) {
+        this.notificationService = notificationService;
     }
 
     /**
-     * Procesa eventos de notificación recibidos desde la cola AMQP.
-     * Si existen teléfonos, utiliza el sender decorado (correo + SMS); de lo contrario, solo correo.
+     * Maneja un evento de notificación recibido desde RabbitMQ.
+     * Valida el evento, registra la información y delega el proceso de envío.
+     * En caso de error, rechaza el mensaje sin reintento.
      *
-     * @param event evento de notificación deserializado desde el mensaje AMQP
+     * @param event evento recibido desde la cola
      */
     @RabbitListener(queues = "${messaging.queues.notification}")
     public void handleNotification(NotificationEvent event) {
@@ -48,7 +44,7 @@ public class NotificationListener {
 
         log.info("""
                         
-                        📬 Nueva notificación:
+                        📬 Nueva notificación a enviar:
                         ├─ Tipo: {}
                         ├─ Destinatarios: {}
                         └─ Mensaje: {}
@@ -57,8 +53,7 @@ public class NotificationListener {
                 event.getMensaje());
 
         try {
-            NotificationSender sender = event.isSMS() ? smsNotificationSender : emailNotificationSender;
-            sender.send(event);
+            notificationService.notificar(event);
         } catch (Exception e) {
             log.error("❌ Error al procesar notificación: {}", e.getMessage(), e);
             throw new AmqpRejectAndDontRequeueException(e);

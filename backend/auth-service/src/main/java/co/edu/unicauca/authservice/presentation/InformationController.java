@@ -19,6 +19,13 @@ public class InformationController {
         return ResponseEntity.ok(email);
     }
 
+    @GetMapping("/{departamento}")
+    public ResponseEntity<String> getEmailJefe(@PathVariable String departamento)
+    {
+        String email =informationService.obtenerEmailJefePorDepartamento(departamento);
+        return ResponseEntity.ok(email);
+    }
+
     @GetMapping("/telefono")
     public ResponseEntity<String> getNumerosTelefono(
             @RequestParam String correo

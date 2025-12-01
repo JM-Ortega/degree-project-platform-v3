@@ -16,6 +16,10 @@ import co.edu.unicauca.notificationservice.service.InformationService;
 public class EmailNotificationSender implements NotificationSender {
     private InformationService informationService;
 
+    public EmailNotificationSender(InformationService informationService) {
+        this.informationService = informationService;
+    }
+
     /**
      * Envía una notificación por correo electrónico.
      * Este método simula el envío registrando los datos del mensaje en el log.

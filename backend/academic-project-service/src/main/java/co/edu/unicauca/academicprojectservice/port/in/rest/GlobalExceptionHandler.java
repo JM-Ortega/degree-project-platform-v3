@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 @Slf4j
@@ -28,9 +29,23 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    // ============================
+    // NUEVO: ERRORS CONTROLADOS (404, 400, etc.)
+    // ============================
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<?> manejarResponseStatus(ResponseStatusException ex) {
+        log.warn("Error controlado: {}", ex.getReason());
+        return ResponseEntity
+                .status(ex.getStatusCode())
+                .body(ex.getReason());
+    }
+
+    // ============================
+    // ERRORES REALES / INESPERADOS
+    // ============================
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> manejarExcepcionesGenerales(Exception ex) {
-        log.error("Error interno no controlado", ex);  // <--- IMPORTANTE
+        log.error("Error interno no controlado", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error interno del servidor");

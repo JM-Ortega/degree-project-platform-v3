@@ -56,13 +56,6 @@ public class DepartmentHeadDataLoader implements CommandLineRunner {
         Docente docente12 = getOrCreateDocente("Marcela Quiñones", "marcela.quinones@unicauca.edu.co", Departamento.SISTEMAS, roles);
         Docente docente13 = getOrCreateDocente("Héctor Julio Valencia", "hector.valencia@unicauca.edu.co", Departamento.ELECTRONICA_INSTRUMENTACION_Y_CONTROL, roles);
 
-        //Toca quemarla enl o que se arregla la cola porque con esta estoy haciendo las pruebas y como no esta en la base
-        // Me genera error al buscar el correo
-        List<Rol> rolesJ = new ArrayList<Rol>() {{
-            add(Rol.JEFE_DE_DEPARTAMENTO);
-        }};
-        Docente jefe = getOrCreateDocente("Laura Hernández", "multi.demo@unicauca.edu.co", Departamento.SISTEMAS, rolesJ);
-
         List<Anteproyecto> nuevos = new ArrayList<>();
 
         for (int i = 1; i <= 15; i++) {

@@ -4,7 +4,7 @@ import co.edu.unicauca.departmentheadservice.access.AnteproyectoRepository;
 import co.edu.unicauca.departmentheadservice.access.DocenteRepository;
 import co.edu.unicauca.departmentheadservice.entities.Anteproyecto;
 import co.edu.unicauca.departmentheadservice.entities.Docente;
-import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
+import co.edu.unicauca.departmentheadservice.infra.messaging.DepartmentHeadEventsPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -14,12 +14,15 @@ public class AnteproyectoService {
 
     private final AnteproyectoRepository anteproyectoRepository;
     private final DocenteRepository docenteRepository;
-    
-    NotificationService notificationService = new NotificationService();
+    private final MesaggingService mesaggingService;
+    private final NotificationService notificationService;
 
-    public AnteproyectoService(AnteproyectoRepository anteproyectoRepository, DocenteRepository docenteRepository) {
+    public AnteproyectoService(AnteproyectoRepository anteproyectoRepository, DocenteRepository docenteRepository,
+                               MesaggingService mesaggingService, NotificationService notificationService) {
         this.anteproyectoRepository = anteproyectoRepository;
         this.docenteRepository = docenteRepository;
+        this.mesaggingService = mesaggingService;
+        this.notificationService = notificationService;
     }
 
     public List<Anteproyecto> obtenerAnteproyectosSinEvaluadores() {
@@ -84,5 +87,6 @@ public class AnteproyectoService {
 
         anteproyectoRepository.save(anteproyecto);
         notificationService.notificarEvaluadores(anteproyecto);
+        mesaggingService.publicarMensaje(anteproyecto);
     }
 }

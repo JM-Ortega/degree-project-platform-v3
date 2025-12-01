@@ -42,8 +42,11 @@ public class FormatoAListener {
 
             proyectoService.registrarResultadoRevisionFormatoADesdeEvento(
                     dto.getProyectoId(),
-                    estado
+                    estado,
+                    dto.getBlob(),
+                    dto.getNombreFormatoA()
             );
+
 
             System.out.println("✔️ [AcademicProjectService] Revisión de FormatoA aplicada al proyecto");
 

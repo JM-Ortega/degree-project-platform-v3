@@ -20,15 +20,19 @@ public class JefeDeDepartamento {
     private String nombre;
 
     @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
     private Departamento departamento;
 
     // Constructor sin argumentos (requerido por JPA)
     protected JefeDeDepartamento() {}
 
     // Constructor con parámetros
-    public JefeDeDepartamento(UUID personaId, String nombre, Departamento departamento) {
+    public JefeDeDepartamento(UUID personaId, String nombre, String email, Departamento departamento) {
         this.personaId = personaId;
         this.nombre = nombre;
+        this.email = email;
         this.departamento = departamento;
     }
 
@@ -45,6 +49,10 @@ public class JefeDeDepartamento {
         return departamento;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public void setPersonaId(UUID personaId) {
         this.personaId = personaId;
     }
@@ -55,5 +63,9 @@ public class JefeDeDepartamento {
 
     public void setDepartamento(Departamento departamento) {
         this.departamento = departamento;
+    }
+
+    public  void setEmail(String email) {
+        this.email = email;
     }
 }

@@ -1,8 +1,10 @@
 package co.edu.unicauca.departmentheadservice.access;
 
 import co.edu.unicauca.departmentheadservice.entities.Docente;
+import co.edu.unicauca.shared.contracts.model.Departamento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,13 +18,13 @@ public interface DocenteRepository extends JpaRepository<Docente, String> {
     Optional<Docente> findByEmail(String email);
 
     @Query("""
-       SELECT d2
-       FROM Docente d1
-       JOIN Docente d2 ON d1.departamento = d2.departamento
-       WHERE d1.email = :email
-         AND co.edu.unicauca.shared.contracts.model.Rol.DOCENTE
-             IN elements(d2.roles)
+       SELECT d 
+       FROM Docente d
+       WHERE d.departamento = (
+           SELECT j.departamento 
+           FROM JefeDeDepartamento j 
+           WHERE j.email = :email
+       )
        """)
     List<Docente> findAllDocentesByEmailDepartamento(String email);
-
 }

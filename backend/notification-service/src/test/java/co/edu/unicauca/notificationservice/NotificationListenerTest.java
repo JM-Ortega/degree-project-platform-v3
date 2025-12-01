@@ -4,6 +4,7 @@ import co.edu.unicauca.notificationservice.consumer.NotificationListener;
 import co.edu.unicauca.notificationservice.sender.EmailNotificationSender;
 import co.edu.unicauca.notificationservice.sender.NotificationSender;
 import co.edu.unicauca.notificationservice.sender.SmsNotificationDecorator;
+import co.edu.unicauca.notificationservice.service.InformationService;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,7 +79,8 @@ class NotificationListenerTest {
     @Test
     void testNotificationDecoratorIntegration_delegatesToEmail() {
         NotificationSender emailSender = mock(EmailNotificationSender.class);
-        NotificationSender smsSender = new SmsNotificationDecorator(emailSender);
+        InformationService informationService = mock(InformationService.class);
+        NotificationSender smsSender = new SmsNotificationDecorator(emailSender, informationService);
 
         NotificationEvent event = new NotificationEvent();
         event.setType("test.sms");

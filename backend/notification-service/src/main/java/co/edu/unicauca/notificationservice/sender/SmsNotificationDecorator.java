@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Slf4j
 public class SmsNotificationDecorator implements NotificationSender {
-    private InformationService informationService;
+    private final InformationService informationService;
 
     /**
      * Componente base decorado (por ejemplo, {@link EmailNotificationSender}).
@@ -27,8 +27,9 @@ public class SmsNotificationDecorator implements NotificationSender {
      *
      * @param wrapped instancia del {@link NotificationSender} base.
      */
-    public SmsNotificationDecorator(NotificationSender wrapped) {
+    public SmsNotificationDecorator(NotificationSender wrapped, InformationService informationService) {
         this.wrapped = wrapped;
+        this.informationService = informationService;
     }
 
     /**
@@ -45,16 +46,22 @@ public class SmsNotificationDecorator implements NotificationSender {
         // Envío base (correo electrónico)
         wrapped.send(event);
 
-        List<String> telefonos = informationService.getTelefonos(event.getCorreos());
-
-        // Envío complementario por SMS
-        for (String telefono : telefonos) {
-            log.info("""
+        for(String correo : event.getCorreos()){
+            String celular = informationService.getTelefono(correo);
+            if (celular == null){
+                log.info("""
+                    
+                    📱 No es posible enviar un SMS
+                    └── El destinatario no ha registrado su número de telefono
+                    """);
+            }else {
+                log.info("""
+                    
                     📱 Enviando SMS
                     ├── A: {}
                     └── Mensaje: {}
-                    """, telefono, event.getMensaje());
+                    """, celular, event.getMensaje());
+            }
         }
-
     }
 }

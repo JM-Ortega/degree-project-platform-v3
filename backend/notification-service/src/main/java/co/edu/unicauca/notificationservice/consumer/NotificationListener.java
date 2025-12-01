@@ -47,6 +47,7 @@ public class NotificationListener {
         }
 
         log.info("""
+                        
                         📬 Nueva notificación:
                         ├─ Tipo: {}
                         ├─ Destinatarios: {}

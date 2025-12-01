@@ -12,9 +12,11 @@ public interface PersonaRepository extends JpaRepository<Persona, String> {
     Optional<Persona> findByUsuarioId(String usuarioId);
 
     @Query("""
-        SELECT p.celular 
-        FROM Persona p 
-        WHERE p.usuario.email IN :correos
-    """)
-    List<String> findCelularesByUsuarioEmailIn(@Param("correos") List<String> correos);
+       SELECT p.celular
+       FROM Persona p
+       JOIN p.usuario u
+       WHERE u.email = :email
+       """)
+    String findCelularByEmail(String email);
+
 }

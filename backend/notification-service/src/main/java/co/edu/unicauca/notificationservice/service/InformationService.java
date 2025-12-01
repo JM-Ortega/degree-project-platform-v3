@@ -16,7 +16,7 @@ public class InformationService {
 
     public InformationService(){
         this.restTemplate = new RestTemplate();
-        this.baseUrlAuth = "http://localhost:8080/api/auth/information";
+        this.baseUrlAuth = "http://localhost:8080/api/auth";
     }
 
     public  String getEmailCoordinador(String programa){
@@ -24,27 +24,8 @@ public class InformationService {
         return restTemplate.getForObject(url, String.class);
     }
 
-    public List<String> getTelefonos(List<String> correos) {
-        String url = baseUrlAuth + "/telefonos";
-
-        // Usamos UriComponentsBuilder para agregar la lista como query params
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
-
-        for (String correo : correos) {
-            builder.queryParam("correos", correo);
-        }
-
-        String finalUrl = builder.toUriString();
-
-        // Hacemos la petición GET esperando una lista de Strings
-        ResponseEntity<List<String>> response = restTemplate.exchange(
-                finalUrl,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<String>>() {}
-        );
-
-        return response.getBody();
+    public String getTelefono(String correo) {
+        String url = baseUrlAuth + "/telefono?correo=" + correo;
+        return restTemplate.getForObject(url, String.class);
     }
-
 }

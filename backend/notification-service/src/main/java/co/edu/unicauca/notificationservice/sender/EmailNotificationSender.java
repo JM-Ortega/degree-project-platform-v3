@@ -32,6 +32,7 @@ public class EmailNotificationSender implements NotificationSender {
         }
 
         log.info("""
+                        
                         ✉️  Enviando correo electrónico
                         ├── Para: {}
                         ├── Asunto: {}

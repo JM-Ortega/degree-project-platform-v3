@@ -22,7 +22,7 @@ public class InformationService {
         return coor.getUsuario().getEmail();
     }
 
-    public List<String> obtenerTelefonosPorCorreo(List<String> correos) {
-        return personaRepository.findCelularesByUsuarioEmailIn(correos);
+    public String obtenerTelefonoPorCorreo(String correo) {
+        return personaRepository.findCelularByEmail(correo);
     }
 }

@@ -50,7 +50,7 @@ public class NotificationPublisher {
                 message,                      // mensaje
                 programa,                     // programa
                 OffsetDateTime.now(ZoneOffset.UTC), // timestamp
-                false
+                true
         );
 
         String routingKey = "notification.send." + type; // p.ej. notification.send.auth.user.created

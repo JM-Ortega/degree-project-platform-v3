@@ -13,11 +13,11 @@ public class FormatoA {
 
     private final int nroVersion;
 
-    private final String nombreFormato;
+    private String nombreFormato;
 
     private final LocalDate fechaCreacion;
 
-    private final byte[] blob;
+    private byte[] blob;
 
     private EstadoFormatoA estado;
 
@@ -60,6 +60,20 @@ public class FormatoA {
         }
         this.estado = nuevoEstado;
     }
+
+    public void aplicarResultadoRevision(EstadoFormatoA nuevoEstado, byte[] archivoRevisado, String nombreFormatoNuevo) {
+        if (nuevoEstado == null) {
+            throw new DomainException("El estado del FormatoA no puede ser nulo.");
+        }
+        this.estado = nuevoEstado;
+        if (archivoRevisado != null && archivoRevisado.length > 0) {
+            this.blob = archivoRevisado;
+        }
+        if (nombreFormatoNuevo != null && !nombreFormatoNuevo.isBlank()) {
+            this.nombreFormato = nombreFormatoNuevo;
+        }
+    }
+
 
     public UUID getId() {
         return id;

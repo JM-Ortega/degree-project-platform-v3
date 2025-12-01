@@ -1,42 +1,30 @@
 package co.edu.unicauca.notificationservice.sender;
 
-import co.edu.unicauca.notificationservice.service.InformationService;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-
 /**
- * Decorador de {@link NotificationSender} que agrega funcionalidad
- * para el envío de mensajes SMS, además del envío base (correo electrónico).
- * <p>
- * Implementa el patrón de diseño <b>Decorator</b>, permitiendo extender el
- * comportamiento del componente sin modificar su estructura interna.
+ * Decorador que añade el envío de SMS después del envío base.
+ * Envuelve un {@link NotificationSender} y ejecuta la lógica adicional.
  */
 @Slf4j
 public class SmsNotificationDecorator implements NotificationSender {
-    /**
-     * Componente base decorado (por ejemplo, {@link EmailNotificationSender}).
-     */
+    /** Componente original encargado del envío base (correo). */
     private final NotificationSender wrapped;
 
     /**
-     * Constructor que recibe el componente base a decorar.
+     * Construye el decorador con el componente que será extendido.
      *
-     * @param wrapped instancia del {@link NotificationSender} base.
+     * @param wrapped implementación base del envío
      */
     public SmsNotificationDecorator(NotificationSender wrapped) {
         this.wrapped = wrapped;
     }
 
     /**
-     * Envía una notificación combinando correo electrónico y SMS.
-     * <ul>
-     *     <li>Primero envía la notificación base (correo electrónico).</li>
-     *     <li>Luego, si existen números telefónicos, envía un SMS a cada uno.</li>
-     * </ul>
+     * Envía la notificación base y luego registra el envío por SMS.
      *
-     * @param event evento de notificación con los datos del mensaje y destinatarios.
+     * @param event evento de notificación con teléfonos y mensaje
      */
     @Override
     public void send(NotificationEvent event) {

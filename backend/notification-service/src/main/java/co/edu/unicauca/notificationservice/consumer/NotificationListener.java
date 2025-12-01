@@ -9,29 +9,31 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- * Consumer de eventos de notificación.
- * Decide el canal de envío (solo correo o correo+SMS) según la presencia de teléfonos.
+ * Listener encargado de recibir eventos de notificación desde la cola de mensajería.
+ * Valida el evento recibido y delega el envío al {@link NotificationService}.
  */
 @Slf4j
 @Component
 public class NotificationListener {
 
+    /** Servicio encargado de procesar y enviar la notificación. */
     NotificationService  notificationService;
 
     /**
-     * Inyección explícita de beans calificados.
+     * Construye el listener con el servicio de notificaciones.
      *
-     * @param notificationService bean del servicio
+     * @param notificationService servicio que maneja el envío de notificaciones
      */
     public NotificationListener(@Qualifier("notificationService") NotificationService  notificationService) {
         this.notificationService = notificationService;
     }
 
     /**
-     * Procesa eventos de notificación recibidos desde la cola AMQP.
-     * Si existen teléfonos, utiliza el sender decorado (correo + SMS); de lo contrario, solo correo.
+     * Maneja un evento de notificación recibido desde RabbitMQ.
+     * Valida el evento, registra la información y delega el proceso de envío.
+     * En caso de error, rechaza el mensaje sin reintento.
      *
-     * @param event evento de notificación deserializado desde el mensaje AMQP
+     * @param event evento recibido desde la cola
      */
     @RabbitListener(queues = "${messaging.queues.notification}")
     public void handleNotification(NotificationEvent event) {

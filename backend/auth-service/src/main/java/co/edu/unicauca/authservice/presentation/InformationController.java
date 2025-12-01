@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/information")
 public class InformationController {
     @Autowired
     private InformationService informationService;
@@ -20,11 +19,11 @@ public class InformationController {
         return ResponseEntity.ok(email);
     }
 
-    @GetMapping("/telefonos")
-    public ResponseEntity<List<String>> getNumerosTelefono(
-            @RequestParam List<String> correos
+    @GetMapping("/telefono")
+    public ResponseEntity<String> getNumerosTelefono(
+            @RequestParam String correo
     ){
-        List<String> telefonos = informationService.obtenerTelefonosPorCorreo(correos);
-        return ResponseEntity.ok(telefonos);
+        String telefono = informationService.obtenerTelefonoPorCorreo(correo);
+        return ResponseEntity.ok(telefono);
     }
 }

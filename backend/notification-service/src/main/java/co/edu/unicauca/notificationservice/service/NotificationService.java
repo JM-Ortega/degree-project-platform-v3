@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -25,58 +26,60 @@ public class NotificationService {
         this.informationService = informationService;
     }
 
-    public void notificar (NotificationEvent event){
-        switch (event.getTipo()) {
+    public void notificar(NotificationEvent event) {
+        agregarDestinatarios(event);
 
-            case "coordinador" -> handleSingleRecipient(
+        if (event.isSMS()) {
+            enviarSms(event);
+        } else {
+            emailNotificationSender.send(event);
+        }
+    }
+
+    private void agregarDestinatarios(NotificationEvent event) {
+        switch (event.getTipo()) {
+            case "coordinador" -> addIfExists(
                     informationService.getEmailCoordinador(event.getPrograma().toString()),
                     "coordinador registrado para el programa",
                     event.getPrograma().toString(),
                     event
             );
-
-            case "anteproyecto.created" -> handleSingleRecipient(
+            case "anteproyecto.created" -> addIfExists(
                     informationService.getEmailJefeDepartamento(event.getDepartamento().toString()),
                     "jefe de departamento registrado para el departamento",
                     event.getDepartamento().toString(),
                     event
             );
-        }
-
-        if (event.isSMS()){
-            List<String> telefonos = new ArrayList<>();
-            for(String correo : event.getCorreos()){
-                String celular = informationService.getTelefono(correo);
-                if(celular != null){
-                    telefonos.add(celular);
-                }
-            }
-            if(telefonos.isEmpty()){
-                log.info("""
-            
-                            📱 No es posible enviar SMS
-                            └── No hay número de telefono registrado
-                            """);
-            }else{
-                event.setTelefonos(telefonos);
-                smsNotificationSender.send(event);
-            }
-        }else {
-            emailNotificationSender.send(event);
+            default -> log.warn("Tipo de notificación desconocido: {}", event.getTipo());
         }
     }
 
-    private void handleSingleRecipient(
-            String email,
-            String warningContext,
-            String ref,
-            NotificationEvent event
-    ) {
+    private void enviarSms(NotificationEvent event) {
+        List<String> telefonos = event.getCorreos().stream()
+                .map(informationService::getTelefono)
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (telefonos.isEmpty()) {
+            log.info("""
+                        
+                        📱 No es posible enviar SMS
+                        └── No hay número de telefono registrado
+                        """);
+            return;
+        }
+
+        event.setTelefonos(telefonos);
+        smsNotificationSender.send(event);
+    }
+
+    private void addIfExists(String email, String contexto, String ref, NotificationEvent event) {
         if (email == null) {
             log.warn("""
+                    
                     ❌📬  No es posible enviar la notificación
                     └── No existe un {} de {}
-                    """, warningContext, ref);
+                    """, contexto, ref);
             return;
         }
         event.getCorreos().add(email);

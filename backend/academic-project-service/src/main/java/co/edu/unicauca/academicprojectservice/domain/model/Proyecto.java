@@ -134,7 +134,7 @@ public class Proyecto {
         this.formatosA.add(nuevo);
     }
 
-    public void registrarResultadoRevisionFormatoA(EstadoFormatoA nuevoEstado) {
+    public void registrarResultadoRevisionFormatoA(EstadoFormatoA nuevoEstado, byte[] archivoRevisado, String nombreArchivoRevisado) {
         if (nuevoEstado == null) {
             throw new DomainException("El nuevo estado del Formato A no puede ser nulo.");
         }
@@ -160,7 +160,6 @@ public class Proyecto {
             if (tipoProyecto == TipoProyecto.PRACTICA_PROFESIONAL && cartaLaboral == null) {
                 throw new DomainException("La práctica profesional requiere carta laboral antes de aprobar el Formato A.");
             }
-
             this.estadoProyecto = EstadoProyecto.FORMATOA_ACEPTADO;
         } else if (nuevoEstado == EstadoFormatoA.OBSERVADO) {
             if (estadoProyecto == EstadoProyecto.PRIMERA_REVISION_FORMATOA) {
@@ -172,8 +171,7 @@ public class Proyecto {
             }
         }
 
-
-        ultimo.cambiarEstado(nuevoEstado);
+        ultimo.aplicarResultadoRevision(nuevoEstado, archivoRevisado, nombreArchivoRevisado);
     }
 
 

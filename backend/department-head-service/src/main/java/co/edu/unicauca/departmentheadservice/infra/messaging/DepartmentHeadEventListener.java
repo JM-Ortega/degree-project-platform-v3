@@ -45,7 +45,6 @@ public class DepartmentHeadEventListener {
         boolean esDocente = event.roles() != null &&
                 event.roles().stream().anyMatch(rol -> "DOCENTE".equalsIgnoreCase(rol.name()));
 
-        // Debe escuchar tambien jefes de departamaneto
         boolean esJefe = event.roles() != null &&
                 event.roles().stream().anyMatch(rol -> "JEFE_DE_DEPARTAMENTO".equalsIgnoreCase(rol.name()));
 
@@ -55,8 +54,6 @@ public class DepartmentHeadEventListener {
         }
 
         try {
-            // Pienso que con que guarde el docente basta ya que docente y jefe tienen los mismos campos, ademas jefe de
-            // Departamento ni se usa, no es necesario
             if(esDocente) {
                 Docente docente = new Docente(event.id(), event.nombre(), event.email(), event.departamento(), event.roles());
                 docenteRepository.save(docente);

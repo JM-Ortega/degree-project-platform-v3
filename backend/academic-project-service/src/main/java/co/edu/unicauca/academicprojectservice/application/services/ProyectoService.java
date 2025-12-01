@@ -20,6 +20,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -167,18 +168,22 @@ public class ProyectoService {
 
     public FormatoADTO obtenerUltimoFormatoAConObservaciones(UUID proyectoId) {
         Proyecto proyecto = dbPortProyecto.findById(proyectoId);
+        if (proyecto == null) {
+            throw new ProyectoNoEncontradoException(proyectoId);
+        }
 
-        List<FormatoA> observados = proyecto.getFormatosA().stream()
-                .filter(f -> f.getEstado() == EstadoFormatoA.OBSERVADO)
+        // Buscar el último Formato A que esté en OBSERVADO o APROBADO
+        List<FormatoA> candidatos = proyecto.getFormatosA().stream()
+                .filter(f -> f.getEstado() == EstadoFormatoA.OBSERVADO
+                        || f.getEstado() == EstadoFormatoA.APROBADO)
                 .sorted((f1, f2) -> f2.getFechaCreacion().compareTo(f1.getFechaCreacion()))
                 .toList();
 
-        if (observados.isEmpty()) {
-            throw new EntityNotFoundException("No hay formatos A con observaciones para este proyecto");
+        if (candidatos.isEmpty()) {
+            return null;
         }
 
-        FormatoA ultimo = observados.getFirst();
-
+        FormatoA ultimo = candidatos.getFirst();
 
         return new FormatoADTO(
                 ultimo.getNombreFormato(),
@@ -289,9 +294,13 @@ public class ProyectoService {
 
 
     public boolean tieneObservaciones(UUID proyectoId) {
-
         FormatoA ultimo = getUltimoFormatoA(proyectoId);
-        return ultimo != null && ultimo.getEstado() == EstadoFormatoA.OBSERVADO;
+        if (ultimo == null) {
+            return false;
+        }
+
+        return ultimo.getEstado() == EstadoFormatoA.OBSERVADO
+                || ultimo.getEstado() == EstadoFormatoA.APROBADO;
     }
 
     public int countProyectosByEstadoYTipo(TipoProyecto tipo, EstadoProyecto estado, String correoDocente) {
@@ -319,8 +328,8 @@ public class ProyectoService {
     }
 
 
-
-      public void asignarEvaluadoresAnteproyectoDesdeDeptHead(AnteproyectoConEvaluadoresEvent event) {
+    @Transactional
+    public void asignarEvaluadoresAnteproyectoDesdeDeptHead(AnteproyectoConEvaluadoresEvent event) {
         if (event == null) {
             throw new IllegalArgumentException("El evento no puede ser nulo");
         }
@@ -338,14 +347,12 @@ public class ProyectoService {
             throw new IllegalStateException("El anteproyecto del evento no coincide con el anteproyecto del proyecto");
         }
 
-        // Mapear correos -> DocenteId usando el puerto de persistencia
         var evaluadores = event.evaluadores().stream()
                 .map(correo -> dbPortDocente.findIdByCorreo(correo)
                         .orElseThrow(() -> new IllegalArgumentException(
                                 "No existe docente con correo: " + correo)))
                 .toList();
 
-        // Usar lógica del dominio
         proyecto.getAnteproyecto().asignarEvaluadores(evaluadores);
         proyecto.marcarAnteproyectoEnRevision();
 

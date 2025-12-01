@@ -1,5 +1,6 @@
 package co.edu.unicauca.shared.contracts.events.notification;
 
+import co.edu.unicauca.shared.contracts.model.Departamento;
 import co.edu.unicauca.shared.contracts.model.Programa;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
@@ -42,6 +43,8 @@ public class NotificationEvent {
     // Creo que el unico que necesittenviar el programa es el micro de academic
     private Programa programa;
 
+    private Departamento departamento;
+
     /** Marca de tiempo del evento (formato ISO-8601). */
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private OffsetDateTime timestamp;
@@ -49,4 +52,38 @@ public class NotificationEvent {
     // Indica si se quiere enviar SMS o no
     @NotBlank
     private boolean SMS;
+
+    private List<String> telefonos;
+
+    // General
+    public NotificationEvent (String tipo, List<String> correos, String asunto, String mensaje, OffsetDateTime timestamp, boolean SMS) {
+        this.tipo = tipo;
+        this.correos = correos;
+        this.asunto = asunto;
+        this.mensaje = mensaje;
+        this.timestamp = timestamp;
+        this.SMS = SMS;
+    }
+
+    // Notificar proyectos
+    public NotificationEvent (String tipo, List<String> correos, String asunto, String mensaje, Programa programa, OffsetDateTime timestamp, boolean SMS) {
+        this.tipo = tipo;
+        this.correos = correos;
+        this.asunto = asunto;
+        this.mensaje = mensaje;
+        this.programa = programa;
+        this.timestamp = timestamp;
+        this.SMS = SMS;
+    }
+
+    // Notificar anteproyectos
+    public NotificationEvent (String tipo, List<String> correos, String asunto, String mensaje, Departamento departamento, OffsetDateTime timestamp, boolean SMS) {
+        this.tipo = tipo;
+        this.correos = correos;
+        this.asunto = asunto;
+        this.mensaje = mensaje;
+        this.departamento = departamento;
+        this.timestamp = timestamp;
+        this.SMS = SMS;
+    }
 }

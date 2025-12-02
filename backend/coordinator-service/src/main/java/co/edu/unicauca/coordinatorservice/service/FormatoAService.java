@@ -157,7 +157,7 @@ public class FormatoAService {
                 })
                 .toList();
 
-        // 👀 DEBUG opcional
+        //  DEBUG opcional
         System.out.println("==== FORMATOS A EN BD PARA PROGRAMA " + programaCoord + " ====");
         for (FormatoA f : filtrados) {
             String progEst = (f.getEstudiantes() == null || f.getEstudiantes().isEmpty())

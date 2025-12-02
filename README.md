@@ -14,19 +14,49 @@ Este README resume el propósito, requisitos funcionales y arquitectura
 
 ---
 
-## 🛠️ Tecnologías principales  
-- ☕ Java 21  
-- 🌱 Spring Boot  
-- ☁️ Spring Cloud  
-- 📘 springdoc  
-- 🔄 MapStruct  
-- 📝 Lombok  
-- 🔐 Keycloak  
-- 🛡️ JWT  
-- 🧂 Argon2  
-- 🐳 Docker  
-- 🐘 PostgreSQL  
-- 🐇 RabbitMQ  
+## 🛠️ Tecnologías principales
+
+### ☕ Backend (Java & Spring)
+- ☕ **Java 21**
+- 🍃 **Spring Boot 3.5.x**
+- ☁️ **Spring Cloud** (Gateway + BOM)
+- 🌐 **Spring Web (WebMVC)**
+- ⚡ **Spring WebFlux**
+- 🔐 **Spring Security** (OAuth2 Resource Server)
+- 🛡️ **JWT**
+- 🗝️ **Keycloak / Keycloak Admin Client**
+- ✔️ **Spring Validation (Jakarta)**
+- 🗄️ **Spring Data JPA (Hibernate)**
+- 📊 **Actuator**
+
+### 🧰 Librerías y utilidades
+- 🔄 **MapStruct**
+- 📝 **Lombok**
+- 📘 **springdoc-openapi (Swagger UI)**
+- 🧂 **Argon2 (argon2-jvm)**
+- 🧱 **Jackson** (databind + jsr310)
+- 🪵 **Logback**
+
+### 🗃️ Bases de datos
+- 🐘 **PostgreSQL**
+- 🧪 **H2** (tests)
+
+### 📨 Mensajería y comunicación
+- 🐇 **RabbitMQ**
+- 📬 **Spring AMQP**
+- 🔗 **Retrofit 2**
+- 🌐 **OkHttp 4**
+
+### 🐳 Contenedores y despliegue
+- 🐳 **Docker / Docker Compose**
+
+### 🧪 Testing
+- 📦 **Testcontainers**
+- 🧪 **JUnit 5**
+- 🤖 **Mockito**
+
+### 🖥️ Interfaz gráfica
+- 🎨 **JavaFX**
 
 ---
 

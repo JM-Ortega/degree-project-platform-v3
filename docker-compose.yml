@@ -80,12 +80,130 @@ services:
   # =========================
   # Microservicios
   # =========================
+
+  # 1) notification-service (primero de tus micros)
+  notification-service:
+    build:
+      context: .
+      dockerfile: backend/notification-service/Dockerfile
+    container_name: notification-service
+    profiles: [ "app" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${NOTIF_DB_USER}
+      DB_PASS: ${NOTIF_DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "8085:8085"
+    restart: unless-stopped
+
+  # 2) academic-project-service
+  academic-project-service:
+    build:
+      context: .
+      dockerfile: backend/academic-project-service/Dockerfile
+    container_name: academic-project-service
+    profiles: [ "app" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${PROJECT_DB_USER}
+      DB_PASS: ${PROJECT_DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+
+  # 3) coordinator-service
+  coordinator-service:
+    build:
+      context: .
+      dockerfile: backend/coordinator-service/Dockerfile
+    container_name: coordinator-service
+    profiles: [ "app" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
+      academic-project-service:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${COORD_DB_USER}
+      DB_PASS: ${COORD_DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "8083:8083"
+    restart: unless-stopped
+
+  # 4) department-head-service
+  department-head-service:
+    build:
+      context: .
+      dockerfile: backend/department-head-service/Dockerfile
+    container_name: department-head-service
+    profiles: [ "app" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
+      academic-project-service:
+        condition: service_started
+      coordinator-service:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DEPT_DB_USER}
+      DB_PASS: ${DEPT_DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "8084:8084"
+    restart: unless-stopped
+
+  # 5) auth-service (penúltimo micro)
   auth-service:
     build:
       context: .
       dockerfile: backend/auth-service/Dockerfile
     container_name: auth-service
-    profiles: ["app"]
+    profiles: [ "app" ]
     depends_on:
       postgres:
         condition: service_healthy
@@ -93,6 +211,14 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
+      notification-service:
+        condition: service_started
+      academic-project-service:
+        condition: service_started
+      coordinator-service:
+        condition: service_started
+      department-head-service:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       DB_HOST: ${DB_HOST}
@@ -114,112 +240,13 @@ services:
       - "8081:8081"
     restart: unless-stopped
 
-  academic-project-service:
-    build:
-      context: .
-      dockerfile: backend/academic-project-service/Dockerfile
-    container_name: academic-project-service
-    profiles: ["app"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${PROJECT_DB_USER}
-      DB_PASS: ${PROJECT_DB_PASS}
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
-    ports:
-      - "8082:8082"
-    restart: unless-stopped
-
-  coordinator-service:
-    build:
-      context: .
-      dockerfile: backend/coordinator-service/Dockerfile
-    container_name: coordinator-service
-    profiles: ["app"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${COORD_DB_USER}
-      DB_PASS: ${COORD_DB_PASS}
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
-    ports:
-      - "8083:8083"
-    restart: unless-stopped
-
-  department-head-service:
-    build:
-      context: .
-      dockerfile: backend/department-head-service/Dockerfile
-    container_name: department-head-service
-    profiles: ["app"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DEPT_DB_USER}
-      DB_PASS: ${DEPT_DB_PASS}
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
-    ports:
-      - "8084:8084"
-    restart: unless-stopped
-
-  notification-service:
-    build:
-      context: .
-      dockerfile: backend/notification-service/Dockerfile
-    container_name: notification-service
-    profiles: ["app"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${NOTIF_DB_USER}
-      DB_PASS: ${NOTIF_DB_PASS}
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
-    ports:
-      - "8085:8085"
-    restart: unless-stopped
-
+  # 6) gateway-service (último, ya depende de todos)
   gateway-service:
     build:
       context: .
       dockerfile: backend/gateway/Dockerfile
     container_name: gateway-service
-    profiles: ["app"]
+    profiles: [ "app" ]
     depends_on:
       auth-service:
         condition: service_started

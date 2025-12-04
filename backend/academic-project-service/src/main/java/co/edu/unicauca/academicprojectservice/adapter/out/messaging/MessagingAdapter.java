@@ -1,4 +1,4 @@
-package co.edu.unicauca.academicprojectservice.adapter.in.messaging;
+package co.edu.unicauca.academicprojectservice.adapter.out.messaging;
 
 import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Docente;
 import co.edu.unicauca.academicprojectservice.adapter.out.persistence.entity.Estudiante;

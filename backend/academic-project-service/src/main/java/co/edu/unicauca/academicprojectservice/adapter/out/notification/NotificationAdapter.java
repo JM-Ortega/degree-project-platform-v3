@@ -186,7 +186,7 @@ public class NotificationAdapter implements NotificationPort {
                     correos,
                     subject,
                     message,
-                    estudiante1.getPrograma(),
+                    director.getDepartamento(),
                     OffsetDateTime.now(),
                     true
             );

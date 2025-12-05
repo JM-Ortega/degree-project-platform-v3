@@ -41,7 +41,7 @@ class NotificationServiceTest {
         when(event.getDepartamento()).thenReturn(Departamento.SISTEMAS);
         when(event.getMensaje()).thenReturn("Mensaje");
         when(event.getTipo()).thenReturn("coordinador");
-        when(event.isSMS()).thenReturn(false);
+        when(event.isSms()).thenReturn(false);
 
         return event;
     }
@@ -59,7 +59,7 @@ class NotificationServiceTest {
     @Test
     void notificar_enviaSmsCuandoEsSMS() {
         NotificationEvent event = buildEvent();
-        when(event.isSMS()).thenReturn(true);
+        when(event.isSms()).thenReturn(true);
         when(event.getCorreos()).thenReturn(List.of("a@unicauca.edu.co"));
 
         when(informationService.getTelefono("a@unicauca.edu.co")).thenReturn("3111111111");
@@ -115,7 +115,7 @@ class NotificationServiceTest {
     @Test
     void enviarSms_sinTelefonos_noEnvia() {
         NotificationEvent event = buildEvent();
-        when(event.isSMS()).thenReturn(true);
+        when(event.isSms()).thenReturn(true);
         when(event.getCorreos()).thenReturn(List.of("a@unicauca.edu.co"));
 
         when(informationService.getTelefono("a@unicauca.edu.co")).thenReturn(null);
@@ -136,7 +136,7 @@ class NotificationServiceTest {
                 "a@unicauca.edu.co",
                 "c@unicauca.edu.co"
         )));
-        event.setSMS(true);
+        event.setSms(true);
 
         when(informationService.getTelefono("a@unicauca.edu.co")).thenReturn("3000000000");
         when(informationService.getTelefono("c@unicauca.edu.co")).thenReturn(null);

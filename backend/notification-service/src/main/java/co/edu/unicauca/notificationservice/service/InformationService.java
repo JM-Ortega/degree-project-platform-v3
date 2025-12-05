@@ -30,7 +30,7 @@ public class InformationService {
      * @return correo del coordinador, o null si no existe
      */
     public  String getEmailCoordinador(String programa){
-        String url = baseUrlAuth + "/" + programa;
+        String url = baseUrlAuth + "/coordinador/" + programa;
         return restTemplate.getForObject(url, String.class);
     }
 
@@ -41,7 +41,7 @@ public class InformationService {
      * @return correo del jefe de departamento, o null si no existe
      */
     public String getEmailJefeDepartamento (String departamento){
-        String url = baseUrlAuth + "/" + departamento;
+        String url = baseUrlAuth + "/jefe/" + departamento;
         return restTemplate.getForObject(url, String.class);
     }
 

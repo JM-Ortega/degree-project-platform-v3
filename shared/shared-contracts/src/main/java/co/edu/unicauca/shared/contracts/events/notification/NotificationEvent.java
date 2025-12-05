@@ -5,7 +5,6 @@ import co.edu.unicauca.shared.contracts.model.Programa;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -50,40 +49,39 @@ public class NotificationEvent {
     private OffsetDateTime timestamp;
 
     // Indica si se quiere enviar SMS o no
-    @NotBlank
-    private boolean SMS;
+    private boolean sms;
 
     private List<String> telefonos;
 
     // General
-    public NotificationEvent (String tipo, List<String> correos, String asunto, String mensaje, OffsetDateTime timestamp, boolean SMS) {
+    public NotificationEvent (String tipo, List<String> correos, String asunto, String mensaje, OffsetDateTime timestamp, boolean sms) {
         this.tipo = tipo;
         this.correos = correos;
         this.asunto = asunto;
         this.mensaje = mensaje;
         this.timestamp = timestamp;
-        this.SMS = SMS;
+        this.sms = sms;
     }
 
     // Notificar proyectos
-    public NotificationEvent (String tipo, List<String> correos, String asunto, String mensaje, Programa programa, OffsetDateTime timestamp, boolean SMS) {
+    public NotificationEvent (String tipo, List<String> correos, String asunto, String mensaje, Programa programa, OffsetDateTime timestamp, boolean sms) {
         this.tipo = tipo;
         this.correos = correos;
         this.asunto = asunto;
         this.mensaje = mensaje;
         this.programa = programa;
         this.timestamp = timestamp;
-        this.SMS = SMS;
+        this.sms = sms;
     }
 
     // Notificar anteproyectos
-    public NotificationEvent (String tipo, List<String> correos, String asunto, String mensaje, Departamento departamento, OffsetDateTime timestamp, boolean SMS) {
+    public NotificationEvent (String tipo, List<String> correos, String asunto, String mensaje, Departamento departamento, OffsetDateTime timestamp, boolean sms) {
         this.tipo = tipo;
         this.correos = correos;
         this.asunto = asunto;
         this.mensaje = mensaje;
         this.departamento = departamento;
         this.timestamp = timestamp;
-        this.SMS = SMS;
+        this.sms = sms;
     }
 }

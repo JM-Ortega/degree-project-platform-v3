@@ -35,7 +35,7 @@ public class InformationController {
             @ApiResponse(responseCode = "200", description = "Correo encontrado exitosamente"),
             @ApiResponse(responseCode = "404", description = "No existe un coordinador para el programa indicado")
     })
-    @GetMapping("/{programa}")
+    @GetMapping("/coordinador/{programa}")
     public ResponseEntity<String> getEmailCoordinador(@PathVariable String programa)
     {
         String email =informationService.obtenerEmailCoordinadorPorPrograma(programa);
@@ -56,7 +56,7 @@ public class InformationController {
             @ApiResponse(responseCode = "200", description = "Correo encontrado exitosamente"),
             @ApiResponse(responseCode = "404", description = "No existe un jefe asociado al departamento indicado")
     })
-    @GetMapping("/{departamento}")
+    @GetMapping("/jefe/{departamento}")
     public ResponseEntity<String> getEmailJefe(@PathVariable String departamento)
     {
         String email =informationService.obtenerEmailJefePorDepartamento(departamento);

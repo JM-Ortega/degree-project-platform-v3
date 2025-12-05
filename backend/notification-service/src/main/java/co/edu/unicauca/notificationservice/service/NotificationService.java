@@ -1,6 +1,7 @@
 package co.edu.unicauca.notificationservice.service;
 
 import co.edu.unicauca.notificationservice.sender.NotificationSender;
+import co.edu.unicauca.notificationservice.sender.SmsNotificationDecorator;
 import co.edu.unicauca.shared.contracts.events.notification.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,12 +51,29 @@ public class NotificationService {
     public void notificar(NotificationEvent event) {
         agregarDestinatarios(event);
 
-        if (event.isSMS()) {
-            enviarSms(event);
-        } else {
-            emailNotificationSender.send(event);
+        NotificationSender sender = emailNotificationSender;
+
+        if (event.isSms()) {
+            var telefonos = event.getCorreos().stream()
+                    .map(informationService::getTelefono)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            if (telefonos.isEmpty()) {
+                log.info("""
+                    
+                    📱 No es posible enviar SMS
+                    └── No hay ningún número de telefono registrado
+                    """);
+            } else {
+                event.setTelefonos(telefonos);
+                sender = new SmsNotificationDecorator(sender);
+            }
         }
+
+        sender.send(event);
     }
+
 
     /**
      * Agrega destinatarios según el tipo de evento.
@@ -77,31 +95,6 @@ public class NotificationService {
                     event
             );
         }
-    }
-
-    /**
-     * Envía una notificación por SMS.
-     * Convierte los correos existentes en números de teléfono consultados en el servicio.
-     *
-     * @param event evento que contiene los datos para el envío
-     */
-    private void enviarSms(NotificationEvent event) {
-        List<String> telefonos = event.getCorreos().stream()
-                .map(informationService::getTelefono)
-                .filter(Objects::nonNull)
-                .toList();
-
-        if (telefonos.isEmpty()) {
-            log.info("""
-                        
-                        📱 No es posible enviar SMS
-                        └── No hay número de telefono registrado
-                        """);
-            return;
-        }
-
-        event.setTelefonos(telefonos);
-        smsNotificationSender.send(event);
     }
 
     /**

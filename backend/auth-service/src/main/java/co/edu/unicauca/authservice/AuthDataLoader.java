@@ -96,7 +96,7 @@ public class AuthDataLoader implements CommandLineRunner {
                 "Jorge",
                 "Ramírez",
                 Programa.INGENIERIA_ELECTRONICA_Y_TELECOMUNICACIONES,
-                Departamento.SISTEMAS,
+                Departamento.ELECTRONICA_INSTRUMENTACION_Y_CONTROL,
                 List.of(Rol.JEFE_DE_DEPARTAMENTO),
                 password
         );

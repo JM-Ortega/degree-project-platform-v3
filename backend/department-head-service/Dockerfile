@@ -1,20 +1,26 @@
-# ====== Etapa 1: Compilación del JAR ======
+# ============================================
+# Etapa 1: Compilación del servicio (build JAR)
+# ============================================
 FROM maven:3.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-# --- 1) POMs para cachear dependencias y satisfacer el reactor de Maven ---
 
-# POM padre del monorepo
+# ================================
+# 1) POMs necesarios para cachear dependencias
+#    (solo POMs para evitar copiar todo el código)
+# ================================
+
+# POM raíz del monorepo
 COPY pom.xml .
 
-# --- shared ---
+# shared-contracts
 COPY shared/shared-contracts/pom.xml shared/shared-contracts/pom.xml
 
-# --- frontend (aunque no se compile aquí, está listado en <modules>) ---
+# frontend (referenciado en <modules>)
 COPY frontend/pom.xml frontend/pom.xml
 
-# --- backend (solo POMs) ---
+# backend (solo POMs)
 COPY backend/gateway/pom.xml backend/gateway/pom.xml
 COPY backend/auth-service/pom.xml backend/auth-service/pom.xml
 COPY backend/academic-project-service/pom.xml backend/academic-project-service/pom.xml
@@ -23,38 +29,38 @@ COPY backend/department-head-service/pom.xml backend/department-head-service/pom
 COPY backend/notification-service/pom.xml backend/notification-service/pom.xml
 
 
+# =======================================================
 # Descarga anticipada de dependencias (capa cacheable)
+# Se omiten tests por completo para acelerar el build
+# =======================================================
+RUN mvn -q -B -Dmaven.test.skip=true \
+    -pl backend/department-head-service -am \
+    dependency:go-offline
 
-# ✔ Línea correcta (cuando los tests funcionen)
-# RUN mvn -q -B -DskipTests -pl backend/department-head-service -am dependency:go-offline
 
-# ❗ Línea temporal mientras los tests están rotos
-RUN mvn -q -B -Dmaven.test.skip=true -pl backend/department-head-service -am dependency:go-offline
-
-
-# --- 2) Código fuente necesario ---
-
-# Módulo compartido
+# ================================
+# 2) Copia de código fuente necesario para el build
+# ================================
 COPY shared/shared-contracts shared/shared-contracts
-
-# Microservicio department-head-service
 COPY backend/department-head-service backend/department-head-service
 
 
-# ====== Compilación del microservicio ======
+# ================================
+# 3) Compilación y empaquetado del servicio
+#    (se omiten tests: no se compilan ni ejecutan)
+# ================================
+RUN mvn -q -B -Dmaven.test.skip=true \
+    -pl backend/department-head-service -am \
+    package
 
-# ✔ Línea correcta (cuando los tests estén bien)
-# RUN mvn -q -B -DskipTests -pl backend/department-head-service -am package
-
-# ❗ Línea temporal mientras los tests están rotos
-RUN mvn -q -B -Dmaven.test.skip=true -pl backend/department-head-service -am package
 
 
-
-# ====== Etapa 2: Imagen final (runtime) ======
+# ============================================
+# Etapa 2: Imagen final (runtime minimalista)
+# ============================================
 FROM eclipse-temurin:21-jre-alpine
 
-# curl para healthchecks
+# curl para healthcheck
 RUN apk add --no-cache curl
 
 # Usuario no-root
@@ -63,17 +69,16 @@ USER spring:spring
 
 WORKDIR /app
 
-# Copiar el JAR generado
+# JAR generado en la etapa de build
 COPY --from=build /app/backend/department-head-service/target/*.jar app.jar
 
-# Puerto expuesto del microservicio
 EXPOSE 8084
 
-# Healthcheck (Spring Boot Actuator)
+# Healthcheck HTTP a Actuator
 HEALTHCHECK --interval=30s --timeout=5s --start-period=50s --retries=3 \
   CMD curl -fsS http://localhost:8084/actuator/health || exit 1
 
-# Entrada JVM optimizada
+# Ejecución optimizada para contenedores
 ENTRYPOINT ["java", \
   "-XX:MaxRAMPercentage=75.0", \
   "-Djava.security.egd=file:/dev/./urandom", \

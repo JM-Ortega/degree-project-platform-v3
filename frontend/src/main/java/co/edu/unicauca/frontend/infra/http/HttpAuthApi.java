@@ -38,7 +38,7 @@ import java.nio.charset.StandardCharsets;
  *
  * <p><b>Ejemplo de uso:</b></p>
  * <pre>{@code
- * AuthApi authApi = new HttpAuthApi("http://localhost:8080/api", "/auth/register", "/auth/login");
+ * AuthApi authApi = new HttpAuthApi("https://api.narvaezlab.dev/api", "/auth/register", "/auth/login");
  * LoginRequestDto dto = new LoginRequestDto("juan@unicauca.edu.co", "Clave123*", Rol.Estudiante);
  * LoginResponseDto response = authApi.login(dto);
  * System.out.println("Token: " + response.token());
@@ -53,7 +53,7 @@ public class HttpAuthApi implements AuthApi {
 
     /**
      * URL base del gateway o del microservicio.
-     * <p>Ejemplo: {@code http://localhost:8080/api}</p>
+     * <p>Ejemplo: {@code https://api.narvaezlab.dev/api}</p>
      */
     private final String baseUrl;
 

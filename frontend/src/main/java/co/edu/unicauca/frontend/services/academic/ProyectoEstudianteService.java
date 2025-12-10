@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class ProyectoEstudianteService {
 
-    private static final String BASE_URL = "http://localhost:8080/api/academic/proyectos";
+    private static final String BASE_URL = "https://api.narvaezlab.dev/api/academic/proyectos";
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper mapper;
 

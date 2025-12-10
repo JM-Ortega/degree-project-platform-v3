@@ -20,7 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 public class ProyectoService implements ObservableService {
-    private final String baseUrlProyectos = "http://localhost:8080/api/academic/proyectos";
+    private final String baseUrlProyectos = "https://api.narvaezlab.dev/api/academic/proyectos";
     private final RestTemplate restTemplate;
     private final List<co.edu.unicauca.frontend.services.academic.Observer> observers = new ArrayList<>();
 

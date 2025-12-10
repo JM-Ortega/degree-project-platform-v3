@@ -20,7 +20,7 @@ public class DocenteService {
     private final String baseUrlDocente;
 
     public DocenteService() {
-        this("http://localhost:8080/api/academic/docentes");
+        this("https://api.narvaezlab.dev/api/academic/docentes");
     }
 
     public DocenteService(String baseUrlDocente) {

@@ -23,7 +23,7 @@ public class CoordinadorClient {
 
     public CoordinadorClient() {
         String b = AppConfig.get("api.base-url");
-        if (b == null || b.isBlank()) b = "http://localhost:8080/api";
+        if (b == null || b.isBlank()) b = "https://api.narvaezlab.dev/api";
         this.baseUrl = trimRightSlash(b);
 
         String ep = AppConfig.get("api.endpoint.coord.info");

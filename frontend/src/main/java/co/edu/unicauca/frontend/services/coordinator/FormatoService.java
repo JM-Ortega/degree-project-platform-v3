@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class FormatoService {
 
     private final HttpClient httpClient;
-    private final String baseUrl;   // http://localhost:8080/api
+    private final String baseUrl;   // https://api.narvaezlab.dev/api
     private final String epListar;  // /coordinator/formatoA/listar/{programa}
 
     private static final String BOUNDARY = "---JavaBoundary";
@@ -43,7 +43,7 @@ public class FormatoService {
                 .build();
 
         String b = AppConfig.get("api.base-url");
-        if (b == null || b.isBlank()) b = "http://localhost:8080/api";
+        if (b == null || b.isBlank()) b = "https://api.narvaezlab.dev/api";
         this.baseUrl = trimRightSlash(b);
 
         this.epListar = ensureLeadingSlash(

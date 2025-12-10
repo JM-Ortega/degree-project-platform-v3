@@ -20,7 +20,7 @@ public class InformationService {
      */
     public InformationService(){
         this.restTemplate = new RestTemplate();
-        this.baseUrlAuth = "http://localhost:8080/api/auth";
+        this.baseUrlAuth = "https://api.narvaezlab.dev/api/auth";
     }
 
     /**

@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class EstudianteService {
     private final RestTemplate restTemplate;
-    private final String baseUrlEstudiante = "http://localhost:8080/api/academic/estudiantes";
+    private final String baseUrlEstudiante = "https://api.narvaezlab.dev/api/academic/estudiantes";
 
     public EstudianteService() {
         this.restTemplate = new RestTemplate();

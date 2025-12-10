@@ -38,8 +38,8 @@ public final class FrontendServices {
 
         baseUrl = AppConfig.get("api.base-url");
         if (baseUrl == null || baseUrl.isBlank()) {
-            System.err.println("[WARN] 'api.base-url' no encontrado. Usando http://localhost:8080/api");
-            baseUrl = "http://localhost:8080/api";
+            System.err.println("[WARN] 'api.base-url' no encontrado. Usando https://api.narvaezlab.dev/api");
+            baseUrl = "https://api.narvaezlab.dev/api";
         }
 
         // ===== Auth =====

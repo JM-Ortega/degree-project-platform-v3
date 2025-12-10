@@ -87,7 +87,7 @@ public class SecurityConfig {
         return jwt -> {
             List<GrantedAuthority> authorities = new ArrayList<>();
 
-            // 1) Roles de realm (opcional, por si quieres usarlos)
+            // 1) Roles de realm
             Map<String, Object> realmAccess = jwt.getClaim("realm_access");
             if (realmAccess != null) {
                 Object roles = realmAccess.get("roles");

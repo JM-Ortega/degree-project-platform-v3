@@ -18,7 +18,7 @@ public record LoginRequest(
 
         @NotBlank
         @Email
-        @Schema(description = "Correo institucional del usuario.", example = "juan@unicauca.edu.co")
+        @Schema(description = "Correo institucional del usuario.", example = "juan.ortega@unicauca.edu.co")
         String email,
 
         @NotBlank

@@ -100,9 +100,6 @@ public class KeycloakUserClient {
 
     /**
      * Asigna una lista de roles de CLIENTE (no realm roles) al usuario dado.
-     *
-     * En tu realm actual los roles JEFE_DE_DEPARTAMENTO, DOCENTE, ESTUDIANTE,
-     * COORDINADOR están en el cliente "sistema-desktop".
      */
     private void assignClientRoles(RealmResource realm,
                                    String keycloakUserId,
